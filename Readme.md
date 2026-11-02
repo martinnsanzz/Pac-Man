@@ -30,6 +30,8 @@ This is a list of multiple resources use throughout the life-cycle of the projec
 ### 😺 GitHub
 - [GitHub Branching Name Best Practices](https://dev.to/jps27cse/github-branching-name-best-practices-49ei)
 - [GitHub Issues Documentation](https://docs.github.com/en/issues)
+- [GitHub Repository vs Project](https://gitprotect.io/blog/github-repository-vs-project/)
+- [CLI GitHub](https://cli.github.com/)
 
 ### 📋 Other Stuff
 
