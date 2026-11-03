@@ -72,7 +72,7 @@ To create an issue you use `gh issue create` or `new` its an alias. You can use 
 menu or use some flags to add **name**, **type** or **assignee**.
 
 ```sh
-gh issue create --title "Creating makefile" --type "Feature" --assignee "Martin"
+gh issue create --title "Creating makefile" --assignee "Martin"
 ```
 
 >Use `gh issue create --help` for more information
@@ -111,10 +111,11 @@ Work normally in that branch, `git add .`, `git commit -m "..."`, `git push <bra
 
 4. Pull request
 
-Once an issue is ready to merge with main, you need to create a pull request. 
+Once an issue is ready to merge with main, you need to create a pull request.
 
 ```sh
 gh pr create --base main --title Added Makefile --body "Closes #<issue-num>"
 ```
 
 >This closes the issue with that number automatically `--body "Closes #<issue-num>"`
+
