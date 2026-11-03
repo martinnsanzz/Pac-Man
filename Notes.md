@@ -153,6 +153,11 @@ menu or use some flags to add **name**, **type** or **assignee**.
 gh issue create --title "Creating makefile" --assignee "Martin"
 ```
 
+To create `sub-issues` use the flag **--parent** with the father **ID-Number**
+
+```sh
+gh issue create --title "Creating makefile" --assignee "Martin" --parent 5
+```
 >Use `gh issue create --help` for more information
 
 To see a list of *active issues* use:
