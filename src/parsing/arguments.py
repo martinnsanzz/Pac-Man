@@ -21,6 +21,7 @@ def load_arguments() -> Namespace:
         raise ArgumentError(None, msg.capitalize()) from e
 
     if unknown:
-        raise ArgumentError(None, f"Incorrect argument on command line:\n   -"
-                                  "Correct usage: uv run python pac-man.py config.json")
+        raise ArgumentError(None, "Incorrect argument on command line:\n   -"
+                                  "Correct usage: uv run python pac-man.py "
+                                  "config.json")
     return known
