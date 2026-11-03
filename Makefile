@@ -19,6 +19,10 @@ UV					:= uv
 RUN_COMM			:= ${UV} run python
 DEBUGGER			:= pdb
 
+# ------------------ Variables  ------------------ #
+ENTRY				:= pac-man.py
+CONFIG				:= config.json
+
 # ------------------ Flags ------------------ #
 MYPY_FLAGS			:= . --warn-return-any --warn-unused-ignores \
 						--ignore-missing-imports --disallow-untyped-defs \
@@ -52,11 +56,11 @@ install: check_uv
 
 run: install
 	@echo "${GREEN}\nRunning program... !!\n${RESET}"
-	@${RUN_COMM} -m src
+	@${RUN_COMM} $(ENTRY) $(CONFIG)
 
 debug: install
 	@echo "${GREEN}\nRunning program in debug mode... !!\n${RESET}"
-	@${RUN_COMM} -m $(DEBUGGER) -m src
+	@${RUN_COMM} -m $(DEBUGGER) $(ENTRY) $(CONFIG)
 
 clean:
 	@echo "${RED}Removing '.mypy_cache' folders.${RESET}"
