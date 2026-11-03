@@ -49,9 +49,83 @@ yet informative. This are some tips:
 - Focus on the *primary task* or issue the branch addresses.
 
 #### Actions
+
 Action is an integration platform that allows you to automate your build, test and deployment
 pipeline. You can create workflows that run tests whenever you push a change to your repository
 or that deploy pull requests to production.
+
+**How it works**
+- A workflow is a `.yml` file in `.github/workflows/` (root of the repo).
+- GitHub finds every file in that folder and runs it on its own server (`runs-on: ubuntu-latest`), not on your machine.
+- Structure: **event** (`on:`) triggers a **job**, which runs **steps** in order on one fresh machine.
+- `uses:` = a prebuilt step (`owner/repo@version`). `run:` = a shell command.
+
+**Our CI: flake8 + mypy on every pull request**
+
+`.github/workflows/ci.yml`:
+
+```yaml
+name: CI
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv sync --locked
+      - name: Lint
+        run: |
+          if [ -n "$(git ls-files '*.py')" ]; then
+            uv run flake8 .
+            uv run mypy .
+          else
+            echo "No Python files, skipping"
+          fi
+```
+
+- `actions/checkout`: downloads the repo code onto the runner (without it the machine is empty).
+- `astral-sh/setup-uv`: installs `uv`.
+- `uv sync --locked`: installs dependencies from `uv.lock`, fails if the lock is out of date.
+- `uv run`: runs the tool inside the project environment.
+- The `if` skips linting when the repo has no `.py` files, so the job stays green.
+- Config lives in the repo: `[tool.mypy] strict = true` in `pyproject.toml` and `.flake8` (`exclude = .venv`).
+
+**Read the results**
+```sh
+gh pr checks --watch        # live status of the PR
+gh run list --limit 5       # recent runs
+gh run view --log-failed    # why it failed
+```
+- Green = passed, red = failed. Every new push to the PR branch re-runs it.
+- A run with no duration usually means the YAML is invalid (it never started). Check the Actions tab for the error line.
+
+**Block merging when checks fail (ruleset on `main`)**
+
+Settings → Rules → Rulesets → New branch ruleset:
+- Name: `protect-main`, Enforcement status: **Active**
+- Bypass list: empty (nobody skips it, you included)
+- Target: default branch (`main`)
+- Tick: Restrict deletions, Block force pushes
+- Tick: **Require a pull request before merging**
+- Tick: **Require status checks to pass** → add `lint`, and tick "Require branches to be up to date before merging"
+
+Result: pushing to `main` is rejected (`GH013: Repository rule violations`) and the merge button is disabled until `lint` is green.
+
+**Common mistakes**
+- Folder named `.github/workflow/` (missing `s`): the workflow never runs.
+- `- run:` written as a separate list item after `- name:`: invalid, they must be the same step (aligned keys).
+- Required check name not matching the job name (`lint`): the PR waits forever on "expected".
+- Committed on local `main` by accident and the push is rejected: move the commit to a branch, then reset `main`:
+  ```sh
+  git switch -c <branch>
+  git switch main
+  git reset --hard origin/main
+  ```
+- Forgetting to commit `uv.lock`: CI and local environments drift apart.
 
 #### GitHub CLI (commands && workflow)
 
@@ -123,7 +197,37 @@ gh pr create --base main --title Added Makefile --body "Closes #<issue-num>"
 
 >This closes the issue with that number automatically `--body "Closes #<issue-num>"`
 
+Once a **pr** is created, within the github website `pull request` panel oyu can see pending
+pull requests. An automatic check can be run such as (mypy or flake8) if a *ci.yml* file is
+located in the repo root under `.github/workflows`. In rulesets you can add a rule that if
+lint fails you wont be able to merge with main.
+
 To check if a `pr` has passed you can run the following commands:
 
 ```sh
 gh run view --log-failed # Will show the exact errors on a specific pull request
+```
+
+>Very useful command to see all branches throughout the life-cycle of the project. You can also
+>install `git graph` extension on **VS Code** to see it on the source control panel.
+
+```sh
+git log --oneline --graph --decorate --all
+git branch -a -vv
+```
+
+If you want to check in the CLI a `pull request` and merge it without touching GitHub website
+run the following commands:
+
+```sh
+gh pr check <num> # Checks the state of a specific pr
+
+# If no errors found you can merge
+gh pr merge <num> <strategy> --delete-branch --auto
+
+# Available strats:
+#   --squash -> All branch commits collapse into a single commit on main. Best option for simplicity
+#   --merge -> Keeps A, B, C exactly as written, plus one extra merge commit X.
+#   --rebasae -> Each commit is replayed one by one on main. No merge commit, linear history.
+# --auto -> Merges automatically the moment the rules pass
+```
