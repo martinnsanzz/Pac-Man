@@ -1,6 +1,5 @@
 # Built-in
 from argparse import ArgumentParser, ArgumentError, Namespace
-from pathlib import Path
 
 
 def json_file(file: str) -> str:
