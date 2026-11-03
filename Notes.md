@@ -215,3 +215,19 @@ gh run view --log-failed # Will show the exact errors on a specific pull request
 git log --oneline --graph --decorate --all
 git branch -a -vv
 ```
+
+If you want to check in the CLI a `pull request` and merge it without touching GitHub website
+run the following commands:
+
+```sh
+gh pr check <num> # Checks the state of a specific pr
+
+# If no errors found you can merge
+gh pr merge <num> <strategy> --delete-branch --auto
+
+# Available strats:
+#   --squash -> All branch commits collapse into a single commit on main. Best option for simplicity
+#   --merge -> Keeps A, B, C exactly as written, plus one extra merge commit X.
+#   --rebasae -> Each commit is replayed one by one on main. No merge commit, linear history.
+# --auto -> Merges automatically the moment the rules pass
+```
