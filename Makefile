@@ -1,6 +1,6 @@
 ONESHELL:
 
-.DEFAULT_GOAL		:= test
+.DEFAULT_GOAL		:= run
 
 # ------------------ Colors ------------------ #
 RESET				:= \033[0m
