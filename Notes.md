@@ -123,3 +123,7 @@ gh pr create --base main --title Added Makefile --body "Closes #<issue-num>"
 
 >This closes the issue with that number automatically `--body "Closes #<issue-num>"`
 
+To check if a `pr` has passed you can run the following commands:
+
+```sh
+gh run view --log-failed # Will show the exact errors on a specific pull request
