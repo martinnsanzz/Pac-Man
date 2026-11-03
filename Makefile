@@ -51,7 +51,6 @@ install: check_uv
 	@echo "${GREEN}Everything installed${RESET}"
 
 run: install
-	@clear
 	@echo "${GREEN}\nRunning program... !!\n${RESET}"
 	@${RUN_COMM} -m src
 
