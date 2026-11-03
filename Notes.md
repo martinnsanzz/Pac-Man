@@ -220,7 +220,7 @@ If you want to check in the CLI a `pull request` and merge it without touching G
 run the following commands:
 
 ```sh
-gh pr check <num> # Checks the state of a specific pr
+gh pr checks <num> # Checks the state of a specific pr
 
 # If no errors found you can merge
 gh pr merge <num> <strategy> --delete-branch --auto
