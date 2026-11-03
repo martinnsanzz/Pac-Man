@@ -51,7 +51,6 @@ install: check_uv
 	@echo "${GREEN}Everything installed${RESET}"
 
 run: install
-	@clear
 	@echo "${GREEN}\nRunning program... !!\n${RESET}"
 	@${RUN_COMM} -m src
 
@@ -81,16 +80,16 @@ fclean: clean
 
 lint:
 	@echo "${YELLOW}Running flake8...${RESET}"
-	-@flake8 . && echo "${GREEN}✓ flake8 passed${RESET}" || true
+	-@${UV} run flake8 . && echo "${GREEN}✓ flake8 passed${RESET}" || true
 
 	@echo "${YELLOW}\nRunning mypy...${RESET}"
-	-@mypy ${MYPY_FLAGS} && echo "${GREEN}✓ mypy passed${RESET}" || true
+	-@${UV} run mypy ${MYPY_FLAGS} && echo "${GREEN}✓ mypy passed${RESET}" || true
 
 lint-strict:
 	@echo "${YELLOW}Running flake8...${RESET}"
-	@flake8 . && echo "${GREEN}✓ flake8 passed${RESET}" || true
+	-@${UV} run flake8 . && echo "${GREEN}✓ flake8 passed${RESET}" || true
 
 	@echo "${YELLOW}Running mypy --strict...${RESET}"
-	@mypy ${MYPY_STRICT_FLAGS} && echo "${GREEN}✓ mypy --strict passed${RESET}"|| true
+	-@${UV} run mypy ${MYPY_STRICT_FLAGS} && echo "${GREEN}✓ mypy --strict passed${RESET}"|| true
 
 .PHONY: help install run debug clean fclean lint lint-strict
