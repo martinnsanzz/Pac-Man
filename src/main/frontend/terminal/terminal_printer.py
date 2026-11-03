@@ -54,7 +54,6 @@ class TerminalPrinter:
         red = cls.build_ansi(COLORS["red"])
         print(f"{red}{ERROR}\n{error}{RESET}", file=stderr, end="")
 
-
     @staticmethod
     def build_ansi(rgb: RGB) -> str:
         """Build the ANSI escape sequence for a 256-color foreground."""

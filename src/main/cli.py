@@ -4,6 +4,7 @@
 from .exceptions import PacManError
 from .frontend import TerminalPrinter
 
+
 def main() -> None:
     try:
         ...
