@@ -1,2 +1,13 @@
-# Vscode folder
+# VSCODE
 .vscode
+
+# PYTHON
+__pycache__/
+
+# CACHE
+.mypy_cache/
+.pytest_cache/
+
+# VIRTUAL ENVIRONMENTS
+.venv/
+venv/

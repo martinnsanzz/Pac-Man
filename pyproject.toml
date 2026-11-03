@@ -1,0 +1,19 @@
+[project]
+name = "pac-man"
+version = "0.1.0"
+description = "Pac-Man in Python with generated mazes, built as a 42 curriculum project."
+readme = "README.md"
+authors = [
+    { name = "Daniel Filipe Moreira Fernandes", email = "danmorei@student.codam.nl" },
+    { name = "Martin Sanz Sanchez", email = "masanz-s@student.codam.nl"}
+]
+requires-python = ">=3.10"
+dependencies = [
+    "pygame-ce>=2.5.8",
+]
+
+[dependency-groups]
+dev = [
+    "flake8>=7.4.1",
+    "mypy>=2.4.0",
+]
