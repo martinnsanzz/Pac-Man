@@ -1,0 +1,11 @@
+# Built-in modules
+
+# Local moodules
+from .exceptions import PacManError
+from .frontend import TerminalPrinter
+
+def main() -> None:
+    try:
+        ...
+    except (PacManError) as e:
+        TerminalPrinter.print_error(f"{e}\n")
