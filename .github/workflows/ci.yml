@@ -14,7 +14,7 @@ jobs:
         run: |
           if [ -n "$(git ls-files '*.py')" ]; then
             uv run flake8 .
-            uv run mypy .
+            uv run mypy . --strict
           else
             echo "No Python files, skipping"
           fi
