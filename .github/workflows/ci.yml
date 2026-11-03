@@ -11,7 +11,7 @@ jobs:
       - uses: astral-sh/setup-uv@v5
       - run: uv sync --locked
       - name: Lint
-      - run: |
+        run: |
           if [ -n "$(git ls-files '*.py')" ]; then
             uv run flake8 .
             uv run mypy .
