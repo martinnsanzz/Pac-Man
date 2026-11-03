@@ -3,5 +3,5 @@ from typing import Any
 from pathlib import Path
 
 
-def load_json(file: Path) -> dict[str, Any]:
-    ...
+def load_json(file: Path) -> dict[str, Any] | None:
+    return None
