@@ -48,6 +48,10 @@ yet informative. This are some tips:
 - *Avoid generic terms* like update, changes, or stuff.
 - Focus on the *primary task* or issue the branch addresses.
 
+#### Actions
+Action is an integration platform that allows you to automate your build, test and deployment
+pipeline. You can create workflows that run tests whenever you push a change to your repository
+or that deploy pull requests to production.
 
 #### GitHub CLI (commands && workflow)
 
