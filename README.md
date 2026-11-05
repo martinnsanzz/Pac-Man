@@ -35,7 +35,7 @@ This is a list of multiple resources use throughout the life-cycle of the projec
 - [CLI GitHub](https://cli.github.com/)
 
 ### 📋 Other Stuff
-
+- [The Pac-Man Dossier by Jamey Pittman](https://pacman.holenet.info/)
 
 ## 🤖 AI Usage
 
