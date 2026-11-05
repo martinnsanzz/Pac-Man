@@ -1,4 +1,10 @@
 {
-    "Hello": 5,
-    "Dict": {"1": 1, "2": 4}
+    "highscore_filename": "highscore.txt",
+    "lives": 3,
+    "total_pacgum": 42,
+    "pacgum_points": 10,
+    "super_pacgum_points": 50,
+    "ghost_points": 200,
+    "level_time_limit": 90,
+    "retro_shader": "on"
 }
