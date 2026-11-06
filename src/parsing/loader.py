@@ -6,7 +6,6 @@ from pathlib import Path
 # Local modules
 from ..exceptions import PacManError
 
-
 def is_comment(line: str) -> bool:
     """Check whether a line is a single-line comment.
 
