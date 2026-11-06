@@ -17,7 +17,7 @@ class App:
     Attributes:
         clock: pygame clock.
         screen: Pygame window to hold the drawings.
-        playable_screen: Subwindow to hold arcade related drawings.
+        arcade_screen: Subwindow to hold arcade related drawings.
         current_screen: Current menu or window to be displayed.
         arcade_size: Arcade window scaled by the user screen.
     """
@@ -47,7 +47,7 @@ class App:
         """
         running = True
         while running:
-            # control block
+            # ---------- control block ----------
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
@@ -57,11 +57,12 @@ class App:
                 action = self.current_screen.handle_event(event)
                 if action is Action.QUIT:
                     running = False
-            # time block
+            # ---------- time block ----------
 
-            # drawing block
+            # ---------- drawing block ----------
             self.screen.fill((0, 0, 0))
             self.arcade_screen.fill((12, 14, 16))
+            self.current_screen.draw(self.arcade_screen)
             playable_surface = pygame.transform.scale(self.arcade_screen,
                                                       self.arcade_size)
             self.screen.blit(

@@ -5,6 +5,11 @@ import pygame
 from .action import Action
 
 
+# Menu
+FONT_SIZE = 64
+LINE_HEIGHT = FONT_SIZE + 10
+
+
 class MainMenu:
     """Main menu screen shown at game start.
 
@@ -19,6 +24,9 @@ class MainMenu:
                 ("Instructions", Action.INSTRUCTIONS),
                 ("Exit", Action.QUIT))
         self.selected: int = 0
+
+        # ---------- UI ----------
+        self.font = pygame.font.Font(None, FONT_SIZE)
 
     def navigate(self, step: int) -> None:
         """Move the selection by `step`.
@@ -54,3 +62,17 @@ class MainMenu:
                 _, action = self.options[self.selected]
                 return action
         return Action.PASS
+
+    def draw(self, surface: pygame.Surface) -> None:
+        """Draw the menu screen on the surface.
+
+        Args:
+            surface: The pygame surface to be drawn on.
+        """
+        start_y = surface.get_height() * 0.55
+        x = surface.get_width() // 2
+        for index, (label, _) in enumerate(self.options):
+            text = self.font.render(label, True, (255, 255, 255))
+            y = start_y + index * LINE_HEIGHT
+            rect = text.get_rect(center=(x, y))
+            surface.blit(text, rect)
