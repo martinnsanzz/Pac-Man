@@ -11,6 +11,10 @@ LINE_HEIGHT = FONT_SIZE + 10
 TEXT_COLOR = (150, 150, 150)
 SELECTED_COLOR = (255, 255, 255)
 
+BOX_PADDING_X = 80
+BOX_PADDING_Y = 10
+BORDER_RADIUS = 15
+
 
 class MainMenu:
     """Main menu screen shown at game start.
@@ -75,7 +79,14 @@ class MainMenu:
         x = surface.get_width() // 2
         for index, (label, _) in enumerate(self.options):
             color = SELECTED_COLOR if index == self.selected else TEXT_COLOR
+            # drawing the text
             text = self.font.render(label, True, color)
             y = start_y + index * LINE_HEIGHT
             rect = text.get_rect(center=(x, y))
+            # drawing the box
+            box = rect.inflate(BOX_PADDING_X, BOX_PADDING_Y)
+            # width=0 fills the box
+            # width=2 draws only the outline
+            pygame.draw.rect(surface, color, box,
+                             width=2, border_radius=BORDER_RADIUS)
             surface.blit(text, rect)
