@@ -7,6 +7,9 @@ import pygame
 # Local modules
 from .action import Action
 
+# UX
+UP_KEYS = (pygame.K_UP, pygame.K_w)
+DOWN_KEYS = (pygame.K_DOWN, pygame.K_s)
 
 # UI
 ASSETS_PATH = Path(__file__).resolve().parents[3] / "assets"
@@ -55,7 +58,7 @@ class MainMenu:
     def handle_event(self, event: pygame.event.Event) -> Action:
         """Handle a single pygame event for the main menu.
 
-        Arrow keys move the selection, Enter confirms it.
+        Arrow or 'WASD' keys move the selection, Enter confirms it.
 
         Args:
             event: The pygame event to process.
@@ -65,9 +68,9 @@ class MainMenu:
             otherwise Action.PASS.
         """
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_UP:
+            if event.key in UP_KEYS:
                 self.navigate(-1)
-            elif event.key == pygame.K_DOWN:
+            elif event.key in DOWN_KEYS:
                 self.navigate(1)
             elif event.key == pygame.K_RETURN:
                 _, action = self.options[self.selected]
