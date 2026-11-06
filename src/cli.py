@@ -8,6 +8,6 @@ from .frontend import TerminalPrinter
 
 def main() -> None:
     try:
-        print("Hello")
+        ...
     except (PacManError, ArgumentError) as e:
         TerminalPrinter.print_error(f"{e}\n")
