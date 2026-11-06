@@ -12,6 +12,8 @@ UP_KEYS = (pygame.K_UP, pygame.K_w)
 DOWN_KEYS = (pygame.K_DOWN, pygame.K_s)
 
 # UI
+TITLE_Y = 0.35
+
 ASSETS_PATH = Path(__file__).resolve().parents[3] / "assets"
 FONT_PATH = ASSETS_PATH / "fonts" / "ARCADECLASSIC.TTF"
 FONT_SIZE = 32
@@ -42,6 +44,14 @@ class MainMenu:
         # ---------- UI ----------
         self.font = pygame.font.Font(FONT_PATH, FONT_SIZE)
 
+    def _draw_title(self, surface: pygame.Surface) -> None:
+        """Draw the logo of the game on top of the given surface."""
+        # TODO: Replace with logo image
+        title = self.font.render("PAC-MAN", True, (255, 255, 0))
+        rect = title.get_rect(center=((surface.get_width() // 2),
+                                      (surface.get_height() * TITLE_Y)))
+        surface.blit(title, rect)
+
     def navigate(self, step: int) -> None:
         """Move the selection by `step`.
 
@@ -58,7 +68,7 @@ class MainMenu:
     def handle_event(self, event: pygame.event.Event) -> Action:
         """Handle a single pygame event for the main menu.
 
-        Arrow or 'WASD' keys move the selection, Enter confirms it.
+        Arrow or 'W/S' keys move the selection, Enter confirms it.
 
         Args:
             event: The pygame event to process.
@@ -83,6 +93,7 @@ class MainMenu:
         Args:
             surface: The pygame surface to be drawn on.
         """
+        self._draw_title(surface)
         start_y = surface.get_height() * 0.55
         x = surface.get_width() // 2
         for index, (label, _) in enumerate(self.options):
