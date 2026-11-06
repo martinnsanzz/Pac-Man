@@ -8,6 +8,8 @@ from .action import Action
 # Menu
 FONT_SIZE = 64
 LINE_HEIGHT = FONT_SIZE + 10
+TEXT_COLOR = (150, 150, 150)
+SELECTED_COLOR = (255, 255, 255)
 
 
 class MainMenu:
@@ -72,7 +74,8 @@ class MainMenu:
         start_y = surface.get_height() * 0.55
         x = surface.get_width() // 2
         for index, (label, _) in enumerate(self.options):
-            text = self.font.render(label, True, (255, 255, 255))
+            color = SELECTED_COLOR if index == self.selected else TEXT_COLOR
+            text = self.font.render(label, True, color)
             y = start_y + index * LINE_HEIGHT
             rect = text.get_rect(center=(x, y))
             surface.blit(text, rect)
