@@ -1,3 +1,6 @@
+# Built-in modules
+from pathlib import Path
+
 # Installed modules
 import pygame
 
@@ -5,9 +8,11 @@ import pygame
 from .action import Action
 
 
-# Menu
-FONT_SIZE = 64
-LINE_HEIGHT = FONT_SIZE + 10
+# UI
+ASSETS_PATH = Path(__file__).resolve().parents[3] / "assets"
+FONT_PATH = ASSETS_PATH / "fonts" / "ARCADECLASSIC.TTF"
+FONT_SIZE = 32
+LINE_HEIGHT = FONT_SIZE + 25
 TEXT_COLOR = (150, 150, 150)
 SELECTED_COLOR = (255, 255, 255)
 
@@ -32,7 +37,7 @@ class MainMenu:
         self.selected: int = 0
 
         # ---------- UI ----------
-        self.font = pygame.font.Font(None, FONT_SIZE)
+        self.font = pygame.font.Font(FONT_PATH, FONT_SIZE)
 
     def navigate(self, step: int) -> None:
         """Move the selection by `step`.
