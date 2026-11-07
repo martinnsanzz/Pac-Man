@@ -2,7 +2,7 @@
 import pygame
 
 # Local modules
-from .screens import MainMenu, Action
+from .screens import MainMenu, Action, Screen
 
 
 # Arcade screen
@@ -38,7 +38,7 @@ class App:
         self.arcade_size = (int(WIDTH * arcade_factor),
                             int(HEIGHT * arcade_factor))
 
-        self.current_screen = MainMenu()
+        self.current_screen: Screen = MainMenu()
 
     def run(self) -> None:
         """Run the main loop until the window is closed.

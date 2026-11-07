@@ -6,6 +6,7 @@ import pygame
 
 # Local modules
 from .action import Action
+from .screen import Screen
 
 # UX
 UP_KEYS = (pygame.K_UP, pygame.K_w)
@@ -26,7 +27,7 @@ BOX_PADDING_Y = 10
 BORDER_RADIUS = 15
 
 
-class MainMenu:
+class MainMenu(Screen):
     """Main menu screen shown at game start.
 
     Attributes:
