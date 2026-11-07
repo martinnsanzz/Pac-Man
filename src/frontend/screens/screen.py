@@ -1,11 +1,15 @@
 # Built-in modules
 from abc import ABC, abstractmethod
+from pathlib import Path
 
 # Installed modules
 import pygame
 
 # Local modules
 from .action import Action
+
+ASSETS_PATH = Path(__file__).resolve().parents[3] / "assets"
+FONT_PATH = ASSETS_PATH / "fonts" / "ARCADECLASSIC.TTF"
 
 
 class Screen(ABC):

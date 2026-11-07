@@ -1,22 +1,17 @@
-# Built-in modules
-from pathlib import Path
-
 # Installed modules
 import pygame
 
 # Local modules
 from .action import Action
-from .screen import Screen
+from .screen import Screen, FONT_PATH
 
-# UX
+# --------- UX ----------
 UP_KEYS = (pygame.K_UP, pygame.K_w)
 DOWN_KEYS = (pygame.K_DOWN, pygame.K_s)
 
-# UI
+# ---------- UI ----------
 TITLE_Y = 0.35
 
-ASSETS_PATH = Path(__file__).resolve().parents[3] / "assets"
-FONT_PATH = ASSETS_PATH / "fonts" / "ARCADECLASSIC.TTF"
 FONT_SIZE = 32
 LINE_HEIGHT = FONT_SIZE + 25
 TEXT_COLOR = (150, 150, 150)

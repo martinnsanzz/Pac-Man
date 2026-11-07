@@ -1,10 +1,13 @@
 # Local modules
 from .main_menu import MainMenu
 from .action import Action
-from .screen import Screen
+from .screen import Screen, FONT_PATH
+from .instructions import Instructions
 
 __all__ = [
-    "MainMenu",
     "Action",
-    "Screen"
+    "Screen",
+    "FONT_PATH",
+    "MainMenu",
+    "Instructions"
 ]
