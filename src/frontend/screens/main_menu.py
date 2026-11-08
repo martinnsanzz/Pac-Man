@@ -3,7 +3,7 @@ import pygame
 
 # Local modules
 from .action import Action
-from .screen import Screen, FONT_PATH
+from .screen import Screen, SUB_SIZE
 
 # --------- UX ----------
 UP_KEYS = (pygame.K_UP, pygame.K_w)
@@ -12,8 +12,7 @@ DOWN_KEYS = (pygame.K_DOWN, pygame.K_s)
 # ---------- UI ----------
 TITLE_Y = 0.35
 
-FONT_SIZE = 32
-LINE_HEIGHT = FONT_SIZE + 25
+LINE_HEIGHT = SUB_SIZE + 25
 TEXT_COLOR = (150, 150, 150)
 SELECTED_COLOR = (255, 255, 255)
 
@@ -30,6 +29,7 @@ class MainMenu(Screen):
         selected: Index of the currently highlighted option.
     """
     def __init__(self) -> None:
+        super().__init__()
         self.options: tuple[tuple[str, Action], ...] = (
                 ("Start", Action.START_GAME),
                 ("Highscores", Action.HIGHSCORES),
@@ -37,13 +37,10 @@ class MainMenu(Screen):
                 ("Exit", Action.QUIT))
         self.selected: int = 0
 
-        # ---------- UI ----------
-        self.font = pygame.font.Font(FONT_PATH, FONT_SIZE)
-
     def _draw_title(self, surface: pygame.Surface) -> None:
         """Draw the logo of the game on top of the given surface."""
         # TODO: Replace with logo image
-        title = self.font.render("PAC-MAN", True, (255, 255, 0))
+        title = self.title_font.render("PAC-MAN", True, (255, 255, 0))
         rect = title.get_rect(center=((surface.get_width() // 2),
                                       (surface.get_height() * TITLE_Y)))
         surface.blit(title, rect)
@@ -95,7 +92,7 @@ class MainMenu(Screen):
         for index, (label, _) in enumerate(self.options):
             color = SELECTED_COLOR if index == self.selected else TEXT_COLOR
             # drawing the text
-            text = self.font.render(label, True, color)
+            text = self.sub_font.render(label, True, color)
             y = start_y + index * LINE_HEIGHT
             rect = text.get_rect(center=(x, y))
             # drawing the box
