@@ -1,5 +1,6 @@
 # Built-in modules
-from math import inf
+import os
+from pathlib import Path
 
 # Installed modules
 from pydantic import BaseModel, Field, PositiveInt, field_validator
@@ -60,7 +61,10 @@ class GameConfig(BaseModel):
     @field_validator("highscore_filename", mode="after")
     @classmethod
     def parse_highscore_file(cls, value: str) -> bool:
-        """Validate that the high score file has a ``.txt`` extension.
+        """Validate the high score file name.
+
+        The name must end in ``.txt``, have a non-empty stem, and contain
+        neither ``/`` nor spaces in the stem.
 
         Args:
             value: File name already validated as a string.
@@ -69,9 +73,20 @@ class GameConfig(BaseModel):
             The unchanged file name.
 
         Raises:
-            ValueError: If the file name does not end with ``.txt``.
+            ValueError: If the name does not end in ``.txt``, has an empty
+                stem, or its stem contains ``/`` or a space.
         """
-        if value.endswith(".txt"):
-            return value
-        raise ValueError(f"Highscore file must be '.txt' file.\n"
-                         f" - File name provided: {value}")
+        file_name = value.split(".txt")
+        if len(file_name) != 2 or file_name[1] != "":
+            raise ValueError("Highscore file name must end in '.txt'.\n"
+                             f" - File name provided: {value}")
+        elif file_name[0] == "":
+            raise ValueError(f"File name empty.\n"
+                             f" - File name provided: {value}")
+        elif "/" in file_name[0]:
+            raise ValueError("Found invalid char '/' in filename.\n"
+                             f" - File name provided: {value}")
+        elif " " in file_name[0]:
+            raise ValueError("Found invalid space in filename.\n"
+                             f" - File name provided: {value}")
+        return value
