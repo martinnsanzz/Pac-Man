@@ -29,7 +29,18 @@ class Highscores:
         A missing or invalid file leaves the table empty instead
         of raising an error.
         """
-        ...
+        try:
+            with open(self.path, "r") as file:
+                data = json.load(file)
+                entries: list[HighscoreEntry] = []
+                for entry in data:
+                    # ** unpacks the dict
+                    entries.append(HighscoreEntry(**entry))
+                self.table = entries
+            self.table.sort(key=lambda entry: entry.score, reverse=True)
+            self.table = self.table[:MAX_ENTRIES]
+        except (OSError, ValueError, ValidationError, TypeError):
+            self.table = []
 
     def save(self) -> None:
         """Write the current table to the file as JSON."""
