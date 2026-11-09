@@ -1,6 +1,5 @@
 # Built-in modules
 from argparse import ArgumentError
-from pathlib import Path
 
 # Local moodules
 from .exceptions import PacManError
