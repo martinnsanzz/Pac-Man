@@ -1,32 +1,22 @@
-# Built-in modules
-from pathlib import Path
-
 # Installed modules
 import pygame
 
 # Local modules
 from .action import Action
+from .screen import (Screen, SUB_SIZE, TEXT_COLOR, SELECTED_COLOR,
+                     BOX_PADDING_X, BOX_PADDING_Y, BORDER_RADIUS)
 
-# UX
+# --------- UX ----------
 UP_KEYS = (pygame.K_UP, pygame.K_w)
 DOWN_KEYS = (pygame.K_DOWN, pygame.K_s)
 
-# UI
+# ---------- UI ----------
 TITLE_Y = 0.35
 
-ASSETS_PATH = Path(__file__).resolve().parents[3] / "assets"
-FONT_PATH = ASSETS_PATH / "fonts" / "ARCADECLASSIC.TTF"
-FONT_SIZE = 32
-LINE_HEIGHT = FONT_SIZE + 25
-TEXT_COLOR = (150, 150, 150)
-SELECTED_COLOR = (255, 255, 255)
-
-BOX_PADDING_X = 80
-BOX_PADDING_Y = 10
-BORDER_RADIUS = 15
+LINE_HEIGHT = SUB_SIZE + 25
 
 
-class MainMenu:
+class MainMenu(Screen):
     """Main menu screen shown at game start.
 
     Attributes:
@@ -34,6 +24,7 @@ class MainMenu:
         selected: Index of the currently highlighted option.
     """
     def __init__(self) -> None:
+        super().__init__()
         self.options: tuple[tuple[str, Action], ...] = (
                 ("Start", Action.START_GAME),
                 ("Highscores", Action.HIGHSCORES),
@@ -41,13 +32,10 @@ class MainMenu:
                 ("Exit", Action.QUIT))
         self.selected: int = 0
 
-        # ---------- UI ----------
-        self.font = pygame.font.Font(FONT_PATH, FONT_SIZE)
-
     def _draw_title(self, surface: pygame.Surface) -> None:
         """Draw the logo of the game on top of the given surface."""
         # TODO: Replace with logo image
-        title = self.font.render("PAC-MAN", True, (255, 255, 0))
+        title = self.title_font.render("PAC-MAN", True, (255, 255, 0))
         rect = title.get_rect(center=((surface.get_width() // 2),
                                       (surface.get_height() * TITLE_Y)))
         surface.blit(title, rect)
@@ -99,7 +87,7 @@ class MainMenu:
         for index, (label, _) in enumerate(self.options):
             color = SELECTED_COLOR if index == self.selected else TEXT_COLOR
             # drawing the text
-            text = self.font.render(label, True, color)
+            text = self.sub_font.render(label, True, color)
             y = start_y + index * LINE_HEIGHT
             rect = text.get_rect(center=(x, y))
             # drawing the box

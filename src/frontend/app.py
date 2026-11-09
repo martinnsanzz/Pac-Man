@@ -2,7 +2,7 @@
 import pygame
 
 # Local modules
-from .screens import MainMenu, Action
+from .screens import MainMenu, Action, Screen, Instructions
 
 
 # Arcade screen
@@ -17,6 +17,7 @@ class App:
     Attributes:
         clock: pygame clock.
         screen: Pygame window to hold the drawings.
+        main_menu: Main menu window to return to.
         arcade_screen: Subwindow to hold arcade related drawings.
         current_screen: Current menu or window to be displayed.
         arcade_size: Arcade window scaled by the user screen.
@@ -30,6 +31,10 @@ class App:
         self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
         win_w, win_h = self.screen.get_size()
 
+        # ---------- UX ----------
+        self.current_screen: Screen = MainMenu()
+        self.main_menu = self.current_screen
+
         # ---------- arcade screen ----------
         self.arcade_screen = pygame.Surface((WIDTH, HEIGHT))
         ratio_w = win_w / WIDTH
@@ -37,8 +42,6 @@ class App:
         arcade_factor = min(ratio_w, ratio_h)
         self.arcade_size = (int(WIDTH * arcade_factor),
                             int(HEIGHT * arcade_factor))
-
-        self.current_screen = MainMenu()
 
     def run(self) -> None:
         """Run the main loop until the window is closed.
@@ -55,8 +58,15 @@ class App:
                     if event.key == pygame.K_ESCAPE:
                         running = False
                 action = self.current_screen.handle_event(event)
-                if action is Action.QUIT:
-                    running = False
+                match action:
+                    case Action.QUIT:
+                        running = False
+                    case Action.BACK:
+                        self.current_screen = self.main_menu
+                    case Action.INSTRUCTIONS:
+                        self.current_screen = Instructions()
+                    case _:
+                        pass
             # ---------- time block ----------
 
             # ---------- drawing block ----------
