@@ -28,6 +28,10 @@ This is a list of multiple resources use throughout the life-cycle of the projec
 - [Python argparse: Syntax, Usage, and Examples](https://mimo.org/glossary/python/argparse)
 - [How to Pass Command-Line Arguments in pytest](https://medium.com/@johnidouglasmarangon/how-to-pass-command-line-arguments-in-pytest-custom-addoptions-a706bae89d05)
 
+#### Pygame
+- [Pygame Docs](https://www.pygame.org/docs/)
+- [How to load Custom Fonts](https://www.makeuseof.com/pygame-fonts-text-effects-how-load/)
+
 ### 😺 GitHub
 - [GitHub Branching Name Best Practices](https://dev.to/jps27cse/github-branching-name-best-practices-49ei)
 - [GitHub Issues Documentation](https://docs.github.com/en/issues)

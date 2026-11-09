@@ -6,25 +6,10 @@ from pathlib import Path
 import pygame
 
 # Local modules
-from .action import Action
+from .actions import ScreenAction
+from ..paths import FontsPaths
+from ..assets import AssetsLoader
 
-# ---------- Fonts ----------
-ASSETS_PATH = Path(__file__).resolve().parents[3] / "assets"
-TITLE_FONT_PATH = ASSETS_PATH / "fonts" / "Crackman.TTF"
-SUB_FONT_PATH = ASSETS_PATH / "fonts" / "ARCADECLASSIC.TTF"
-TEXT_FONT_PATH = ASSETS_PATH / "fonts" / "ARCADE.TTF"
-
-TITLE_SIZE = 80
-SUB_SIZE = 25
-TEXT_SIZE = 22
-
-# ---------- UI ----------
-TEXT_COLOR = (150, 150, 150)
-SELECTED_COLOR = (255, 255, 255)
-
-BOX_PADDING_X = 80
-BOX_PADDING_Y = 10
-BORDER_RADIUS = 15
 
 
 class Screen(ABC):
@@ -35,13 +20,28 @@ class Screen(ABC):
         sub_font: Font to be used on the options in the main menu.
         text_font: Font to be used in regular text across the game.
     """
-    def __init__(self) -> None:
-        self.title_font = pygame.font.Font(TITLE_FONT_PATH, TITLE_SIZE)
-        self.sub_font = pygame.font.Font(SUB_FONT_PATH, SUB_SIZE)
-        self.text_font = pygame.font.Font(TEXT_FONT_PATH, TEXT_SIZE)
+    TITLE_SIZE = 80
+    SUB_SIZE = 25
+    TEXT_SIZE = 22
+
+    # ---------- UI ----------
+    TEXT_COLOR = (150, 150, 150)
+    SELECTED_COLOR = (255, 255, 255)
+
+    BOX_PADDING_X = 80
+    BOX_PADDING_Y = 10
+    BORDER_RADIUS = 15
+
+    def __init__(self, screen_w: int, screen_h: int,
+                 assets: AssetsLoader) -> None:
+        self.title_font = assets.fonts["CRACKMAN"]
+        self.sub_font = assets.fonts["ARCADECLASSIC"]
+        self.text_font = assets.fonts["ARCADE"]
+        self.screen_w = screen_w
+        self.screen_h = screen_h
 
     @abstractmethod
-    def handle_event(self, event: pygame.event.Event) -> Action:
+    def handle_event(self, event: pygame.event.Event) -> ScreenAction:
         """Handle a single pygame event for the current screen.
 
         The keys accepted will be personalized for each screen.
@@ -51,6 +51,15 @@ class Screen(ABC):
 
         Returns:
             The action of the selected option in the screen.
+        """
+
+    def update(self, dt: float) -> None:
+        """Advance the screen state by dt seconds.
+
+        Does nothing by default; screens with moving parts override it.
+
+        Args:
+            dt: Seconds elapsed since the previous frame.
         """
 
     @abstractmethod

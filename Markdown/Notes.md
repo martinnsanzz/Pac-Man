@@ -1,4 +1,4 @@
-# Fly-in
+# Pac-Man
 
 ## Concepts
 
@@ -236,3 +236,239 @@ gh pr merge <num> <strategy> --delete-branch --auto
 #   --rebasae -> Each commit is replayed one by one on main. No merge commit, linear history.
 # --auto -> Merges automatically the moment the rules pass
 ```
+
+### Pygame
+
+#### 1. Mental model
+
+- Pygame draws pixels onto **Surfaces** (2D arrays of pixels in RAM).
+- The **display surface** is the window. Nothing appears until `pygame.display.flip()`.
+- A game is a loop: **events -> update -> draw -> flip -> tick**.
+- Coordinates: `(0, 0)` is top-left, x grows right, **y grows down**.
+
+#### 2. Init and window
+
+```python
+import pygame
+
+pygame.init()                                   # init all modules
+screen = pygame.display.set_mode((672, 864))    # returns the display Surface
+pygame.display.set_caption("Pac-Man")
+...
+pygame.quit()                                   # always on exit
+```
+
+| Flag | Effect |
+|---|---|
+| `pygame.RESIZABLE` | user can resize (emits `VIDEORESIZE`) |
+| `pygame.FULLSCREEN` | fullscreen |
+| `pygame.SCALED` | fixed logical size, auto-scaled by pygame |
+
+`set_mode((0, 0))` uses the current desktop size.
+
+#### 3. Main loop
+
+```python
+clock = pygame.time.Clock()
+running = True
+while running:
+    for event in pygame.event.get():            # 1. events
+        if event.type == pygame.QUIT:
+            running = False
+
+    dt = clock.tick(60) / 1000                  # 2. cap FPS, dt in seconds
+    update(dt)                                  # 3. logic
+
+    screen.fill((0, 0, 0))                      # 4. draw
+    draw(screen)
+    pygame.display.flip()                       # 5. show
+pygame.quit()
+```
+
+- `clock.tick(60)` sleeps to cap at 60 FPS and returns ms since the last call.
+- **Use `dt`** for movement: `x += speed * dt` (speed in pixels/second). Never move "N pixels per frame" if speed must be consistent.
+- `pygame.event.get()` empties the queue. Call it **once per frame**; two calls steal events from each other.
+
+#### 4. Events and input
+
+Two ways to read the keyboard:
+
+| Method | Use for | Fires |
+|---|---|---|
+| `event.type == KEYDOWN` / `KEYUP` | one-shot actions (pause, menu select, "next direction") | once per press |
+| `pygame.key.get_pressed()` | continuous state (is a key held now?) | every call |
+
+```python
+for event in pygame.event.get():
+    if event.type == pygame.KEYDOWN:
+        if event.key == pygame.K_ESCAPE: ...
+        if event.key == pygame.K_LEFT: ...
+
+keys = pygame.key.get_pressed()
+if keys[pygame.K_LEFT]: ...
+```
+
+Mouse: `MOUSEBUTTONDOWN` (`event.pos`, `event.button`), `MOUSEMOTION`, or `pygame.mouse.get_pos()`.
+
+Common events: `QUIT`, `KEYDOWN`, `KEYUP`, `MOUSEBUTTONDOWN`, `MOUSEBUTTONUP`, `MOUSEMOTION`, `VIDEORESIZE`.
+
+#### 5. Surface and blit
+
+```python
+surf = pygame.Surface((w, h))             # opaque
+surf = pygame.Surface((w, h), pygame.SRCALPHA)  # per-pixel alpha
+surf.fill((r, g, b))                      # or (r, g, b, a) with SRCALPHA
+target.blit(surf, (x, y))                 # copy surf onto target at (x, y)
+```
+
+- `blit(source, dest, area=None)`: `area` is a `Rect` of the source to copy (this is how you draw one tile of a sprite sheet).
+- Order of blits = draw order (last one on top).
+- `surf.get_size()`, `get_width()`, `get_height()`, `get_rect()`.
+- `surf.subsurface(rect)` returns a **view** sharing pixels with `surf` (no copy).
+- `surf.copy()` returns a real copy.
+
+#### 6. Rect
+
+`pygame.Rect(x, y, w, h)` holds integers. Handy attributes (assignable):
+`x y w h`, `top bottom left right`, `center centerx centery`, `topleft bottomright size`.
+
+```python
+r = surf.get_rect(center=(100, 100))     # position a surface by its center
+r.colliderect(other)                     # overlap test
+r.collidepoint(pos)                      # mouse over button?
+r.move(dx, dy)                           # returns new Rect
+r.move_ip(dx, dy)                        # in place
+```
+
+**Pitfall:** Rects store ints. `rect.x += 0.4` is truncated, so slow movement stops. Keep a float position `pos` and copy it to `rect.topleft` each frame.
+
+#### 7. Drawing primitives
+
+```python
+pygame.draw.rect(surf, color, rect, width=0, border_radius=0)   # width 0 = filled
+pygame.draw.circle(surf, color, center, radius, width=0)
+pygame.draw.line(surf, color, start, end, width=1)
+pygame.draw.polygon(surf, color, points, width=0)
+pygame.draw.arc(...)
+```
+
+Colors: `(r, g, b)` or `(r, g, b, a)`, 0..255. Or `pygame.Color("yellow")`.
+
+#### 8. Images and sprite sheets
+
+```python
+img = pygame.image.load("assets/tiles.png").convert_alpha()
+```
+
+- `.convert()` (opaque) or `.convert_alpha()` (transparency): **do it once after load**, it makes blitting much faster. It needs `set_mode` to have been called first.
+- Load images once at startup, not every frame.
+
+Slicing a grid sheet (16x16 tiles, 4 per row):
+
+```python
+TILE = 16
+def get_tile(sheet, v):
+    x = (v % 4) * TILE
+    y = (v // 4) * TILE
+    return sheet.subsurface(pygame.Rect(x, y, TILE, TILE))
+```
+
+#### 9. Scaling
+
+```python
+pygame.transform.scale(surf, (w, h))        # nearest neighbour: sharp, use for pixel art
+pygame.transform.smoothscale(surf, (w, h))  # smooth: blurs pixel art
+pygame.transform.rotate(surf, angle)
+pygame.transform.flip(surf, flip_x, flip_y)
+```
+
+**Pattern for fixed-resolution games:** draw everything on a fixed logical surface (e.g. 672x864), then scale that one surface to the window once per frame and blit it centered. Mouse positions must then be converted from window coords to logical coords:
+
+```python
+lx = (mouse_x - offset_x) / scale
+ly = (mouse_y - offset_y) / scale
+```
+
+Compute scale as `min(win_w / W, win_h / H)` to keep the aspect ratio.
+
+#### 10. Text
+
+```python
+font = pygame.font.Font("assets/font.ttf", 24)   # or pygame.font.SysFont("arial", 24)
+text = font.render("SCORE 100", True, (255, 255, 255))   # True = antialiasing
+screen.blit(text, (10, 10))
+```
+
+`render` is slow-ish: create fonts once, and re-render text only when it changes.
+
+#### 11. Sound
+
+```python
+pygame.mixer.init()                      # done by pygame.init()
+sfx = pygame.mixer.Sound("assets/eat.wav")
+sfx.play()
+pygame.mixer.music.load("assets/theme.ogg")
+pygame.mixer.music.play(-1)              # -1 = loop forever
+```
+
+Sounds are short effects loaded in memory; music is streamed.
+
+#### 12. Timing
+
+- `pygame.time.get_ticks()`: ms since `init`.
+- `pygame.time.set_timer(EVENT_ID, ms)`: posts a custom event every `ms`.
+- Custom events: `MY_EVENT = pygame.USEREVENT + 1`.
+- For timed states (power pellet lasts 6 s), store a deadline and compare, or count down with `dt`.
+
+#### 13. Screens / game states
+
+A clean structure for menus + game:
+
+```python
+class Screen:
+    def handle_event(self, event) -> Action: ...   # input
+    def update(self, dt) -> None: ...              # logic
+    def draw(self, surface) -> None: ...           # drawing only
+```
+
+- The app holds `current_screen` and calls the same three methods every frame.
+- A screen **returns an action** to request a change (`START_GAME`, `BACK`, `QUIT`) instead of importing other screens. That avoids circular imports.
+- `draw` must not change game state; `update` must not draw.
+
+#### 14. Common mistakes
+
+- Calling `convert_alpha()` or loading images **every frame**.
+- Forgetting `display.flip()` (black window) or `fill()` (ghost trails).
+- Moving by fixed pixels per frame instead of `speed * dt`.
+- Using `Rect` for positions that need decimals.
+- Calling `event.get()` twice per frame.
+- Using `smoothscale` on pixel art.
+- Not handling `QUIT` (window can't be closed).
+- Getting mouse position without converting to logical coordinates after scaling.
+- Doing blocking work (`time.sleep`, long loops) inside the main loop: the window freezes.
+- Forgetting `pygame.quit()`.
+
+#### 15. Grid-based movement (Pac-Man style)
+
+- Keep the **grid position** (`col`, `row`) and a **pixel offset** between cells.
+- Store the player's **requested direction**; apply it only when centered on a cell and the next cell is open (check the wall bit).
+- Cell value is a bitmask: bit 0 N, 1 E, 2 S, 3 W; `1` = closed.
+  `can_go_north = not (cell & 1)`, `can_go_east = not (cell & 2)`, etc.
+- Pixel position = `col * TILE`, `row * TILE` (plus the maze offset on the arcade surface).
+
+#### 16. Quick reference
+
+| Task | Call |
+|---|---|
+| Init / quit | `pygame.init()` / `pygame.quit()` |
+| Window | `pygame.display.set_mode(size, flags)` |
+| Show frame | `pygame.display.flip()` |
+| Clear | `surf.fill(color)` |
+| Draw image | `target.blit(surf, pos)` |
+| Load image | `pygame.image.load(p).convert_alpha()` |
+| Events | `pygame.event.get()` |
+| Held keys | `pygame.key.get_pressed()` |
+| Mouse | `pygame.mouse.get_pos()` |
+| FPS / dt | `clock.tick(fps)` |
+| Scale | `pygame.transform.scale(...)` |
+| Collision | `rect.colliderect(other)` |
