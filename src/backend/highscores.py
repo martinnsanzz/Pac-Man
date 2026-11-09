@@ -1,5 +1,6 @@
 # Built-in modules
 from pathlib import Path
+import json
 
 # Installed modules
 from pydantic import ValidationError
@@ -32,7 +33,16 @@ class Highscores:
 
     def save(self) -> None:
         """Write the current table to the file as JSON."""
-        ...
+        data: list[dict[str, str | int]] = []
+        for entry in self.table:
+            data.append(entry.model_dump())
+
+        try:
+            with open(self.path, "w") as file:
+                json.dump(data, file, indent=4)
+        except OSError:
+            # TODO: Decide what should happen after a fail
+            pass
 
     def insert(self, name: str, score: int) -> bool:
         """Add a score to the table if it makes the top MAX_ENTRIES.
