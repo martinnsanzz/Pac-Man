@@ -1,7 +1,3 @@
-# Built-in modules
-import os
-from pathlib import Path
-
 # Installed modules
 from pydantic import BaseModel, Field, PositiveInt, field_validator
 
@@ -32,7 +28,7 @@ class GameConfig(BaseModel):
     super_pacgum_points: PositiveInt = Field(default=50, le=500)
     ghost_points: PositiveInt = Field(default=200, le=2000)
     level_time_limit: PositiveInt = Field(default=90, gt=0, le=1000)
-    retro_shader: bool = Field(default=True) # 'on == true' and 'off == false' 
+    retro_shader: bool = Field(default=True)
 
     @field_validator("retro_shader", mode="before")
     @classmethod
@@ -55,12 +51,12 @@ class GameConfig(BaseModel):
             return True
         elif value == "off":
             return False
-        raise ValueError(f"Incorrect mode for 'retro_shader'.\n"
+        raise ValueError("Incorrect mode for 'retro_shader'.\n"
                          "  - Accepted: 'on'/'off'")
 
     @field_validator("highscore_filename", mode="after")
     @classmethod
-    def parse_highscore_file(cls, value: str) -> bool:
+    def parse_highscore_file(cls, value: str) -> str:
         """Validate the high score file name.
 
         The name must end in ``.txt``, have a non-empty stem, and contain
@@ -81,7 +77,7 @@ class GameConfig(BaseModel):
             raise ValueError("Highscore file name must end in '.txt'.\n"
                              f" - File name provided: {value}")
         elif file_name[0] == "":
-            raise ValueError(f"File name empty.\n"
+            raise ValueError("File name empty.\n"
                              f" - File name provided: {value}")
         elif "/" in file_name[0]:
             raise ValueError("Found invalid char '/' in filename.\n"

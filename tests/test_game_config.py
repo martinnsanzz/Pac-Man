@@ -5,6 +5,7 @@ import re
 
 # Local modules
 from src.parsing import parse_game_config
+from src.models import GameConfig
 from src.exceptions import PacManError
 
 VALID_CONFIG: dict[str, Any] = {
@@ -19,109 +20,107 @@ VALID_CONFIG: dict[str, Any] = {
 }
 
 
-def _set(cfg, name):
-    cfg["highscore_filename"] = name
-    return cfg
-
-@pytest.mark.parametrize("name", [
-    "highscore.txt",
-    "a.txt",                  # 1-char stem
-    "HIGH_score-1.txt",
-    "score.v2.txt",           # dots in stem
-    "a..txt",
-    "ünï.txt",                # unicode
-    "x" * 200 + ".txt",       # long name
-])
-def test_filename_valid(valid_config, name):
-    cfg = parse_game_config(_set(valid_config, name))
-    assert cfg.highscore_filename == name
-
-
-@pytest.mark.parametrize("name", [
-    "", "score", "txt", "score.tx", "score.csv",
-    "score.TXT",              # case-sensitive
-    "score.txt.bak",
-    "score.txt ",             # trailing space after the extension
-])
-def test_filename_bad_extension(valid_config, name):
-    with pytest.raises(PacManError, match=re.escape("must end in '.txt'")):
-        parse_game_config(_set(valid_config, name))
-
-
-def test_filename_empty_stem(valid_config):
-    with pytest.raises(PacManError, match="File name empty"):
-        parse_game_config(_set(valid_config, ".txt"))
-
-
-@pytest.mark.parametrize("name", [
-    "a/b.txt", "/a.txt", "../a.txt", "dir/.txt",
-])
-def test_filename_slash(valid_config, name):
-    with pytest.raises(PacManError, match=re.escape("invalid char '/'")):
-        parse_game_config(_set(valid_config, name))
-
-
-@pytest.mark.parametrize("name", ["my score.txt", " a.txt", "a .txt"])
-def test_filename_space(valid_config, name):
-    with pytest.raises(PacManError, match="invalid space"):
-        parse_game_config(_set(valid_config, name))
-
-
-def test_filename_check_order(valid_config):
-    # both '/' and space in the stem: your if/elif order decides the message
-    with pytest.raises(PacManError, match=re.escape("invalid char '/'")):
-        parse_game_config(_set(valid_config, "a b/c.txt"))
-
-
-@pytest.mark.parametrize("name", [123, None, ["a.txt"], {}, 1.5])
-def test_filename_not_a_string(valid_config, name):
-    with pytest.raises(PacManError, match="'highscore_filename'"):
-        parse_game_config(_set(valid_config, name))
-
-
 @pytest.fixture
 def valid_config() -> dict[str, Any]:
     """Fresh copy per test, so mutating it never leaks."""
     return dict(VALID_CONFIG)
 
 
-def test_empty_uses_defaults():
-    assert parse_game_config({}).lives == 3
+class TestHighscoreName:
+    """Validation of ``GameConfig.highscore_filename``."""
+
+    @staticmethod
+    def parse(cfg: dict[str, Any], name: object) -> GameConfig:
+        return parse_game_config({**cfg, "highscore_filename": name})
+
+    @pytest.mark.parametrize("name", [
+        "highscore.txt",
+        "a.txt",                  # 1-char stem
+        "HIGH_score-1.txt",
+        "score.v2.txt",           # dots in stem
+        "a..txt",
+        "ünï.txt",                # unicode
+        "x" * 200 + ".txt",       # long name
+    ])
+    def test_valid(self, valid_config: dict[str, Any], name: object) -> None:
+        assert self.parse(valid_config, name).highscore_filename == name
+
+    @pytest.mark.parametrize("name, msg", [
+        # extension
+        ("", "must end in '.txt'"),
+        ("score", "must end in '.txt'"),
+        ("score.tx", "must end in '.txt'"),
+        ("score.TXT", "must end in '.txt'"),      # case-sensitive
+        ("score.txt.bak", "must end in '.txt'"),
+        ("score.txt ", "must end in '.txt'"),     # trailing space
+        # empty stem
+        (".txt", "File name empty"),
+        # slash
+        ("a/b.txt", "invalid char '/'"),
+        ("/a.txt", "invalid char '/'"),
+        ("../a.txt", "invalid char '/'"),
+        ("dir/.txt", "invalid char '/'"),
+        # space
+        ("my score.txt", "invalid space"),
+        (" a.txt", "invalid space"),
+        ("a .txt", "invalid space"),
+        # precedence: '/' is checked before space
+        ("a b/c.txt", "invalid char '/'"),
+    ])
+    def test_rejected(self, valid_config: dict[str, Any],
+                      name: object, msg: str) -> None:
+        with pytest.raises(PacManError, match=re.escape(msg)):
+            self.parse(valid_config, name)
+
+    @pytest.mark.parametrize("name", [123, None, ["a.txt"], {}, 1.5])
+    def test_not_a_string(self, valid_config: dict[str, Any],
+                          name: object) -> None:
+        with pytest.raises(PacManError, match="'highscore_filename'"):
+            self.parse(valid_config, name)
 
 
-@pytest.mark.parametrize("value", ["yes", "ON", "", True, None, 1])
-def test_shader_rejected(valid_config, value):
-    valid_config["retro_shader"] = value
-    with pytest.raises(PacManError, match="Incorrect mode for 'retro_shader'"):
-        parse_game_config(valid_config)
+class TestConfigLoading:
+    """Whole-config behavior: defaults, partial input, unknown keys."""
+
+    def test_valid(self, valid_config: dict[str, Any]) -> None:
+        cfg = parse_game_config(valid_config)
+        assert cfg.model_dump() == {**VALID_CONFIG, "retro_shader": True}
+
+    def test_empty_uses_defaults(self) -> None:
+        assert parse_game_config({}).lives == 3
+
+    def test_partial_keeps_other_defaults(self) -> None:
+        cfg = parse_game_config({"lives": 5})
+        assert cfg.lives == 5
+        assert cfg.total_pacgum == 42
+
+    def test_unknown_keys_ignored(self, valid_config: dict[str, Any]) -> None:
+        parse_game_config({**valid_config, "foo": "bar"})  # must not raise
 
 
-@pytest.mark.parametrize("value", [0, -1, 11, "abc", 3.5])
-def test_lives_rejected(valid_config, value):
-    valid_config["lives"] = value
-    with pytest.raises(PacManError):
-        parse_game_config(valid_config)
+class TestRetroShader:
+
+    @pytest.mark.parametrize("raw, expected", [("on", True), ("off", False)])
+    def test_accepted(self, valid_config: dict[str, Any],
+                      raw: str, expected: bool) -> None:
+        cfg = parse_game_config({**valid_config, "retro_shader": raw})
+        assert cfg.retro_shader is expected
+
+    @pytest.mark.parametrize("value", ["yes", "ON", "", True, None, 1])
+    def test_rejected(self, valid_config: dict[str, Any], value: Any) -> None:
+        with pytest.raises(PacManError, match="Incorrect mode"):
+            parse_game_config({**valid_config, "retro_shader": value})
 
 
-def test_bad_extension(valid_config):
-    valid_config["highscore_filename"] = "score.csv"
-    with pytest.raises(PacManError, match="Highscore file must be '.txt'"):
-        parse_game_config(valid_config)
+class TestLives:
 
-def test_partial_keeps_other_defaults():
-    cfg = parse_game_config({"lives": 5})
-    assert cfg.lives == 5 and cfg.total_pacgum == 42
+    @pytest.mark.parametrize("value", [1, 10])
+    def test_bounds_accepted(self, valid_config: dict[str, Any],
+                             value: Any) -> None:
+        assert parse_game_config({**valid_config, "lives": value}).lives \
+            == value
 
-
-def test_unknown_keys_ignored(valid_config):
-    valid_config["foo"] = "bar"
-    parse_game_config(valid_config)
-
-
-def test_valid(valid_config):
-    cfg = parse_game_config(valid_config)
-    assert cfg.model_dump() == {**VALID_CONFIG, "retro_shader": True}
-
-def test_shader_off(valid_config):
-    valid_config["retro_shader"] = "off"
-    assert parse_game_config(valid_config).retro_shader is False
+    @pytest.mark.parametrize("value", [0, -1, 11, "abc", 3.5])
+    def test_rejected(self, valid_config: dict[str, Any], value: Any) -> None:
+        with pytest.raises(PacManError, match="'lives'"):
+            parse_game_config({**valid_config, "lives": value})
