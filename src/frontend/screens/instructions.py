@@ -18,10 +18,11 @@ CONTENT: dict[str, tuple[str, ...]] = {
         "CONTROLS": ("Arrows / 'WASD': move Pac-Man",
                      "'p': pause/unpause",
                      "'esc': quit the game"),
-        "RULES": ("Pacgums: 10 points",
-                  "Super-Pacgums: 50 points & opens a window to eat ghosts"),
+        "RULES": ("Pacgums: Give points",
+                  "Super-Pacgums: Give points & lets Pac-Man eat ghosts"),
         "CHEAT CODES": ("TODO",)
         }
+# TODO: read values of pacgums from config
 
 
 class Instructions(Screen):
