@@ -18,13 +18,21 @@ TITLE_SIZE = 80
 SUB_SIZE = 25
 TEXT_SIZE = 22
 
+# ---------- UI ----------
+TEXT_COLOR = (150, 150, 150)
+SELECTED_COLOR = (255, 255, 255)
+
+BOX_PADDING_X = 80
+BOX_PADDING_Y = 10
+BORDER_RADIUS = 15
+
 
 class Screen(ABC):
     """Base screen class for all screens in game.
 
     Attributes:
         title_font: Font to be used in titles across the game.
-        option_font: Font to be used on the options in the main menu.
+        sub_font: Font to be used on the options in the main menu.
         text_font: Font to be used in regular text across the game.
     """
     def __init__(self) -> None:

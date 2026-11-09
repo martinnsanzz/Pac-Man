@@ -3,7 +3,8 @@ import pygame
 
 # Local modules
 from .action import Action
-from .screen import Screen, SUB_SIZE
+from .screen import (Screen, SUB_SIZE, TEXT_COLOR, SELECTED_COLOR,
+                     BOX_PADDING_X, BOX_PADDING_Y, BORDER_RADIUS)
 
 # --------- UX ----------
 UP_KEYS = (pygame.K_UP, pygame.K_w)
@@ -13,12 +14,6 @@ DOWN_KEYS = (pygame.K_DOWN, pygame.K_s)
 TITLE_Y = 0.35
 
 LINE_HEIGHT = SUB_SIZE + 25
-TEXT_COLOR = (150, 150, 150)
-SELECTED_COLOR = (255, 255, 255)
-
-BOX_PADDING_X = 80
-BOX_PADDING_Y = 10
-BORDER_RADIUS = 15
 
 
 class MainMenu(Screen):
