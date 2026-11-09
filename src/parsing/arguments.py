@@ -3,12 +3,26 @@ from argparse import ArgumentParser, ArgumentError, Namespace
 
 
 def json_file(file: str) -> str:
+    """Checks if file name ends with '.json' extension"""
     if not file.lower().endswith(".json"):
         raise TypeError(f"'{file}' isn't a valid json file.")
     return file
 
 
 def load_arguments() -> Namespace:
+    """Parse and validate the command-line arguments.
+
+    Expect exactly one positional argument: the path to a ``.json``
+    configuration file. The path is checked with ``json_file``.
+
+    Returns:
+        The parsed arguments, with the configuration path in ``file``.
+
+    Raises:
+        ArgumentError: If the configuration file is missing, fails the
+            ``json_file`` check, or if any unrecognized arguments are
+            present on the command line.
+    """
     parser = ArgumentParser(description="Read a file from CLI",
                             exit_on_error=False)
 
