@@ -27,8 +27,11 @@ class Highscores:
     def load(self) -> None:
         """Load the table from the file.
 
-        A missing or invalid file leaves the table empty instead
-        of raising an error.
+        A missing file leaves the table empty. An unreadable or invalid
+        file also empties the table, then raises.
+
+        Raises:
+            PacManError: If it is not possible to load highscore file.
         """
         try:
             with open(self.path, "r") as file:
@@ -40,8 +43,11 @@ class Highscores:
                 self.table = entries
             self.table.sort(key=lambda entry: entry.score, reverse=True)
             self.table = self.table[:MAX_ENTRIES]
-        except (OSError, ValueError, ValidationError, TypeError):
+        except FileNotFoundError:
             self.table = []
+        except (OSError, ValueError, TypeError) as e:
+            self.table = []
+            raise PacManError(f"Could not load '{self.path}': {e}.")
 
     def save(self) -> None:
         """Write the current table to the file as JSON.
