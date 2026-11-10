@@ -1,12 +1,18 @@
+# Built-in modules
+from pathlib import Path
+
 # Installed modules
 import pygame
 
 # Local modules
-from .screens import MainMenu, ScreenAction, Screen, Instructions, Game
+from .screens import (MainMenu, ScreenAction, Screen,
+                      Instructions, Game, HighscoresTable)
 from .paths import FontsPaths, SpritesPaths, TilemapPath
 from .assets import AssetsLoader
-from ..exceptions import LoadAssetsError
+from ..exceptions import LoadAssetsError, PacManError
 from ..models import GameConfig
+from ..backend import Highscores
+from .terminal import TerminalPrinter
 
 
 class App:
@@ -20,6 +26,7 @@ class App:
         arcade_screen: Subwindow to hold arcade related drawings.
         current_screen: Current menu or window to be displayed.
         arcade_size: Arcade window scaled by the user screen.
+        highscores: Persistent highscore table, loaded at startup.
     """
     # Arcade screen
     WIDTH = 672
@@ -47,6 +54,12 @@ class App:
         self.game: Game | None = None
         self.current_screen: Screen = self.main_menu
         self.running = True
+
+        self.highscores = Highscores(Path(game_config.highscore_filename))
+        try:
+            self.highscores.load()
+        except PacManError as e:
+            TerminalPrinter.print_error(f"{e}\n") 
 
     def run(self) -> None:
         """Run the main loop until the window is closed."""
@@ -80,6 +93,10 @@ class App:
             case ScreenAction.RESUME:
                 if self.game is not None:
                     self.current_screen = self.game
+            case ScreenAction.HIGHSCORES:
+                self.current_screen = HighscoresTable(self.WIDTH, self.HEIGHT,
+                                                      self.assets,
+                                                      self.highscores)
             case _:
                 pass
 
