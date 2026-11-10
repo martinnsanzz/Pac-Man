@@ -2,13 +2,8 @@
 import pygame
 
 # Local modules
-from .screens import MainMenu, Action, Screen, Instructions
-
-
-# Arcade screen
-WIDTH = 672
-HEIGHT = 864
-FPS = 60
+from .screens import MainMenu, ScreenAction, Screen, Instructions, Game
+from .assets import AssetsLoader
 
 
 class App:
@@ -22,64 +17,85 @@ class App:
         current_screen: Current menu or window to be displayed.
         arcade_size: Arcade window scaled by the user screen.
     """
+    # Arcade screen
+    WIDTH = 672
+    HEIGHT = 864
+    FPS = 60
+    BACKGROUND = (12, 14, 16)
+
     def __init__(self) -> None:
-        """Open the window and load the main menu."""
-        # ---------- pygame controls ----------
+        """Open the window, load the assets and show the main menu."""
         pygame.init()
-
         self.clock = pygame.time.Clock()
-        self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+        self.screen = pygame.display.set_mode((0, 0), pygame.RESIZABLE)
+        pygame.display.set_caption("Pac-Man")
+
+        # Needs the display to exist (convert_alpha)
+        self.assets = AssetsLoader()
+        self.assets.load()
+
+        self.arcade_screen = pygame.Surface((self.WIDTH, self.HEIGHT))
+        self.arcade_size = self._compute_arcade_size()
+
+        self.main_menu: Screen = MainMenu(self.WIDTH, self.HEIGHT, self.assets)
+        self.game: Game | None = None
+        self.current_screen: Screen = self.main_menu
+        self.running = True
+
+    def _compute_arcade_size(self) -> tuple[int, int]:
+        """Return the arcade size scaled to fit the window."""
         win_w, win_h = self.screen.get_size()
+        factor = min(win_w / self.WIDTH, win_h / self.HEIGHT)
+        return int(self.WIDTH * factor), int(self.HEIGHT * factor)
 
-        # ---------- UX ----------
-        self.current_screen: Screen = MainMenu()
-        self.main_menu = self.current_screen
+    def _switch(self, action: ScreenAction) -> None:
+        """Change the current screen according to the action."""
+        match action:
+            case ScreenAction.QUIT:
+                self.running = False
+            case ScreenAction.BACK:
+                self.game = None
+                self.current_screen = self.main_menu
+            case ScreenAction.INSTRUCTIONS:
+                self.current_screen = Instructions(self.WIDTH, self.HEIGHT,
+                                                   self.assets)
+            case ScreenAction.START_GAME:
+                self.game = Game(self.WIDTH, self.HEIGHT, self.assets)
+                self.current_screen = self.game
+            case ScreenAction.RESUME:
+                if self.game is not None:
+                    self.current_screen = self.game
+            case _:
+                pass
 
-        # ---------- arcade screen ----------
-        self.arcade_screen = pygame.Surface((WIDTH, HEIGHT))
-        ratio_w = win_w / WIDTH
-        ratio_h = win_h / HEIGHT
-        arcade_factor = min(ratio_w, ratio_h)
-        self.arcade_size = (int(WIDTH * arcade_factor),
-                            int(HEIGHT * arcade_factor))
+    def _handle_events(self) -> None:
+        """Read the pygame events and forward them to the screen."""
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.running = False
+            elif event.type == pygame.VIDEORESIZE:
+                self.arcade_size = self._compute_arcade_size()
+            self._switch(self.current_screen.handle_event(event))
+
+    def _draw(self) -> None:
+        """Draw the current screen scaled and centered in the window."""
+        self.screen.fill((0, 0, 0))
+        self.arcade_screen.fill(self.BACKGROUND)
+        self.current_screen.draw(self.arcade_screen)
+        scaled = pygame.transform.scale(self.arcade_screen, self.arcade_size)
+        self.screen.blit(
+            scaled, scaled.get_rect(center=self.screen.get_rect().center))
+        pygame.display.flip()
+
+    def _update(self, dt: float) -> None:
+        """Advance the current screen by dt seconds."""
+        self.current_screen.update(dt)
 
     def run(self) -> None:
-        """Run the main loop until the window is closed.
-
-        Each frame handles key presses and redraws the window.
-        """
-        running = True
-        while running:
-            # ---------- control block ----------
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    running = False
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_ESCAPE:
-                        running = False
-                action = self.current_screen.handle_event(event)
-                match action:
-                    case Action.QUIT:
-                        running = False
-                    case Action.BACK:
-                        self.current_screen = self.main_menu
-                    case Action.INSTRUCTIONS:
-                        self.current_screen = Instructions()
-                    case _:
-                        pass
-            # ---------- time block ----------
-
-            # ---------- drawing block ----------
-            self.screen.fill((0, 0, 0))
-            self.arcade_screen.fill((12, 14, 16))
-            self.current_screen.draw(self.arcade_screen)
-            playable_surface = pygame.transform.scale(self.arcade_screen,
-                                                      self.arcade_size)
-            self.screen.blit(
-                    playable_surface,
-                    playable_surface.get_rect(
-                        center=self.screen.get_rect().center))
-            pygame.display.flip()
-            self.clock.tick(FPS)
-
+        """Run the main loop until the window is closed."""
+        while self.running:
+            dt = self.clock.tick(self.FPS) / 1000
+            self._handle_events()
+            self._update(dt)
+            self._draw()
         pygame.quit()
