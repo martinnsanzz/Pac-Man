@@ -40,3 +40,30 @@ class TestInsert:
         assert len(highscores.table) == 10
         scores = [entry.score for entry in highscores.table]
         assert scores == sorted(scores, reverse=True)
+
+
+class TestLoadSave:
+    """Validation of ``Highscores.save and Highscores.load``."""
+
+    def test_round_trip(self, highscores: Highscores) -> None:
+        highscores.insert("Daniel", 42)
+        highscores.insert("Martin", 67)
+        highscores.save()
+        new_table = Highscores(highscores.path)
+        new_table.load()
+        assert new_table.table == highscores.table
+
+    def test_missing_file(self, highscores: Highscores) -> None:
+        highscores.load()
+        assert highscores.table == []
+
+    @pytest.mark.parametrize("content", [
+        "{bad",
+        "42",
+        "null",
+        '[{"name": "Bad!", "score": 1}]',
+        '[{"name": "Al"}]'])
+    def test_invalid_file(self, highscores: Highscores, content: str) -> None:
+        highscores.path.write_text(content)
+        highscores.load()
+        assert highscores.table == []
