@@ -10,7 +10,7 @@ class GameConfig(BaseModel):
 
     Attributes:
         highscore_filename: Name of the file used to store the high score.
-            Must end with ``.txt``.
+            Must end with ``.json``.
         lives: Number of lives the player starts with (1 to 10).
         total_pacgum: Total number of pac-gums (1 to 100).
         pacgum_points: Points awarded per pac-gum (1 to 100).
@@ -21,7 +21,7 @@ class GameConfig(BaseModel):
             configuration as ``"on"`` or ``"off"``.
     """
 
-    highscore_filename: str = Field(default="highscore.txt")
+    highscore_filename: str = Field(default="highscore.json")
     lives: PositiveInt = Field(default=3, gt=0, le=10)
     total_pacgum: PositiveInt = Field(default=42, gt=0, le=100)
     pacgum_points: PositiveInt = Field(default=10, le=100)
@@ -59,7 +59,7 @@ class GameConfig(BaseModel):
     def parse_highscore_file(cls, value: str) -> str:
         """Validate the high score file name.
 
-        The name must end in ``.txt``, have a non-empty stem, and contain
+        The name must end in ``.json``, have a non-empty stem, and contain
         neither ``/`` nor spaces in the stem.
 
         Args:
@@ -69,12 +69,12 @@ class GameConfig(BaseModel):
             The unchanged file name.
 
         Raises:
-            ValueError: If the name does not end in ``.txt``, has an empty
+            ValueError: If the name does not end in ``.json``, has an empty
                 stem, or its stem contains ``/`` or a space.
         """
-        file_name = value.split(".txt")
+        file_name = value.split(".json")
         if len(file_name) != 2 or file_name[1] != "":
-            raise ValueError("Highscore file name must end in '.txt'.\n"
+            raise ValueError("Highscore file name must end in '.json'.\n"
                              f" - File name provided: {value}")
         elif file_name[0] == "":
             raise ValueError("File name empty.\n"
