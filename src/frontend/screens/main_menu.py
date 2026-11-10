@@ -91,7 +91,7 @@ class MainMenu(Screen):
             color = self.SELECTED_COLOR if index == self.selected \
                 else self.TEXT_COLOR
             # drawing the text
-            text = self.sub_font.render(label, True, color)
+            text = self.text_font.render(label, True, color)
             y = start_y + index * self.LINE_HEIGHT
             rect = text.get_rect(center=(x, y))
             # drawing the box

@@ -1,25 +1,60 @@
 # Built-in modules
 from pathlib import Path
 
-# Path to the root of the project
 ROOT = Path(__file__).resolve().parents[2]
-
-# Assets folder within the project
 ASSETS = ROOT / "assets"
-
-# Fonts folder
 FONTS = ASSETS / "fonts"
 
 
-class FontsPaths():
-    CRACKMAN = (FONTS / "Crackman").with_suffix(".TTF")
-    ARCADECLASSIC = (FONTS / "ARCADECLASSIC").with_suffix(".TTF")
-    ARCADE = (FONTS / "ARCADE").with_suffix(".TTF")
+class PathsBase():
+    """Base class for groups of asset path constants.
+
+    Subclasses declare `pathlib.Path` class attributes. Call `validate()` on
+    a subclass to check that those files exist on disk.
+    """
+    @classmethod
+    def validate(cls) -> list[str]:
+        """Return a description of each missing path declared on the class.
+
+        Inspect only the `Path` attributes defined directly on `cls`;
+        attributes inherited from a parent class are not checked.
+
+        Returns:
+            A list of `"NAME: relative/path"` strings, one per path that does
+            not exist, with the path relative to `ROOT` in POSIX form. The
+            list is empty when every path exists.
+        """
+        return [f"{name}: {value.relative_to(ROOT).as_posix()}"
+                for name, value in vars(cls).items()
+                if isinstance(value, Path) and not value.exists()]
 
 
-class TilemapPath():
+class FontsPaths(PathsBase):
+    """Paths to the font files used by the game.
+
+    Attributes:
+        CRACKMAN: Path to the Crackman `.TTF` font.
+        ARCADECLASSIC: Path to the ARCADECLASSIC `.TTF` font.
+        ARCADE: Path to the ARCADE `.TTF` font.
+    """
+    CRACKMAN = [(FONTS / "Crackman").with_suffix(".TTF"), 100]
+    ARCADECLASSIC = [(FONTS / "ARCADECLASSIC").with_suffix(".TTF"), 30]
+    ARCADE = [(FONTS / "ARCADE").with_suffix(".TTF"), 18]
+
+
+class TilemapPath(PathsBase):
+    """Path to the tilemap image.
+
+    Attributes:
+        TILEMAP: Path to the tilemap `.png` file.
+    """
     TILEMAP = (ASSETS / "tilemap" / "tilemap").with_suffix(".png")
 
 
-class SpritesPaths():
+class SpritesPaths(PathsBase):
+    """Paths to sprite files.
+
+    Attributes:
+        PAC_MAN: Path to the Pac-Man animation `.gif` file.
+    """
     PAC_MAN = (ASSETS / "player" / "PacMan-Anim").with_suffix(".gif")
