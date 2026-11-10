@@ -6,6 +6,7 @@ from .actions import ScreenAction
 from .screen import Screen
 from ..assets import AssetsLoader
 
+
 class MainMenu(Screen):
     """Main menu screen shown at game start.
 
@@ -73,7 +74,7 @@ class MainMenu(Screen):
             elif event.key == pygame.K_RETURN:
                 _, action = self.options[self.selected]
                 return action
-            elif event.key == pygame.K_ESCAPE: # TEMP TO BE DELETED !!!
+            elif event.key == pygame.K_ESCAPE:  # TEMP TO BE DELETED !!!
                 return ScreenAction.QUIT
         return ScreenAction.NONE
 
@@ -87,7 +88,8 @@ class MainMenu(Screen):
         start_y = surface.get_height() * 0.55
         x = surface.get_width() // 2
         for index, (label, _) in enumerate(self.options):
-            color = self.SELECTED_COLOR if index == self.selected else self.TEXT_COLOR
+            color = self.SELECTED_COLOR if index == self.selected \
+                else self.TEXT_COLOR
             # drawing the text
             text = self.sub_font.render(label, True, color)
             y = start_y + index * self.LINE_HEIGHT

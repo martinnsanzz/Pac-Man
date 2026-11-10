@@ -13,4 +13,3 @@ class ScreenAction(Enum):
     PAUSE = auto()
     TEXT_BOX = auto()
     NONE = auto()
-

@@ -29,7 +29,8 @@ class AssetsLoader():
                                (v // self.COLS) * self.TILE,
                                self.TILE, self.TILE)
             tile = tilemap.subsurface(rect)
-            self.tiles.append(pygame.transform.scale(tile, (self.SIZE, self.SIZE)))
+            self.tiles.append(pygame.transform.scale(tile,
+                                                     (self.SIZE, self.SIZE)))
 
     def _load_sprites(self) -> None:
         for key, value in vars(SpritesPaths).items():

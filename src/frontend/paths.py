@@ -10,6 +10,7 @@ ASSETS = ROOT / "assets"
 # Fonts folder
 FONTS = ASSETS / "fonts"
 
+
 class FontsPaths():
     CRACKMAN = (FONTS / "Crackman").with_suffix(".TTF")
     ARCADECLASSIC = (FONTS / "ARCADECLASSIC").with_suffix(".TTF")

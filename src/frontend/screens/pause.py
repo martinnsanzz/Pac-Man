@@ -2,7 +2,6 @@
 
 # Installed modules
 import pygame
-from mazegen import MazeGenerator
 
 # Local modules
 from .screen import Screen
@@ -21,9 +20,9 @@ class Pause(Screen):
         super().__init__(int(screen_w / 2), int(screen_h / 3), assets)
 
         self.options: tuple[tuple[str, ScreenAction], ...] = (
-        ("Menu", ScreenAction.BACK),
-        ("Resume", ScreenAction.RESUME),
-        ("Quit", ScreenAction.QUIT))
+            ("Menu", ScreenAction.BACK),
+            ("Resume", ScreenAction.RESUME),
+            ("Quit", ScreenAction.QUIT))
 
         self.selected: int = 0
 

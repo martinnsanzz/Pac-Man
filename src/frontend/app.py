@@ -2,10 +2,8 @@
 import pygame
 
 # Local modules
-from .screens import MainMenu, ScreenAction, Screen, Instructions, Game, Pause
+from .screens import MainMenu, ScreenAction, Screen, Instructions, Game
 from .assets import AssetsLoader
-
-
 
 
 class App:
@@ -31,14 +29,14 @@ class App:
         self.clock = pygame.time.Clock()
         self.screen = pygame.display.set_mode((0, 0), pygame.RESIZABLE)
         pygame.display.set_caption("Pac-Man")
- 
+
         # Needs the display to exist (convert_alpha)
         self.assets = AssetsLoader()
         self.assets.load()
- 
+
         self.arcade_screen = pygame.Surface((self.WIDTH, self.HEIGHT))
         self.arcade_size = self._compute_arcade_size()
- 
+
         self.main_menu: Screen = MainMenu(self.WIDTH, self.HEIGHT, self.assets)
         self.game: Game | None = None
         self.current_screen: Screen = self.main_menu
@@ -61,11 +59,9 @@ class App:
             case ScreenAction.INSTRUCTIONS:
                 self.current_screen = Instructions(self.WIDTH, self.HEIGHT,
                                                    self.assets)
-            # case ScreenAction.START_GAME:
-            #     self.game = Game(self.WIDTH, self.HEIGHT, self.assets)
-            #     self.current_screen = self.game
-            # case ScreenAction.PAUSE:
-            #     self.current_screen = Pause(self.WIDTH, self.HEIGHT, self.assets)
+            case ScreenAction.START_GAME:
+                self.game = Game(self.WIDTH, self.HEIGHT, self.assets)
+                self.current_screen = self.game
             case ScreenAction.RESUME:
                 if self.game is not None:
                     self.current_screen = self.game

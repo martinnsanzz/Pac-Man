@@ -1,15 +1,12 @@
 # Built-in modules
 from abc import ABC, abstractmethod
-from pathlib import Path
 
 # Installed modules
 import pygame
 
 # Local modules
 from .actions import ScreenAction
-from ..paths import FontsPaths
 from ..assets import AssetsLoader
-
 
 
 class Screen(ABC):
