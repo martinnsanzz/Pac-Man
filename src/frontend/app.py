@@ -1,9 +1,15 @@
-# Installed modules
-import pygame
+# Built-in modules
+import os
 
 # Local modules
 from .screens import MainMenu, ScreenAction, Screen, Instructions, Game
 from .assets import AssetsLoader
+from ..exceptions import LoadAssetsError
+from .paths import FontsPaths, SpritesPaths, TilemapPath
+
+# Installed modules
+os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
+import pygame  # noqa
 
 
 class App:
@@ -25,12 +31,13 @@ class App:
 
     def __init__(self) -> None:
         """Open the window, load the assets and show the main menu."""
+        self.validate_assets()
+
         pygame.init()
         self.clock = pygame.time.Clock()
         self.screen = pygame.display.set_mode((0, 0), pygame.RESIZABLE)
         pygame.display.set_caption("Pac-Man")
 
-        # Needs the display to exist (convert_alpha)
         self.assets = AssetsLoader()
         self.assets.load()
 
@@ -41,6 +48,15 @@ class App:
         self.game: Game | None = None
         self.current_screen: Screen = self.main_menu
         self.running = True
+
+    def run(self) -> None:
+        """Run the main loop until the window is closed."""
+        while self.running:
+            dt = self.clock.tick(self.FPS) / 1000
+            self._handle_events()
+            self._update(dt)
+            self._draw()
+        pygame.quit()
 
     def _compute_arcade_size(self) -> tuple[int, int]:
         """Return the arcade size scaled to fit the window."""
@@ -91,11 +107,13 @@ class App:
         """Advance the current screen by dt seconds."""
         self.current_screen.update(dt)
 
-    def run(self) -> None:
-        """Run the main loop until the window is closed."""
-        while self.running:
-            dt = self.clock.tick(self.FPS) / 1000
-            self._handle_events()
-            self._update(dt)
-            self._draw()
-        pygame.quit()
+    @staticmethod
+    def validate_assets() -> None:
+        """Raise LoadAssetsError listing every missing asset."""
+        missing: list[str] = []
+        for paths in (FontsPaths, SpritesPaths, TilemapPath):
+            missing += paths.validate()
+        if missing:
+            raise LoadAssetsError(
+                "Missing assets needed to run pac-man:\n - "
+                + "\n - ".join(missing))

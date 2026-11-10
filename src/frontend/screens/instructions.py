@@ -30,7 +30,7 @@ class Instructions(Screen):
     def __init__(self, screen_w: int, screen_h: int,
                  assets: AssetsLoader) -> None:
         super().__init__(screen_w, screen_h, assets)
-        self.sub_title_font = assets.fonts["CRACKMAN"]
+        self.sub_title_font = assets.fonts["ARCADECLASSIC"]
 
     def handle_event(self, event: pygame.event.Event) -> ScreenAction:
         """Handle a single pygame event for the Instructions screen.
@@ -77,7 +77,7 @@ class Instructions(Screen):
             y += self.SECTION_GAP
 
         # ---------- back button ----------
-        text = self.sub_font.render("Back", True, self.SELECTED_COLOR)
+        text = self.text_font.render("Back", True, self.SELECTED_COLOR)
         rect = text.get_rect(center=(surface.get_width() // 2, y))
         box = rect.inflate(self.BOX_PADDING_X, self.BOX_PADDING_Y)
         pygame.draw.rect(surface, self.SELECTED_COLOR, box,
