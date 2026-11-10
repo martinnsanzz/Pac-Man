@@ -16,6 +16,9 @@ class FontsPaths():
     ARCADE = (FONTS / "ARCADE").with_suffix(".TTF")
 
 
+class TilemapPath():
+    TILEMAP = (ASSETS / "tilemap" / "tilemap").with_suffix(".png")
+
+
 class SpritesPaths():
     PAC_MAN = (ASSETS / "player" / "PacMan-Anim").with_suffix(".gif")
-    TILEMAP = (ASSETS / "tilemap" / "tilemap").with_suffix(".png")

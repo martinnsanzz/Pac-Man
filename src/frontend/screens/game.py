@@ -29,9 +29,18 @@ class Game(Screen):
         return ScreenAction.NONE
 
     def draw(self, surface: pygame.Surface) -> None:
-        ...
+        maze = self.generate_maze()
+        pix_y = 0
+        for col in maze:
+            pix_x = 0
+            for val in col:
+                surface.blit(self.assets.tiles[val], (pix_x, pix_y))
+                pix_x += self.assets.TILE * self.assets.SCALE
+            pix_y += self.assets.TILE * self.assets.SCALE
 
-    # def generate_maze(self) -> list[list[int]]:
-    #     maze = MazeGenerator(10, 10, (0, 0), (9, 9), False)
-    #     maze.generate()
-    #     return maze.maze
+
+
+    def generate_maze(self) -> list[list[int]]:
+        maze = MazeGenerator(10, 10, (0, 0), (9, 9), False)
+        maze.generate()
+        return maze.maze

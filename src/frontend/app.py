@@ -61,11 +61,11 @@ class App:
             case ScreenAction.INSTRUCTIONS:
                 self.current_screen = Instructions(self.WIDTH, self.HEIGHT,
                                                    self.assets)
-            case ScreenAction.START_GAME:
-                self.game = Game(self.WIDTH, self.HEIGHT, self.assets)
-                self.current_screen = self.game
-            case ScreenAction.PAUSE:
-                self.current_screen = Pause(self.WIDTH, self.HEIGHT, self.assets)
+            # case ScreenAction.START_GAME:
+            #     self.game = Game(self.WIDTH, self.HEIGHT, self.assets)
+            #     self.current_screen = self.game
+            # case ScreenAction.PAUSE:
+            #     self.current_screen = Pause(self.WIDTH, self.HEIGHT, self.assets)
             case ScreenAction.RESUME:
                 if self.game is not None:
                     self.current_screen = self.game
