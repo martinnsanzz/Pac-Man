@@ -1,21 +1,19 @@
-# Built-in modules
-import os
+# Installed modules
+import pygame
 
 # Local modules
 from .screens import MainMenu, ScreenAction, Screen, Instructions, Game
+from .paths import FontsPaths, SpritesPaths, TilemapPath
 from .assets import AssetsLoader
 from ..exceptions import LoadAssetsError
-from .paths import FontsPaths, SpritesPaths, TilemapPath
-
-# Installed modules
-os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
-import pygame  # noqa
+from ..models import GameConfig
 
 
 class App:
     """Pygame window that plays the game and handles user input.
 
     Attributes:
+        game_config: Configuration of game extracted from config.json
         clock: pygame clock.
         screen: Pygame window to hold the drawings.
         main_menu: Main menu window to return to.
@@ -29,9 +27,10 @@ class App:
     FPS = 60
     BACKGROUND = (12, 14, 16)
 
-    def __init__(self) -> None:
+    def __init__(self, game_config: GameConfig) -> None:
         """Open the window, load the assets and show the main menu."""
         self.validate_assets()
+        self.game_config = game_config
 
         pygame.init()
         self.clock = pygame.time.Clock()

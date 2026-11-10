@@ -1,10 +1,9 @@
 {
-    "highscore_filename": ".txt",
+    "highscore_filename": "highscore.txt",
     "lives": 10,
     "total_pacgum": 42,
     "pacgum_points": 10,
     "super_pacgum_points": 50,
     "ghost_points": 200,
-    "level_time_limit": 90,
-    "random": 10
+    "level_time_limit": 90
 }
