@@ -2,7 +2,7 @@
 from enum import Enum, auto
 
 
-class Action(Enum):
+class ScreenAction(Enum):
     """Possible selections from the game menus."""
     START_GAME = auto()
     RESUME = auto()
@@ -10,4 +10,6 @@ class Action(Enum):
     QUIT = auto()
     HIGHSCORES = auto()
     INSTRUCTIONS = auto()
-    PASS = auto()
+    PAUSE = auto()
+    TEXT_BOX = auto()
+    NONE = auto()

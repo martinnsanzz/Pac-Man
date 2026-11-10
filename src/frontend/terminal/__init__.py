@@ -1,5 +1,5 @@
 # Local modules
-from .terminal_printer import TerminalPrinter
+from .printer import TerminalPrinter
 
 __all__ = [
     "TerminalPrinter"
