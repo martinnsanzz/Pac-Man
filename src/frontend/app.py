@@ -59,7 +59,7 @@ class App:
         try:
             self.highscores.load()
         except PacManError as e:
-            TerminalPrinter.print_error(f"{e}\n") 
+            TerminalPrinter.print_error(f"{e}\n")
 
     def run(self) -> None:
         """Run the main loop until the window is closed."""
