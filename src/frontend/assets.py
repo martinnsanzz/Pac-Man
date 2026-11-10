@@ -6,7 +6,7 @@ from .paths import SpritesPaths, FontsPaths, TilemapPath
 
 
 class AssetsLoader():
-    SCALE = 3
+    SCALE = 2
     TILE = 16
     COLS = 4
     SIZE = TILE * SCALE
