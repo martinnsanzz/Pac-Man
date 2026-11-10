@@ -62,5 +62,4 @@ class AssetsLoader():
         """Load fonts as Font objects."""
         for key, value in vars(FontsPaths).items():
             if not key.startswith("__") and not callable(value):
-                print(value)
                 self.fonts[key] = pygame.font.Font(value[0], value[1])
