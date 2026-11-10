@@ -83,4 +83,3 @@ class TestLoadSave:
         highscores.insert("Pac", 10)
         with pytest.raises(PacManError):
             highscores.save()
-
