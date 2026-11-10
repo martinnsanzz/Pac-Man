@@ -52,6 +52,7 @@ This is a list of multiple resources use throughout the life-cycle of the projec
 #### Pygame
 - [Pygame Docs](https://www.pygame.org/docs/)
 - [How to load Custom Fonts](https://www.makeuseof.com/pygame-fonts-text-effects-how-load/)
+- [Pygame-cd Docs](https://pyga.me/docs/)
 
 ### 😺 GitHub
 - [GitHub Branching Name Best Practices](https://dev.to/jps27cse/github-branching-name-best-practices-49ei)

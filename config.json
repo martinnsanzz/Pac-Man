@@ -5,6 +5,5 @@
     "pacgum_points": 10,
     "super_pacgum_points": 50,
     "ghost_points": 200,
-    "level_time_limit": 90,
-    "random": 10
+    "level_time_limit": 90
 }
