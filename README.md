@@ -18,8 +18,29 @@
 
 In this section additional requirements mentioned on the `subject.pdf` will be added:
 
+### 🏆 Highscores
+Highscores are saved in a JSON file. Its name is set by `highscore_filename` in the config file (default: `highscore.json`).
+The file is created on the first save, in the folder the game is run from.
 
+**Format:** a list of entries, sorted from highest to lowest score.
 
+```json
+[
+    {"name": "PacMaster", "score": 1200},
+    {"name": "MsPacMan", "score": 850}
+]
+```
+
+**Rules:**
+- Only the top 10 scores are kept
+- Names: 1-10 characters, letters, digits and spaces only (can't start with a space)
+- Scores: non-negative integers
+- On a tie, the older score stays ranked above the new one
+
+**Error handling:**
+- Missing file -> the game starts with an empty table
+- Corrupted or invalid file -> the table is emptied and a warning is printed in the terminal
+- File can-t be written -> a warning is printed in the terminal and the game keeps running
 
 ## 📖 Resources
 This is a list of multiple resources use throughout the life-cycle of the project

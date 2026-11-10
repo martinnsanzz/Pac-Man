@@ -7,6 +7,7 @@ from pydantic import ValidationError
 
 # Local modules
 from ..models.highscore_entry import HighscoreEntry
+from ..exceptions import PacManError
 
 MAX_ENTRIES = 10
 
@@ -26,8 +27,11 @@ class Highscores:
     def load(self) -> None:
         """Load the table from the file.
 
-        A missing or invalid file leaves the table empty instead
-        of raising an error.
+        A missing file leaves the table empty. An unreadable or invalid
+        file also empties the table, then raises.
+
+        Raises:
+            PacManError: If it is not possible to load highscore file.
         """
         try:
             with open(self.path, "r") as file:
@@ -39,11 +43,18 @@ class Highscores:
                 self.table = entries
             self.table.sort(key=lambda entry: entry.score, reverse=True)
             self.table = self.table[:MAX_ENTRIES]
-        except (OSError, ValueError, ValidationError, TypeError):
+        except FileNotFoundError:
             self.table = []
+        except (OSError, ValueError, TypeError) as e:
+            self.table = []
+            raise PacManError(f"Could not load '{self.path}': {e}.")
 
     def save(self) -> None:
-        """Write the current table to the file as JSON."""
+        """Write the current table to the file as JSON.
+
+        Raises:
+            PacManError: If the file can't be written.
+        """
         data: list[dict[str, str | int]] = []
         for entry in self.table:
             data.append(entry.model_dump())
@@ -51,9 +62,9 @@ class Highscores:
         try:
             with open(self.path, "w") as file:
                 json.dump(data, file, indent=4)
-        except OSError:
-            # TODO: Decide what should happen after a fail
-            pass
+        except OSError as e:
+            raise PacManError(f"Could not save highscores to '{self.path}':"
+                              f" {e}.")
 
     def insert(self, name: str, score: int) -> bool:
         """Add a score to the table if it makes the top MAX_ENTRIES.

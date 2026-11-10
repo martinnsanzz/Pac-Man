@@ -9,7 +9,7 @@ from src.models import GameConfig
 from src.exceptions import PacManError
 
 VALID_CONFIG: dict[str, Any] = {
-    "highscore_filename": "highscore.txt",
+    "highscore_filename": "highscore.json",
     "lives": 3,
     "total_pacgum": 42,
     "pacgum_points": 10,
@@ -34,45 +34,45 @@ class TestHighscoreName:
         return parse_game_config({**cfg, "highscore_filename": name})
 
     @pytest.mark.parametrize("name", [
-        "highscore.txt",
-        "a.txt",                  # 1-char stem
-        "HIGH_score-1.txt",
-        "score.v2.txt",           # dots in stem
-        "a..txt",
-        "ünï.txt",                # unicode
-        "x" * 200 + ".txt",       # long name
+        "highscore.json",
+        "a.json",                 # 1-char stem
+        "HIGH_score-1.json",
+        "score.v2.json",          # dots in stem
+        "a..json",
+        "ünï.json",               # unicode
+        "x" * 200 + ".json",      # long name
     ])
     def test_valid(self, valid_config: dict[str, Any], name: object) -> None:
         assert self.parse(valid_config, name).highscore_filename == name
 
     @pytest.mark.parametrize("name, msg", [
         # extension
-        ("", "must end in '.txt'"),
-        ("score", "must end in '.txt'"),
-        ("score.tx", "must end in '.txt'"),
-        ("score.TXT", "must end in '.txt'"),      # case-sensitive
-        ("score.txt.bak", "must end in '.txt'"),
-        ("score.txt ", "must end in '.txt'"),     # trailing space
+        ("", "must end in '.json'"),
+        ("score", "must end in '.json'"),
+        ("score.jso", "must end in '.json'"),
+        ("score.JSON", "must end in '.json'"),     # case-sensitive
+        ("score.json.bak", "must end in '.json'"),
+        ("score.json ", "must end in '.json'"),    # trailing space
         # empty stem
-        (".txt", "File name empty"),
+        (".json", "File name empty"),
         # slash
-        ("a/b.txt", "invalid char '/'"),
-        ("/a.txt", "invalid char '/'"),
-        ("../a.txt", "invalid char '/'"),
-        ("dir/.txt", "invalid char '/'"),
+        ("a/b.json", "invalid char '/'"),
+        ("/a.json", "invalid char '/'"),
+        ("../a.json", "invalid char '/'"),
+        ("dir/.json", "invalid char '/'"),
         # space
-        ("my score.txt", "invalid space"),
-        (" a.txt", "invalid space"),
-        ("a .txt", "invalid space"),
+        ("my score.json", "invalid space"),
+        (" a.json", "invalid space"),
+        ("a .json", "invalid space"),
         # precedence: '/' is checked before space
-        ("a b/c.txt", "invalid char '/'"),
+        ("a b/c.json", "invalid char '/'"),
     ])
     def test_rejected(self, valid_config: dict[str, Any],
                       name: object, msg: str) -> None:
         with pytest.raises(PacManError, match=re.escape(msg)):
             self.parse(valid_config, name)
 
-    @pytest.mark.parametrize("name", [123, None, ["a.txt"], {}, 1.5])
+    @pytest.mark.parametrize("name", [123, None, ["a.json"], {}, 1.5])
     def test_not_a_string(self, valid_config: dict[str, Any],
                           name: object) -> None:
         with pytest.raises(PacManError, match="'highscore_filename'"):

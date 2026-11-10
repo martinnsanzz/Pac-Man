@@ -6,6 +6,7 @@ import pytest
 
 # Local modules
 from src.backend import Highscores
+from src.exceptions import PacManError
 
 
 @pytest.fixture
@@ -65,5 +66,20 @@ class TestLoadSave:
         '[{"name": "Al"}]'])
     def test_invalid_file(self, highscores: Highscores, content: str) -> None:
         highscores.path.write_text(content)
-        highscores.load()
+        with pytest.raises(PacManError):
+            highscores.load()
         assert highscores.table == []
+
+    def test_failed_load_clears_table(self, highscores: Highscores) -> None:
+        highscores.insert("MrPac", 100)
+        highscores.save()
+        highscores.path.write_text("{bad")
+        with pytest.raises(PacManError):
+            highscores.load()
+        assert highscores.table == []
+
+    def test_save_failure(self, tmp_path: Path) -> None:
+        highscores = Highscores(tmp_path)
+        highscores.insert("Pac", 10)
+        with pytest.raises(PacManError):
+            highscores.save()
