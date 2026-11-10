@@ -7,6 +7,7 @@ from pydantic import ValidationError
 
 # Local modules
 from ..models.highscore_entry import HighscoreEntry
+from ..exceptions import PacManError
 
 MAX_ENTRIES = 10
 
@@ -43,7 +44,11 @@ class Highscores:
             self.table = []
 
     def save(self) -> None:
-        """Write the current table to the file as JSON."""
+        """Write the current table to the file as JSON.
+
+        Raises:
+            PacManError: If the file can't be written.
+        """
         data: list[dict[str, str | int]] = []
         for entry in self.table:
             data.append(entry.model_dump())
@@ -51,9 +56,9 @@ class Highscores:
         try:
             with open(self.path, "w") as file:
                 json.dump(data, file, indent=4)
-        except OSError:
-            # TODO: Decide what should happen after a fail
-            pass
+        except OSError as e:
+            raise PacManError(f"Could not save highscores to '{self.path}':"
+                              f" {e}.")
 
     def insert(self, name: str, score: int) -> bool:
         """Add a score to the table if it makes the top MAX_ENTRIES.
