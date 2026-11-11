@@ -38,9 +38,9 @@ class FontsPaths(PathsBase):
         ARCADECLASSIC: Path to the ARCADECLASSIC `.TTF` font.
         ARCADE: Path to the ARCADE `.TTF` font.
     """
-    CRACKMAN = [(FONTS / "Crackman").with_suffix(".TTF"), 100]
-    ARCADECLASSIC = [(FONTS / "ARCADECLASSIC").with_suffix(".TTF"), 30]
-    ARCADE = [(FONTS / "ARCADE").with_suffix(".TTF"), 18]
+    CRACKMAN = (FONTS / "Crackman").with_suffix(".TTF")
+    ARCADECLASSIC = (FONTS / "ARCADECLASSIC").with_suffix(".TTF")
+    ARCADE = (FONTS / "ARCADE").with_suffix(".TTF")
 
 
 class TilemapPath(PathsBase):
@@ -52,12 +52,18 @@ class TilemapPath(PathsBase):
     TILEMAP = (ASSETS / "tilemap" / "tilemap").with_suffix(".png")
 
 
+class HudPaths(PathsBase):
+    """Paths to HUD files.
+
+    Attributes:
+        LIVE: Path to hud live symbol `.png` file.
+    """
+    LIVE = (HUD / "live").with_suffix(".png")
+
 class SpritesPaths(PathsBase):
     """Paths to sprite files.
 
     Attributes:
         PAC_MAN: Path to the Pac-Man animation `.gif` file.
-        LIVE: Path to hud live symbol `.png` file.
     """
     PAC_MAN = (ASSETS / "player" / "PacMan-Anim").with_suffix(".gif")
-    LIVE = (HUD / "live").with_suffix(".png")

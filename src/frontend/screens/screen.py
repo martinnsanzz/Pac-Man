@@ -32,9 +32,9 @@ class Screen(ABC):
     def __init__(self, screen_w: int, screen_h: int,
                  assets: AssetsLoader) -> None:
         self.assets = assets
-        self.title_font = assets.fonts["CRACKMAN"]
-        self.sub_font = assets.fonts["ARCADECLASSIC"]
-        self.text_font = assets.fonts["ARCADE"]
+        self.title_font = assets.get_font("CRACKMAN", 100)
+        self.sub_font = assets.get_font("ARCADECLASSIC", 30)
+        self.text_font = assets.get_font("ARCADE", 18)
         self.screen_w = screen_w
         self.screen_h = screen_h
 
