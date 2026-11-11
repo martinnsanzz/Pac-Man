@@ -16,9 +16,9 @@ class AssetsLoader():
         fonts: dict containing all fonts for the game as pygame Font.
     """
     SCALE = 2
-    TILE = 16
-    COLS = 4
-    SIZE = TILE * SCALE
+    TILE_SRC_SIZE = 16
+    TILEMAP_COLS = 4
+    TILE_PX = TILE_SRC_SIZE * SCALE
 
     def __init__(self) -> None:
         """Declare the attributes and initialize them to nothing"""
@@ -45,12 +45,12 @@ class AssetsLoader():
         tilemap = pygame.image.load(TilemapPath.TILEMAP).convert_alpha()
 
         for v in range(16):
-            rect = pygame.Rect((v % self.COLS) * self.TILE,
-                               (v // self.COLS) * self.TILE,
-                               self.TILE, self.TILE)
+            rect = pygame.Rect((v % self.TILEMAP_COLS) * self.TILE_SRC_SIZE,
+                               (v // self.TILEMAP_COLS) * self.TILE_SRC_SIZE,
+                               self.TILE_SRC_SIZE, self.TILE_SRC_SIZE)
             tile = tilemap.subsurface(rect)
             self.tiles.append(pygame.transform.scale(tile,
-                                                     (self.SIZE, self.SIZE)))
+                                                     (self.TILE_PX, self.TILE_PX)))
 
     def _load_sprites(self) -> None:
         """Load sprites as Surface objects."""
