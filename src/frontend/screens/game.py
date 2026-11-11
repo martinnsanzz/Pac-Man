@@ -2,13 +2,14 @@
 
 # Installed modules
 import pygame
-from mazegen import MazeGenerator
 
 # Local modules
 from .screen import Screen
 from .actions import ScreenAction
 from ..assets import AssetsLoader
-from ...models import GameConfig
+from ...models import GameConfig, Maze
+from ..maze_renderer import MazeRenderer
+from ..hud import HUD
 
 
 class Game(Screen):
@@ -17,13 +18,16 @@ class Game(Screen):
     def __init__(self, screen_w: int, screen_h: int,
                  assets: AssetsLoader, config: GameConfig) -> None:
         super().__init__(screen_w, screen_h, assets)
-        self.level = self.generate_level_maze()
+        self.config = config
+        self.maze = Maze()
+        self.maze_renderer = MazeRenderer(self.maze.grid, assets,
+                                          screen_w, screen_h)
+        self.hud = HUD(assets)
+
         self.lives = config.lives
-        self.total_pacgum = config.total_pacgum
-        self.pacgum_points = config.pacgum_points
-        self.super_pacgum_points = config.super_pacgum_points
-        self.ghost_points = config.ghost_points
-        self.level_time_limit = config.level_time_limit
+        self.score = 0
+        self.highscore = 0  # Needs replacement with highscore backend
+        self.time_left = config.level_time_limit
 
     def handle_event(self, event: pygame.event.Event) -> ScreenAction:
         if event.type == pygame.KEYDOWN:
@@ -36,24 +40,6 @@ class Game(Screen):
         return ScreenAction.NONE
 
     def draw(self, surface: pygame.Surface) -> None:
-        self.display_level_maze(surface)
-
-    def display_hud(self, surface: pygame.Surface) -> None:
-        ...
-
-    def display_level_maze(self, surface: pygame.Surface) -> None:
-        tile = self.assets.TILE_PX
-        start_x = (surface.get_width() - len(self.level[0]) * tile) // 2
-        start_y = (surface.get_height() - len(self.level) * tile) // 2
-
-        for row_i, row in enumerate(self.level):
-            for col_i, val in enumerate(row):
-                surface.blit(self.assets.tiles[val],
-                             (start_x + col_i * tile,
-                             start_y + row_i * tile))
-
-    def generate_level_maze(self) -> list[list[int]]:
-        generator = MazeGenerator(19, 20, (0, 0), (1, 1), False)
-        generator.generate()
-        maze: list[list[int]] = generator.maze
-        return maze
+        self.maze_renderer.render_maze(surface)
+        self.hud.display_hud(surface, self.lives, self.score,
+                             self.highscore, self.time_left)
