@@ -75,7 +75,8 @@ class App:
                 self.current_screen = Instructions(self.WIDTH, self.HEIGHT,
                                                    self.assets)
             case ScreenAction.START_GAME:
-                self.game = Game(self.WIDTH, self.HEIGHT, self.assets)
+                self.game = Game(self.WIDTH, self.HEIGHT, self.assets,
+                                 self.game_config)
                 self.current_screen = self.game
             case ScreenAction.RESUME:
                 if self.game is not None:
