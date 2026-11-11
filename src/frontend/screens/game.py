@@ -49,7 +49,8 @@ class Game(Screen):
         for row_i, row in enumerate(self.level):
             for col_i, val in enumerate(row):
                 surface.blit(self.assets.tiles[val],
-                            (start_x + col_i * tile, start_y + row_i * tile))
+                             (start_x + col_i * tile,
+                             start_y + row_i * tile))
 
     def generate_level_maze(self) -> list[list[int]]:
         generator = MazeGenerator(19, 20, (0, 0), (1, 1), False)

@@ -50,7 +50,8 @@ class AssetsLoader():
                                self.TILE_SRC_SIZE, self.TILE_SRC_SIZE)
             tile = tilemap.subsurface(rect)
             self.tiles.append(pygame.transform.scale(tile,
-                                                     (self.TILE_PX, self.TILE_PX)))
+                                                     (self.TILE_PX,
+                                                      self.TILE_PX)))
 
     def _load_sprites(self) -> None:
         """Load sprites as Surface objects."""
