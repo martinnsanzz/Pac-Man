@@ -59,6 +59,8 @@ This is a list of multiple resources use throughout the life-cycle of the projec
 - [GitHub Issues Documentation](https://docs.github.com/en/issues)
 - [GitHub Repository vs Project](https://gitprotect.io/blog/github-repository-vs-project/)
 - [CLI GitHub](https://cli.github.com/)
+- [Managing remote repositories](https://docs.github.com/en/get-started/git-basics/managing-remote-repositories)
+- [Push 2 different githubs](https://www.youtube.com/watch?v=mIH_heuc1Y0)
 
 ### 📋 Other Stuff
 - [The Pac-Man Dossier by Jamey Pittman](https://pacman.holenet.info/)
