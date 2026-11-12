@@ -76,10 +76,4 @@ class Instructions(Screen):
 
             y += self.SECTION_GAP
 
-        # ---------- back button ----------
-        text = self.button_font.render("Back", True, self.SELECTED_COLOR)
-        rect = text.get_rect(center=(surface.get_width() // 2, y))
-        box = rect.inflate(self.BOX_PADDING_X, self.BOX_PADDING_Y)
-        pygame.draw.rect(surface, self.SELECTED_COLOR, box,
-                         width=2, border_radius=self.BORDER_RADIUS)
-        surface.blit(text, rect)
+        self._draw_back_button(surface)

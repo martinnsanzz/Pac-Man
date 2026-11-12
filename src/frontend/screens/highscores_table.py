@@ -81,3 +81,5 @@ class HighscoresTable(Screen):
                 surface.blit(score_text, score_text.get_rect(
                     midleft=(width * 0.65, y)))
                 y += self.ROW_HEIGHT
+
+        self._draw_back_button(surface)
