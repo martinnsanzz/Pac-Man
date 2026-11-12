@@ -34,7 +34,8 @@ class Screen(ABC):
         self.assets = assets
         self.title_font = assets.fonts["CRACKMAN"]
         self.sub_font = assets.fonts["ARCADECLASSIC"]
-        self.text_font = assets.fonts["ARCADE"]
+        self.text_font = assets.fonts["BARCADE"]
+        self.button_font = assets.fonts["ARCADEBUTTON"]
         self.screen_w = screen_w
         self.screen_h = screen_h
 
