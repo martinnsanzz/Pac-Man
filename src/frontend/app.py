@@ -45,7 +45,7 @@ class App:
 
         self.main_menu: Screen = MainMenu(self.WIDTH, self.HEIGHT, self.assets)
         self.game: Game | None = Game(self.WIDTH, self.HEIGHT, self.assets,
-                                 self.game_config)
+                                      self.game_config)
         self.current_screen: Screen = self.game
         self.running = True
 

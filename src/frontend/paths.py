@@ -60,6 +60,7 @@ class HudPaths(PathsBase):
     """
     LIVE = (HUD / "live").with_suffix(".png")
 
+
 class SpritesPaths(PathsBase):
     """Paths to sprite files.
 
@@ -67,3 +68,4 @@ class SpritesPaths(PathsBase):
         PAC_MAN: Path to the Pac-Man animation `.gif` file.
     """
     PAC_MAN = (ASSETS / "player" / "PacMan-Anim").with_suffix(".gif")
+    FRUITS = (ASSETS / "fruits" / "fruits_sheet").with_suffix(".png")

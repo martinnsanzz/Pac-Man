@@ -6,7 +6,7 @@ import pygame
 # Local modules
 from .screen import Screen
 from .actions import ScreenAction
-from ..assets import AssetsLoader
+from ..assets import AssetsLoader, Fruit
 from ...models import GameConfig, Maze
 from ..maze_renderer import MazeRenderer
 from ..hud import HUD
@@ -28,6 +28,7 @@ class Game(Screen):
         self.score = 0
         self.highscore = 0  # Needs replacement with highscore backend
         self.time_left = config.level_time_limit
+        self.fruits_collected = [Fruit.APPLE, Fruit.STRAWBERRY, Fruit.KEY]
 
     def handle_event(self, event: pygame.event.Event) -> ScreenAction:
         if event.type == pygame.KEYDOWN:
@@ -41,5 +42,5 @@ class Game(Screen):
 
     def draw(self, surface: pygame.Surface) -> None:
         self.maze_renderer.render_maze(surface)
-        self.hud.display_hud(surface, self.lives, self.score,
-                             self.highscore, self.time_left)
+        self.hud.display_hud(surface, self.lives, self.fruits_collected,
+                             self.score, self.highscore, self.time_left)
