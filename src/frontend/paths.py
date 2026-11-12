@@ -36,11 +36,16 @@ class FontsPaths(PathsBase):
     Attributes:
         CRACKMAN: Path to the Crackman `.TTF` font.
         ARCADECLASSIC: Path to the ARCADECLASSIC `.TTF` font.
-        ARCADE: Path to the ARCADE `.TTF` font.
+        ARCADEBUTTON: Path to the ARCADECLASSIC `.TTF` font.
+        DIGITAL808: Path to the Digital808 `.TTF` font.
+        BARCADE: Path to the barcadenobar `.ttf` font.
     """
-    CRACKMAN = [(FONTS / "Crackman").with_suffix(".TTF"), 100]
-    ARCADECLASSIC = [(FONTS / "ARCADECLASSIC").with_suffix(".TTF"), 30]
-    ARCADE = [(FONTS / "ARCADE").with_suffix(".TTF"), 18]
+    CRACKMAN = [(FONTS / "CRACKMAN" / "Crackman.TTF"), 100]
+    ARCADECLASSIC = [(FONTS / "ARCADECLASSIC" / "ARCADECLASSIC.TTF"), 30]
+    ARCADEBUTTON = [(FONTS / "ARCADECLASSIC" / "ARCADECLASSIC.TTF"), 38]
+    ARCADETITLE = [(FONTS / "ARCADECLASSIC" / "ARCADECLASSIC.TTF"), 42]
+    DIGITAL808 = [(FONTS / "digital808" / "Digital808.TTF"), 40]
+    BARCADE = [(FONTS / "barcade" / "barcadenobar.ttf"), 18]
 
 
 class TilemapPath(PathsBase):

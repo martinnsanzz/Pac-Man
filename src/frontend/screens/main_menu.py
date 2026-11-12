@@ -21,7 +21,7 @@ class MainMenu(Screen):
     # ---------- UI ----------
     TITLE_Y = 0.35
 
-    LINE_HEIGHT = Screen.SUB_SIZE + 25
+    LINE_HEIGHT = Screen.SUB_SIZE + 40
 
     def __init__(self, screen_w: int, screen_h: int,
                  assets: AssetsLoader) -> None:
@@ -91,7 +91,7 @@ class MainMenu(Screen):
             color = self.SELECTED_COLOR if index == self.selected \
                 else self.TEXT_COLOR
             # drawing the text
-            text = self.text_font.render(label, True, color)
+            text = self.button_font.render(label, True, color)
             y = start_y + index * self.LINE_HEIGHT
             rect = text.get_rect(center=(x, y))
             # drawing the box

@@ -29,12 +29,15 @@ class Screen(ABC):
     BOX_PADDING_Y = 10
     BORDER_RADIUS = 15
 
+    BACK_BUTTON_MARGIN = 50
+
     def __init__(self, screen_w: int, screen_h: int,
                  assets: AssetsLoader) -> None:
         self.assets = assets
         self.title_font = assets.fonts["CRACKMAN"]
         self.sub_font = assets.fonts["ARCADECLASSIC"]
-        self.text_font = assets.fonts["ARCADE"]
+        self.text_font = assets.fonts["BARCADE"]
+        self.button_font = assets.fonts["ARCADEBUTTON"]
         self.screen_w = screen_w
         self.screen_h = screen_h
 
@@ -67,3 +70,18 @@ class Screen(ABC):
         Args:
             surface: The pygame surface to be drawn on.
         """
+
+    def _draw_back_button(self, surface: pygame.Surface) -> None:
+        """Draw a centered "Back" button nead the bottom of the surface.
+
+        Args:
+            surface: The pygame surface to be drawn on.
+        """
+        x = surface.get_width() // 2
+        y = surface.get_height() - self.BACK_BUTTON_MARGIN
+        text = self.button_font.render("Back", True, self.SELECTED_COLOR)
+        rect = text.get_rect(center=(x, y))
+        box = rect.inflate(self.BOX_PADDING_X, self.BOX_PADDING_Y)
+        pygame.draw.rect(surface, self.SELECTED_COLOR, box,
+                         width=2, border_radius=self.BORDER_RADIUS)
+        surface.blit(text, rect)
