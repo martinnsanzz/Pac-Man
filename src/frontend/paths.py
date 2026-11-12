@@ -3,6 +3,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 ASSETS = ROOT / "assets"
+HUD = ASSETS / "hud"
 FONTS = ASSETS / "fonts"
 
 
@@ -60,5 +61,7 @@ class SpritesPaths(PathsBase):
 
     Attributes:
         PAC_MAN: Path to the Pac-Man animation `.gif` file.
+        LIVE: Path to hud live symbol `.png` file.
     """
     PAC_MAN = (ASSETS / "player" / "PacMan-Anim").with_suffix(".gif")
+    LIVE = (HUD / "live").with_suffix(".png")
