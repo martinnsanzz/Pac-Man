@@ -43,7 +43,8 @@ class FontsPaths(PathsBase):
     CRACKMAN = [(FONTS / "CRACKMAN" / "Crackman.TTF"), 100]
     ARCADECLASSIC = [(FONTS / "ARCADECLASSIC" / "ARCADECLASSIC.TTF"), 30]
     ARCADEBUTTON = [(FONTS / "ARCADECLASSIC" / "ARCADECLASSIC.TTF"), 38]
-    DIGITAL808 = [(FONTS / "digital808" / "Digital808.TTF"), 18]
+    ARCADETITLE = [(FONTS / "ARCADECLASSIC" / "ARCADECLASSIC.TTF"), 42]
+    DIGITAL808 = [(FONTS / "digital808" / "Digital808.TTF"), 40]
     BARCADE = [(FONTS / "barcade" / "barcadenobar.ttf"), 18]
 
 

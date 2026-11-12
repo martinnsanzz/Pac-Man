@@ -11,22 +11,20 @@ from ...backend import Highscores
 class HighscoresTable(Screen):
     """Highscores screen with sorted entries.
 
-    Args:
+    Attributes:
         highscores: The table of entries to display.
     """
     TITLE_Y_RATIO = 0.15
     TITLE_GAP = 70
-    SUB_TITLE_SIZE = 100
     LINE_HEIGHT = 32
     ROW_HEIGHT = 40
-    ROW_SIZE = 30
     HEADER_COLOR = (255, 255, 0)
 
     def __init__(self, screen_w: int, screen_h: int,
                  assets: AssetsLoader, highscores: Highscores) -> None:
         super().__init__(screen_w, screen_h, assets)
         self.highscores = highscores
-        self.sub_title_font = assets.fonts["ARCADECLASSIC"]
+        self.sub_title_font = assets.fonts["ARCADETITLE"]
         self.row_font = assets.fonts["DIGITAL808"]
 
     def handle_event(self, event: pygame.event.Event) -> ScreenAction:
