@@ -60,18 +60,24 @@ class HighscoresTable(Screen):
 
         # ---------- rows ----------
         width = surface.get_width()
-        for rank, entry in enumerate(self.highscores.table, start=1):
-            rank_text = self.row_font.render(f"{rank}.", True,
-                                             self.SELECTED_COLOR)
-            name_text = self.row_font.render(entry.name, True,
-                                             self.SELECTED_COLOR)
-            score_text = self.row_font.render(str(entry.score), True,
-                                              self.SELECTED_COLOR)
+        if not self.highscores.table:
+            text = self.row_font.render("NO SCORES YET", True,
+                                        self.TEXT_COLOR)
+            surface.blit(text, text.get_rect(
+                center=(width // 2, surface.get_height() // 2)))
+        else:
+            for rank, entry in enumerate(self.highscores.table, start=1):
+                rank_text = self.row_font.render(f"{rank}.", True,
+                                                 self.SELECTED_COLOR)
+                name_text = self.row_font.render(entry.name, True,
+                                                 self.SELECTED_COLOR)
+                score_text = self.row_font.render(str(entry.score), True,
+                                                  self.SELECTED_COLOR)
 
-            surface.blit(rank_text, rank_text.get_rect(
-                midleft=(width * 0.15, y)))
-            surface.blit(name_text, name_text.get_rect(
-                midleft=(width * 0.30, y)))
-            surface.blit(score_text, score_text.get_rect(
-                midleft=(width * 0.65, y)))
-            y += self.ROW_HEIGHT
+                surface.blit(rank_text, rank_text.get_rect(
+                    midleft=(width * 0.15, y)))
+                surface.blit(name_text, name_text.get_rect(
+                    midleft=(width * 0.30, y)))
+                surface.blit(score_text, score_text.get_rect(
+                    midleft=(width * 0.65, y)))
+                y += self.ROW_HEIGHT
