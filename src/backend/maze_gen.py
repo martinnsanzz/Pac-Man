@@ -2,7 +2,7 @@
 from mazegen import MazeGenerator
 
 
-class Maze():
+class MazeGen():
     def __init__(self) -> None:
         self.width = 19
         self.height = 20

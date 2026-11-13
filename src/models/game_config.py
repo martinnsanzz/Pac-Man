@@ -22,7 +22,7 @@ class GameConfig(BaseModel):
     """
 
     highscore_filename: str = Field(default="highscore.json")
-    lives: PositiveInt = Field(default=3, gt=0, le=100)
+    lives: PositiveInt = Field(default=3, gt=0, le=10)
     total_pacgum: PositiveInt = Field(default=42, gt=0, le=100)
     pacgum_points: PositiveInt = Field(default=10, le=100)
     super_pacgum_points: PositiveInt = Field(default=50, le=500)
