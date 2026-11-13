@@ -60,7 +60,7 @@ class App:
 
     @staticmethod
     def _create_window() -> pygame.Surface:
-        """Open the resizable window and set its title and hide the 
+        """Open the resizable window and set its title and hide the
         cursor.
         """
         pygame.display.set_caption("Pac-Man")
