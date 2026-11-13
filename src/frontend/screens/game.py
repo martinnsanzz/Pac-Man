@@ -4,8 +4,7 @@
 import pygame
 
 # Local modules
-from .screen import Screen
-from .actions import ScreenAction
+from .screen import Screen, ScreenAction
 from ..assets import AssetsLoader, Fruit
 from ..maze_renderer import MazeRenderer
 from ..hud import HUD
@@ -49,9 +48,9 @@ class Game(Screen):
             if event.key == pygame.K_ESCAPE:
                 return ScreenAction.PAUSE
             elif event.key == pygame.K_t:
-                return ScreenAction.TEXT_BOX
-            elif event.key == pygame.K_q:  # TEMP TO BE DELETED
-                return ScreenAction.QUIT
+                return ScreenAction.CHEATS
+            elif event.key == pygame.K_g:
+                return ScreenAction.GAME_OVER
         return ScreenAction.NONE
 
     def update(self, dt: float) -> None:

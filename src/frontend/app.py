@@ -6,7 +6,8 @@ import pygame
 
 # Local modules
 from .screens import (MainMenu, ScreenAction, Screen,
-                      Instructions, Game, HighscoresTable, Pause)
+                      Instructions, Game, HighscoresTable, Pause,
+                      GameOver)
 from .paths import FontsPaths, SpritesPaths, TilemapPath
 from .assets import AssetsLoader
 from .terminal import TerminalPrinter
@@ -84,12 +85,17 @@ class App:
         return highscores
 
     def run(self) -> None:
-        """Run the main loop until the window is closed."""
+        """Run the main loop until the window is closed.
+
+        Once the game stops running saves the highscore
+        to 'data/highscores.json'
+        """
         while self.running:
             dt = self.clock.tick(self.FPS) / 1000
             self._handle_events()
             self._update(dt)
             self._draw()
+        self.highscores.save()
         pygame.quit()
 
     def _compute_arcade_size(self) -> tuple[int, int]:
@@ -100,32 +106,31 @@ class App:
 
     def _switch(self, action: ScreenAction) -> None:
         """Change the current screen according to the action."""
+        w, h, assets = self.WIDTH, self.HEIGHT, self.assets
+
         match action:
             case ScreenAction.QUIT:
                 self.running = False
-            case ScreenAction.BACK:
+            case ScreenAction.BACK | ScreenAction.MAIN_MENU:
+                self.game = None
                 self.current_screen = self.main_menu
             case ScreenAction.START_GAME:
-                self.game = Game(self.WIDTH, self.HEIGHT,
-                                 self.assets, self.game_config,
+                self.game = Game(w, h, assets, self.game_config,
                                  self.highscores.get_high_score())
                 self.current_screen = self.game
             case ScreenAction.HIGHSCORES:
-                self.current_screen = HighscoresTable(self.WIDTH, self.HEIGHT,
-                                                      self.assets,
+                self.current_screen = HighscoresTable(w, h, assets,
                                                       self.highscores)
             case ScreenAction.INSTRUCTIONS:
-                self.current_screen = Instructions(self.WIDTH, self.HEIGHT,
-                                                   self.assets)
-            case ScreenAction.PAUSE:
-                if self.game:
-                    self.current_screen = Pause(self.WIDTH, self.HEIGHT,
-                                                self.assets, self.game)
+                self.current_screen = Instructions(w, h, assets)
+            case ScreenAction.PAUSE | ScreenAction.GAME_OVER:
+                if self.game is not None:
+                    overlay = (Pause if action is ScreenAction.PAUSE
+                               else GameOver)
+                    self.current_screen = overlay(w, h, assets, self.game)
             case ScreenAction.RESUME:
-                if self.game:
+                if self.game is not None:
                     self.current_screen = self.game
-            case _:
-                pass
 
     def _handle_events(self) -> None:
         """Read the pygame events and forward them to the screen."""
