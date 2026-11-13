@@ -1,3 +1,6 @@
+# Built-in modules
+from pathlib import Path
+
 # Installed modules
 from pydantic import BaseModel, Field, PositiveInt, field_validator
 
@@ -9,7 +12,7 @@ class GameConfig(BaseModel):
     Values outside the documented bounds raise a validation error.
 
     Attributes:
-        highscore_filename: Name of the file used to store the high score.
+        highscore_path: Name of the file used to store the high score.
             Must end with ``.json``.
         lives: Number of lives the player starts with (1 to 10).
         total_pacgum: Total number of pac-gums (1 to 100).
@@ -21,7 +24,7 @@ class GameConfig(BaseModel):
             configuration as ``"on"`` or ``"off"``.
     """
 
-    highscore_filename: str = Field(default="highscore.json")
+    highscores_path: str = Field(default="data/highscores.json")
     lives: PositiveInt = Field(default=3, gt=0, le=10)
     total_pacgum: PositiveInt = Field(default=42, gt=0, le=100)
     pacgum_points: PositiveInt = Field(default=10, le=100)
@@ -54,35 +57,38 @@ class GameConfig(BaseModel):
         raise ValueError("Incorrect mode for 'retro_shader'.\n"
                          "  - Accepted: 'on'/'off'")
 
-    @field_validator("highscore_filename", mode="after")
+    @field_validator("highscores_path", mode="after")
     @classmethod
-    def parse_highscore_file(cls, value: str) -> str:
-        """Validate the high score file name.
+    def validate_highscores_path(cls, value: str) -> str:
+        """Validate the high score file path.
 
-        The name must end in ``.json``, have a non-empty stem, and contain
-        neither ``/`` nor spaces in the stem.
+        The path must be relative, stay inside ``data/``, end in ``.json``,
+        and its file name must have a non-empty stem with no spaces.
 
         Args:
-            value: File name already validated as a string.
+            value: Path already validated as a string.
 
         Returns:
-            The unchanged file name.
+            The unchanged path.
 
         Raises:
-            ValueError: If the name does not end in ``.json``, has an empty
-                stem, or its stem contains ``/`` or a space.
+            ValueError: If any of the rules above is broken.
         """
-        file_name = value.split(".json")
-        if len(file_name) != 2 or file_name[1] != "":
-            raise ValueError("Highscore file name must end in '.json'.\n"
-                             f" - File name provided: {value}")
-        elif file_name[0] == "":
-            raise ValueError("File name empty.\n"
-                             f" - File name provided: {value}")
-        elif "/" in file_name[0]:
-            raise ValueError("Found invalid char '/' in filename.\n"
-                             f" - File name provided: {value}")
-        elif " " in file_name[0]:
-            raise ValueError("Found invalid space in filename.\n"
-                             f" - File name provided: {value}")
+        if not value.endswith(".json"):
+            raise ValueError("Highscore file must end in '.json'.\n"
+                             f" - Path provided: {value}")
+
+        path = Path(value)
+        if path.name == ".json":
+            raise ValueError("Highscore file name is empty.\n"
+                             f" - Path provided: {value}")
+        if " " in path.name:
+            raise ValueError("Found invalid space in highscore file name.\n"
+                             f" - Path provided: {value}")
+        if path.is_absolute() or ".." in path.parts:
+            raise ValueError("Highscore path must be relative and cannot "
+                             f"contain '..'.\n - Path provided: {value}")
+        if path.parts[0] != "data":
+            raise ValueError("Highscore file must be inside 'data/'.\n"
+                             f" - Path provided: {value}")
         return value

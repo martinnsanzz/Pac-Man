@@ -73,7 +73,7 @@ class App:
 
     def _load_highscores(self) -> Highscores:
         """Load the highscore table; on failure print the error and go on."""
-        highscores = Highscores(Path(self.game_config.highscore_filename))
+        highscores = Highscores(Path(self.game_config.highscores_path))
         try:
             highscores.load()
         except PacManError as e:
@@ -87,6 +87,7 @@ class App:
             self._handle_events()
             self._update(dt)
             self._draw()
+        self.highscores.save()
         pygame.quit()
 
     def _compute_arcade_size(self) -> tuple[int, int]:

@@ -1,5 +1,5 @@
 {
-    "highscore_filename": "highscore.json",
+    "highscores_path": "data/highscore.json",
     "lives": 4,
     "total_pacgum": 42,
     "pacgum_points": 10,
