@@ -17,7 +17,8 @@ class Game(Screen):
     """Game screen that will run all the core pac-man logic."""
 
     def __init__(self, screen_w: int, screen_h: int,
-                 assets: AssetsLoader, config: GameConfig) -> None:
+                 assets: AssetsLoader, config: GameConfig,
+                 highscore: int) -> None:
         super().__init__(screen_w, screen_h, assets)
         self.config = config
         self.maze = MazeGen()
@@ -27,7 +28,7 @@ class Game(Screen):
 
         self.lives = config.lives
         self.score = 0
-        self.highscore = 0  # Needs replacement with highscore backend
+        self.highscore = highscore
         self.time_left = config.level_time_limit
         self.fruits_collected: list[Fruit] = []
 

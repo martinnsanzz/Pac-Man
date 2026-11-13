@@ -35,32 +35,50 @@ class App:
     BACKGROUND = (12, 14, 16)
 
     def __init__(self, game_config: GameConfig) -> None:
-        """Open the window, load the assets and show the main menu."""
+        """Open the window, load the assets and highscore"""
         self.validate_assets()
         self.game_config = game_config
 
         pygame.init()
         self.clock = pygame.time.Clock()
-        self.screen = pygame.display.set_mode((0, 0), pygame.RESIZABLE)
-        pygame.display.set_caption("Pac-Man")
-
-        self.assets = AssetsLoader()
-        self.assets.load()
-
+        self.screen = self._create_window()
         self.arcade_screen = pygame.Surface((self.WIDTH, self.HEIGHT))
         self.arcade_size = self._compute_arcade_size()
 
+        self.assets = AssetsLoader()
+        self.assets.load()
+        self.highscores = self._load_highscores()
+
         self.main_menu: Screen = MainMenu(self.WIDTH, self.HEIGHT, self.assets)
-        self.game: Game | None = Game(self.WIDTH, self.HEIGHT, self.assets,
-                                      self.game_config)
+        self.game: Game | None = None
         self.current_screen: Screen = self.main_menu
         self.running = True
 
-        self.highscores = Highscores(Path(game_config.highscore_filename))
+    @staticmethod
+    def _create_window() -> pygame.Surface:
+        """Open the resizable window and set its title."""
+        pygame.display.set_caption("Pac-Man")
+        return pygame.display.set_mode((0, 0), pygame.RESIZABLE)
+
+    @staticmethod
+    def validate_assets() -> None:
+        """Raise LoadAssetsError listing every missing asset."""
+        missing: list[str] = []
+        for paths in (FontsPaths, SpritesPaths, TilemapPath):
+            missing += paths.validate()
+        if missing:
+            raise LoadAssetsError(
+                "Missing assets needed to run pac-man:\n - "
+                + "\n - ".join(missing))
+
+    def _load_highscores(self) -> Highscores:
+        """Load the highscore table; on failure print the error and go on."""
+        highscores = Highscores(Path(self.game_config.highscore_filename))
         try:
-            self.highscores.load()
+            highscores.load()
         except PacManError as e:
             TerminalPrinter.print_error(f"{e}\n")
+        return highscores
 
     def run(self) -> None:
         """Run the main loop until the window is closed."""
@@ -90,7 +108,8 @@ class App:
                                                    self.assets)
             case ScreenAction.START_GAME:
                 self.game = Game(self.WIDTH, self.HEIGHT, self.assets,
-                                 self.game_config)
+                                 self.game_config,
+                                 self.highscores.get_high_score())
                 self.current_screen = self.game
             case ScreenAction.RESUME:
                 if self.game is not None:
@@ -124,14 +143,3 @@ class App:
     def _update(self, dt: float) -> None:
         """Advance the current screen by dt seconds."""
         self.current_screen.update(dt)
-
-    @staticmethod
-    def validate_assets() -> None:
-        """Raise LoadAssetsError listing every missing asset."""
-        missing: list[str] = []
-        for paths in (FontsPaths, SpritesPaths, TilemapPath):
-            missing += paths.validate()
-        if missing:
-            raise LoadAssetsError(
-                "Missing assets needed to run pac-man:\n - "
-                + "\n - ".join(missing))

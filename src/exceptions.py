@@ -4,3 +4,7 @@ class PacManError(Exception):
 
 class LoadAssetsError(PacManError):
     """Error class to raise when something fails loading assets"""
+
+
+class HighScoreError(PacManError):
+    """Error class to raise when anything goes wrong with highscore"""
