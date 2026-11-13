@@ -86,7 +86,7 @@ class App:
 
     def run(self) -> None:
         """Run the main loop until the window is closed.
-        
+
         Once the game stops running saves the highscore
         to 'data/highscores.json'
         """
