@@ -28,7 +28,7 @@ class Game(Screen):
         self.score = 0
         self.highscore = 0  # Needs replacement with highscore backend
         self.time_left = config.level_time_limit
-        self.fruits_collected = [Fruit.APPLE, Fruit.STRAWBERRY, Fruit.KEY]
+        self.fruits_collected: list[Fruit] = []
 
     def handle_event(self, event: pygame.event.Event) -> ScreenAction:
         if event.type == pygame.KEYDOWN:
