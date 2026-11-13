@@ -1,8 +1,8 @@
 # Local modules
 from .game_config import GameConfig
-from .maze import Maze
+from .highscore_entry import HighscoreEntry
 
 __all__ = [
     "GameConfig",
-    "Maze"
+    "HighscoreEntry"
 ]

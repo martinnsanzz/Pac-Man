@@ -7,9 +7,10 @@ import pygame
 from .screen import Screen
 from .actions import ScreenAction
 from ..assets import AssetsLoader, Fruit
-from ...models import GameConfig, Maze
 from ..maze_renderer import MazeRenderer
 from ..hud import HUD
+from ...models import GameConfig
+from ...backend import MazeGen
 
 
 class Game(Screen):
@@ -19,7 +20,7 @@ class Game(Screen):
                  assets: AssetsLoader, config: GameConfig) -> None:
         super().__init__(screen_w, screen_h, assets)
         self.config = config
-        self.maze = Maze()
+        self.maze = MazeGen()
         self.maze_renderer = MazeRenderer(self.maze.grid, assets,
                                           screen_w, screen_h)
         self.hud = HUD(assets)
