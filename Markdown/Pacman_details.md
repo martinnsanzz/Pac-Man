@@ -35,6 +35,17 @@ All 244 dots must be eaten to advance.
 - Stays on screen between `9 and 10 seconds` (the exact time is random, not predictable).
 - The last 6 completed levels plus the current one are shown along the bottom (fruit/level counter).
 
+| Levels | Item | Points | Two per board |
+|---|---|---|---|
+| 1 | Cherry | 100 | 200 |
+| 2 | Strawberry | 300 | 600 |
+| 3 to 4 | Orange | 500 | 1,000 |
+| 5 to 6 | Apple | 700 | 1,400 |
+| 7 to 8 | Melon | 1,000 | 2,000 |
+| 9 to 10 | Galaxian flagship | 2,000 | 4,000 |
+| 11 to 12 | Bell | 3,000 | 6,000 |
+| 13 and beyond | Key | 5,000 | 10,000 |
+
 ## Ghost behavior
 
 ### Modes

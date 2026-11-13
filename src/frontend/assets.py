@@ -1,8 +1,35 @@
+# Built-in modules
+from enum import IntEnum
+from typing import Any, Iterator
+
 # Installed modules
 import pygame
 
 # Local modules
-from .paths import SpritesPaths, FontsPaths, TilemapPath
+from .paths import SpritesPaths, FontsPaths, TilemapPath, HudPaths
+
+
+class Fruit(IntEnum):
+    """Enumerate the bonus items and their sprite indices.
+
+    Members are integer values starting at 0, so they can be used directly
+    as list indices.
+    """
+    CHERRY = 0
+    STRAWBERRY = 1
+    ORANGE = 2
+    APPLE = 3
+    MELON = 4
+    SHIP = 5
+    BELL = 6
+    KEY = 7
+
+
+def _public_attrs(cls: type) -> Iterator[tuple[str, Any]]:
+    """Yield (name, value) for each public, non-callable class attribute."""
+    for key, value in vars(cls).items():
+        if not key.startswith("__") and not callable(value):
+            yield key, value
 
 
 class AssetsLoader():
@@ -15,16 +42,22 @@ class AssetsLoader():
         sprites: dict containing all sprites for the game as pygame Surfaces.
         fonts: dict containing all fonts for the game as pygame Font.
     """
-    SCALE = 2
-    TILE_SRC_SIZE = 16
+    SRC_SIZE = 16
+    SCALE_VAL = 2
+    HUD_SCALE = 2.5
+    SCALED_SIZE = SRC_SIZE * SCALE_VAL
+    SCALED_HUD = int(SRC_SIZE * HUD_SCALE)
     TILEMAP_COLS = 4
-    TILE_PX = TILE_SRC_SIZE * SCALE
+    FRUIT_COLS = 4
 
     def __init__(self) -> None:
         """Declare the attributes and initialize them to nothing"""
         self.tiles: list[pygame.Surface] = []
         self.sprites: dict[str, pygame.Surface] = {}
-        self.fonts: dict[str, pygame.font.Font] = {}
+        self.hud_icons: dict[str, pygame.Surface] = {}
+        self.fruit_sprites: dict[Fruit, pygame.Surface] = {}
+        self.fruit_icons: dict[Fruit, pygame.Surface] = {}
+        self.fonts: dict[tuple[str, int], pygame.font.Font] = {}
 
     def load(self) -> None:
         """Loads all assets independently. It modifies class attributes
@@ -32,35 +65,54 @@ class AssetsLoader():
         """
         self._load_tiles()
         self._load_sprites()
-        self._load_fonts()
+        self._load_hud_icons()
+        self._load_fruits()
 
     def _load_tiles(self) -> None:
-        """Load the tilemap image and append 16 scaled tiles to `self.tiles`.
-
-        Read the image at `TilemapPath.TILEMAP`, cut it into `self.TILE` x
-        `self.TILE` squares laid out row by row in a grid `self.COLS` tiles
-        wide, and scale each square to `self.SIZE` x `self.SIZE`. Tiles are
-        appended in reading order (left to right, top to bottom).
-        """
+        """Cut the tilemap into 16 tiles, in reading order."""
         tilemap = pygame.image.load(TilemapPath.TILEMAP).convert_alpha()
-
         for v in range(16):
-            rect = pygame.Rect((v % self.TILEMAP_COLS) * self.TILE_SRC_SIZE,
-                               (v // self.TILEMAP_COLS) * self.TILE_SRC_SIZE,
-                               self.TILE_SRC_SIZE, self.TILE_SRC_SIZE)
-            tile = tilemap.subsurface(rect)
-            self.tiles.append(pygame.transform.scale(tile,
-                                                     (self.TILE_PX,
-                                                      self.TILE_PX)))
+            tile = self._cut(tilemap, v, self.TILEMAP_COLS)
+            self.tiles.append(self._scale(tile, self.SCALED_SIZE))
 
     def _load_sprites(self) -> None:
-        """Load sprites as Surface objects."""
-        for key, value in vars(SpritesPaths).items():
-            if not key.startswith("__") and not callable(value):
-                self.sprites[key] = pygame.image.load(value)
+        """Load the in-game sprites (the fruit sheet is handled separately)."""
+        for key, path in _public_attrs(SpritesPaths):
+            if key == "FRUITS":
+                continue
+            sprite = pygame.image.load(path).convert_alpha()
+            self.sprites[key] = self._scale(sprite, self.SCALED_SIZE)
 
-    def _load_fonts(self) -> None:
-        """Load fonts as Font objects."""
-        for key, value in vars(FontsPaths).items():
-            if not key.startswith("__") and not callable(value):
-                self.fonts[key] = pygame.font.Font(value[0], value[1])
+    def _load_hud_icons(self) -> None:
+        """Load one HUD icon per attribute of HudPaths."""
+        for key, path in _public_attrs(HudPaths):
+            icon = pygame.image.load(path).convert_alpha()
+            self.hud_icons[key] = self._scale(icon, self.SCALED_HUD)
+
+    def _load_fruits(self) -> None:
+        """Cut the fruit sheet once, scaling each fruit for game and HUD."""
+        sheet = pygame.image.load(SpritesPaths.FRUITS).convert_alpha()
+        for fruit in Fruit:
+            cell = self._cut(sheet, fruit.value, self.FRUIT_COLS)
+            self.fruit_sprites[fruit] = self._scale(cell, self.SCALED_SIZE)
+            self.fruit_icons[fruit] = self._scale(cell, self.SCALED_HUD)
+
+    def get_font(self, name: str, size: int) -> pygame.font.Font:
+        """Return the font `name` at `size`, creating it on first use."""
+        key = (name, size)
+        if key not in self.fonts:
+            self.fonts[key] = pygame.font.Font(getattr(FontsPaths, name), size)
+        return self.fonts[key]
+
+    def _cut(self, sheet: pygame.Surface, index: int,
+             cols: int) -> pygame.Surface:
+        """Return cell `index` of a sheet of SRC_SIZE squares, `cols` wide."""
+        rect = pygame.Rect((index % cols) * self.SRC_SIZE,
+                           (index // cols) * self.SRC_SIZE,
+                           self.SRC_SIZE, self.SRC_SIZE)
+        return sheet.subsurface(rect)
+
+    @staticmethod
+    def _scale(surface: pygame.Surface, size: int) -> pygame.Surface:
+        """Return `surface` scaled to `size` x `size` pixels."""
+        return pygame.transform.scale(surface, (size, size))

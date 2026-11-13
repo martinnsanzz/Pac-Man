@@ -51,7 +51,8 @@ class App:
         self.arcade_size = self._compute_arcade_size()
 
         self.main_menu: Screen = MainMenu(self.WIDTH, self.HEIGHT, self.assets)
-        self.game: Game | None = None
+        self.game: Game | None = Game(self.WIDTH, self.HEIGHT, self.assets,
+                                      self.game_config)
         self.current_screen: Screen = self.main_menu
         self.running = True
 

@@ -40,12 +40,11 @@ class FontsPaths(PathsBase):
         DIGITAL808: Path to the Digital808 `.TTF` font.
         BARCADE: Path to the barcadenobar `.ttf` font.
     """
-    CRACKMAN = [(FONTS / "CRACKMAN" / "Crackman.TTF"), 100]
-    ARCADECLASSIC = [(FONTS / "ARCADECLASSIC" / "ARCADECLASSIC.TTF"), 30]
-    ARCADEBUTTON = [(FONTS / "ARCADECLASSIC" / "ARCADECLASSIC.TTF"), 38]
-    ARCADETITLE = [(FONTS / "ARCADECLASSIC" / "ARCADECLASSIC.TTF"), 42]
-    DIGITAL808 = [(FONTS / "digital808" / "Digital808.TTF"), 40]
-    BARCADE = [(FONTS / "barcade" / "barcadenobar.ttf"), 18]
+    CRACKMAN = (FONTS / "CRACKMAN" / "Crackman").with_suffix(".TTF")
+    ARCADECLASSIC = (FONTS / "ARCADECLASSIC" / "ARCADECLASSIC") \
+        .with_suffix(".TTF")
+    DIGITAL808 = (FONTS / "digital808" / "Digital808").with_suffix(".TTF")
+    BARCADE = (FONTS / "barcade" / "barcadenobar").with_suffix(".ttf")
 
 
 class TilemapPath(PathsBase):
@@ -57,12 +56,20 @@ class TilemapPath(PathsBase):
     TILEMAP = (ASSETS / "tilemap" / "tilemap").with_suffix(".png")
 
 
+class HudPaths(PathsBase):
+    """Paths to HUD files.
+
+    Attributes:
+        LIVE: Path to hud live symbol `.png` file.
+    """
+    LIVE = (HUD / "live").with_suffix(".png")
+
+
 class SpritesPaths(PathsBase):
     """Paths to sprite files.
 
     Attributes:
         PAC_MAN: Path to the Pac-Man animation `.gif` file.
-        LIVE: Path to hud live symbol `.png` file.
     """
     PAC_MAN = (ASSETS / "player" / "PacMan-Anim").with_suffix(".gif")
-    LIVE = (HUD / "live").with_suffix(".png")
+    FRUITS = (ASSETS / "fruits" / "fruits_sheet").with_suffix(".png")

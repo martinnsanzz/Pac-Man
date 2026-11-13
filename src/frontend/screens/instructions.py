@@ -30,7 +30,7 @@ class Instructions(Screen):
     def __init__(self, screen_w: int, screen_h: int,
                  assets: AssetsLoader) -> None:
         super().__init__(screen_w, screen_h, assets)
-        self.sub_title_font = assets.fonts["ARCADETITLE"]
+        self.sub_title_font = assets.get_font("ARCADECLASSIC", 50)
 
     def handle_event(self, event: pygame.event.Event) -> ScreenAction:
         """Handle a single pygame event for the Instructions screen.

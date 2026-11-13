@@ -24,8 +24,8 @@ class HighscoresTable(Screen):
                  assets: AssetsLoader, highscores: Highscores) -> None:
         super().__init__(screen_w, screen_h, assets)
         self.highscores = highscores
-        self.sub_title_font = assets.fonts["ARCADETITLE"]
-        self.row_font = assets.fonts["DIGITAL808"]
+        self.sub_title_font = assets.get_font("ARCADECLASSIC", 50)
+        self.row_font = assets.get_font("DIGITAL808", 30)
 
     def handle_event(self, event: pygame.event.Event) -> ScreenAction:
         """Handle a single pygame event for the Highscores screen.
