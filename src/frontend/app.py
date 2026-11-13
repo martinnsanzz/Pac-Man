@@ -87,7 +87,6 @@ class App:
             self._handle_events()
             self._update(dt)
             self._draw()
-        self.highscores.save()
         pygame.quit()
 
     def _compute_arcade_size(self) -> tuple[int, int]:
