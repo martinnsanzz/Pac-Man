@@ -85,12 +85,17 @@ class App:
         return highscores
 
     def run(self) -> None:
-        """Run the main loop until the window is closed."""
+        """Run the main loop until the window is closed.
+        
+        Once the game stops running saves the highscore
+        to 'data/highscores.json'
+        """
         while self.running:
             dt = self.clock.tick(self.FPS) / 1000
             self._handle_events()
             self._update(dt)
             self._draw()
+        self.highscores.save()
         pygame.quit()
 
     def _compute_arcade_size(self) -> tuple[int, int]:
