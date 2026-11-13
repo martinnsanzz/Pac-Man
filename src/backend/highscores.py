@@ -7,7 +7,7 @@ from pydantic import ValidationError
 
 # Local modules
 from ..models import HighscoreEntry
-from ..exceptions import PacManError
+from ..exceptions import HighScoreError
 
 MAX_ENTRIES = 10
 
@@ -31,40 +31,33 @@ class Highscores:
         file also empties the table, then raises.
 
         Raises:
-            PacManError: If it is not possible to load highscore file.
+            HighScoreError: If it is not possible to load highscore file.
         """
         try:
-            with open(self.path, "r") as file:
-                data = json.load(file)
-                entries: list[HighscoreEntry] = []
-                for entry in data:
-                    # ** unpacks the dict
-                    entries.append(HighscoreEntry(**entry))
-                self.table = entries
-            self.table.sort(key=lambda entry: entry.score, reverse=True)
-            self.table = self.table[:MAX_ENTRIES]
+            raw = json.loads(self.path.read_text())
+            entries = [HighscoreEntry.model_validate(item) for item in raw]
         except FileNotFoundError:
             self.table = []
         except (OSError, ValueError, TypeError) as e:
             self.table = []
-            raise PacManError(f"Could not load '{self.path}': {e}.")
+            raise HighScoreError(f"Could not load '{self.path}': {e}.") from e
+        else:
+            self.table = entries
+            self._sort_and_trim()
 
     def save(self) -> None:
         """Write the current table to the file as JSON.
 
         Raises:
-            PacManError: If the file can't be written.
+            HighScoreError: If the file can't be written.
         """
-        data: list[dict[str, str | int]] = []
-        for entry in self.table:
-            data.append(entry.model_dump())
-
+        data = [entry.model_dump() for entry in self.table]
         try:
-            with open(self.path, "w") as file:
-                json.dump(data, file, indent=4)
+            self.path.write_text(json.dumps(data, indent=4))
         except OSError as e:
-            raise PacManError(f"Could not save highscores to '{self.path}':"
-                              f" {e}.")
+            raise HighScoreError(
+                f"Could not save highscores to '{self.path}': {e}."
+            ) from e
 
     def insert(self, name: str, score: int) -> bool:
         """Add a score to the table if it makes the top MAX_ENTRIES.
@@ -76,16 +69,24 @@ class Highscores:
         Returns:
             True if the entry was added, False otherwise.
         """
-        if not self.is_highscore(score):
-            return False
         try:
             entry = HighscoreEntry(name=name, score=score)
         except ValidationError:
             return False
+        if not self.is_highscore(score):
+            return False
         self.table.append(entry)
-        self.table.sort(key=lambda entry: entry.score, reverse=True)
-        self.table = self.table[:MAX_ENTRIES]
+        self._sort_and_trim()
         return True
+
+    def get_high_score(self) -> int:
+        """Return the highest score in the table.
+
+        Returns:
+            The highest ``score`` among all entries, or 0 if the table is
+            empty.
+        """
+        return max((entry.score for entry in self.table), default=0)
 
     def is_highscore(self, score: int) -> bool:
         """Check whether a score would make it into the table.
@@ -99,3 +100,8 @@ class Highscores:
         if len(self.table) < MAX_ENTRIES:
             return True
         return score > self.table[-1].score
+
+    def _sort_and_trim(self) -> None:
+        """Keep the table sorted high to low and at most MAX_ENTRIES long."""
+        self.table.sort(key=lambda entry: entry.score, reverse=True)
+        del self.table[MAX_ENTRIES:]
