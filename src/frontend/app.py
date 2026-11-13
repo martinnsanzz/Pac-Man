@@ -6,13 +6,13 @@ import pygame
 
 # Local modules
 from .screens import (MainMenu, ScreenAction, Screen,
-                      Instructions, Game, HighscoresTable)
+                      Instructions, Game, HighscoresTable, Pause)
 from .paths import FontsPaths, SpritesPaths, TilemapPath
 from .assets import AssetsLoader
+from .terminal import TerminalPrinter
 from ..exceptions import LoadAssetsError, PacManError
 from ..models import GameConfig
 from ..backend import Highscores
-from .terminal import TerminalPrinter
 
 
 class App:
@@ -49,10 +49,13 @@ class App:
         self.assets.load()
         self.highscores = self._load_highscores()
 
-        self.main_menu: Screen = MainMenu(self.WIDTH, self.HEIGHT, self.assets)
-        self.game: Game | None = None
+        self.main_menu: Screen = MainMenu(self.WIDTH,
+                                          self.HEIGHT,
+                                          self.assets)
         self.current_screen: Screen = self.main_menu
         self.running = True
+
+        self.game: Game | None = None
 
     @staticmethod
     def _create_window() -> pygame.Surface:
@@ -101,23 +104,26 @@ class App:
             case ScreenAction.QUIT:
                 self.running = False
             case ScreenAction.BACK:
-                self.game = None
                 self.current_screen = self.main_menu
-            case ScreenAction.INSTRUCTIONS:
-                self.current_screen = Instructions(self.WIDTH, self.HEIGHT,
-                                                   self.assets)
             case ScreenAction.START_GAME:
-                self.game = Game(self.WIDTH, self.HEIGHT, self.assets,
-                                 self.game_config,
+                self.game = Game(self.WIDTH, self.HEIGHT,
+                                 self.assets, self.game_config,
                                  self.highscores.get_high_score())
                 self.current_screen = self.game
-            case ScreenAction.RESUME:
-                if self.game is not None:
-                    self.current_screen = self.game
             case ScreenAction.HIGHSCORES:
                 self.current_screen = HighscoresTable(self.WIDTH, self.HEIGHT,
                                                       self.assets,
                                                       self.highscores)
+            case ScreenAction.INSTRUCTIONS:
+                self.current_screen = Instructions(self.WIDTH, self.HEIGHT,
+                                                   self.assets)
+            case ScreenAction.PAUSE:
+                if self.game:
+                    self.current_screen = Pause(self.WIDTH, self.HEIGHT,
+                                                self.assets, self.game)
+            case ScreenAction.RESUME:
+                if self.game:
+                    self.current_screen = self.game
             case _:
                 pass
 
