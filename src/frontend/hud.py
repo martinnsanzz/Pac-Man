@@ -27,7 +27,7 @@ class HUD():
 
     def __init__(self, assets: AssetsLoader):
         self.assets = assets
-        self.font = assets.get_font("ARCADE", self.FONT_SIZE)
+        self.font = assets.get_font("DIGITAL808", self.FONT_SIZE)
 
     def display_hud(self, surface: pygame.Surface, lives: int,
                     fruits: list[Fruit], score: int, high_score: int,
