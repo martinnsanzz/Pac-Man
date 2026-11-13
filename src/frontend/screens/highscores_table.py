@@ -73,6 +73,7 @@ class HighscoresTable(Screen):
             score_text = self.row_font.render(str(entry.score), True,
                                               self.SELECTED_COLOR)
             rows.append(Row(rank_text, name_text, score_text))
+        highscores.insert("Martin", 200)
         return rows
 
     def handle_event(self, event: pygame.event.Event) -> ScreenAction:

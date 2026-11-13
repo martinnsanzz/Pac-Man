@@ -46,14 +46,18 @@ class Highscores:
             self._sort_and_trim()
 
     def save(self) -> None:
-        """Write the current table to the file as JSON.
+        """Write the current table to the file as JSON, one entry per line.
 
         Raises:
             HighScoreError: If the file can't be written.
         """
-        data = [entry.model_dump() for entry in self.table]
+        lines = [json.dumps(entry.model_dump()) for entry in self.table]
+        body = ",\n".join(f"    {line}" for line in lines)
+        text = f"[\n{body}\n]\n" if lines else "[]\n"
+
         try:
-            self.path.write_text(json.dumps(data, indent=4))
+            self.path.parent.mkdir(parents=True, exist_ok=True)
+            self.path.write_text(text)
         except OSError as e:
             raise HighScoreError(
                 f"Could not save highscores to '{self.path}': {e}."

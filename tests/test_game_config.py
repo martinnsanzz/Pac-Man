@@ -9,7 +9,7 @@ from src.models import GameConfig
 from src.exceptions import PacManError
 
 VALID_CONFIG: dict[str, Any] = {
-    "highscore_filename": "highscore.json",
+    "highscores_path": "data/highscores.json",
     "lives": 3,
     "total_pacgum": 42,
     "pacgum_points": 10,
@@ -26,57 +26,64 @@ def valid_config() -> dict[str, Any]:
     return dict(VALID_CONFIG)
 
 
-class TestHighscoreName:
-    """Validation of ``GameConfig.highscore_filename``."""
+class TestHighscorePath:
+    """Validation of ``GameConfig.highscores_path``."""
 
     @staticmethod
-    def parse(cfg: dict[str, Any], name: object) -> GameConfig:
-        return parse_game_config({**cfg, "highscore_filename": name})
+    def parse(cfg: dict[str, Any], path: object) -> GameConfig:
+        return parse_game_config({**cfg, "highscores_path": path})
 
-    @pytest.mark.parametrize("name", [
-        "highscore.json",
-        "a.json",                 # 1-char stem
-        "HIGH_score-1.json",
-        "score.v2.json",          # dots in stem
-        "a..json",
-        "ünï.json",               # unicode
-        "x" * 200 + ".json",      # long name
+    @pytest.mark.parametrize("path", [
+        "data/highscores.json",
+        "data/a.json",                    # 1-char stem
+        "data/HIGH_score-1.json",
+        "data/score.v2.json",             # dots in stem
+        "data/a..json",
+        "data/ünï.json",                  # unicode
+        "data/" + "x" * 200 + ".json",    # long name
+        "data/sub/a.json",                # subfolder
+        "./data/a.json",                  # leading './'
     ])
-    def test_valid(self, valid_config: dict[str, Any], name: object) -> None:
-        assert self.parse(valid_config, name).highscore_filename == name
+    def test_valid(self, valid_config: dict[str, Any], path: str) -> None:
+        assert self.parse(valid_config, path).highscores_path == path
 
-    @pytest.mark.parametrize("name, msg", [
+    @pytest.mark.parametrize("path, msg", [
         # extension
         ("", "must end in '.json'"),
-        ("score", "must end in '.json'"),
-        ("score.jso", "must end in '.json'"),
-        ("score.JSON", "must end in '.json'"),     # case-sensitive
-        ("score.json.bak", "must end in '.json'"),
-        ("score.json ", "must end in '.json'"),    # trailing space
+        ("data/score", "must end in '.json'"),
+        ("data/score.jso", "must end in '.json'"),
+        ("data/score.JSON", "must end in '.json'"),     # case-sensitive
+        ("data/score.json.bak", "must end in '.json'"),
+        ("data/score.json ", "must end in '.json'"),    # trailing space
         # empty stem
-        (".json", "File name empty"),
-        # slash
-        ("a/b.json", "invalid char '/'"),
-        ("/a.json", "invalid char '/'"),
-        ("../a.json", "invalid char '/'"),
-        ("dir/.json", "invalid char '/'"),
-        # space
-        ("my score.json", "invalid space"),
-        (" a.json", "invalid space"),
-        ("a .json", "invalid space"),
-        # precedence: '/' is checked before space
-        ("a b/c.json", "invalid char '/'"),
+        (".json", "name is empty"),
+        ("data/.json", "name is empty"),
+        # space in the file name
+        ("data/my score.json", "invalid space"),
+        ("data/ a.json", "invalid space"),
+        ("data/a .json", "invalid space"),
+        # absolute or '..'
+        ("/data/a.json", "relative and cannot contain"),
+        ("/a.json", "relative and cannot contain"),
+        ("../a.json", "relative and cannot contain"),
+        ("data/../a.json", "relative and cannot contain"),
+        # not inside data/
+        ("a.json", "inside 'data/'"),
+        ("highscores.json", "inside 'data/'"),
+        ("other/a.json", "inside 'data/'"),
+        ("database/a.json", "inside 'data/'"),
+        ("a/data/b.json", "inside 'data/'"),
     ])
     def test_rejected(self, valid_config: dict[str, Any],
-                      name: object, msg: str) -> None:
+                      path: str, msg: str) -> None:
         with pytest.raises(PacManError, match=re.escape(msg)):
-            self.parse(valid_config, name)
+            self.parse(valid_config, path)
 
-    @pytest.mark.parametrize("name", [123, None, ["a.json"], {}, 1.5])
+    @pytest.mark.parametrize("path", [123, None, ["a.json"], {}, 1.5])
     def test_not_a_string(self, valid_config: dict[str, Any],
-                          name: object) -> None:
-        with pytest.raises(PacManError, match="'highscore_filename'"):
-            self.parse(valid_config, name)
+                          path: object) -> None:
+        with pytest.raises(PacManError, match="'highscores_path'"):
+            self.parse(valid_config, path)
 
 
 class TestConfigLoading:
@@ -87,7 +94,9 @@ class TestConfigLoading:
         assert cfg.model_dump() == {**VALID_CONFIG, "retro_shader": True}
 
     def test_empty_uses_defaults(self) -> None:
-        assert parse_game_config({}).lives == 3
+        cfg = parse_game_config({})
+        assert cfg.lives == 3
+        assert cfg.highscores_path == "data/highscores.json"
 
     def test_partial_keeps_other_defaults(self) -> None:
         cfg = parse_game_config({"lives": 5})
