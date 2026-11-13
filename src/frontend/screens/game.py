@@ -4,8 +4,7 @@
 import pygame
 
 # Local modules
-from .screen import Screen
-from .actions import ScreenAction
+from .screen import Screen, ScreenAction
 from ..assets import AssetsLoader, Fruit
 from ..maze_renderer import MazeRenderer
 from ..hud import HUD

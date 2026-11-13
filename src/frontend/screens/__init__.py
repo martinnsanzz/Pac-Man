@@ -1,7 +1,6 @@
 # Local modules
 from .main_menu import MainMenu
-from .actions import ScreenAction
-from .screen import Screen
+from .screen import Screen, ScreenAction
 from .instructions import Instructions
 from .highscores_table import HighscoresTable
 from .game import Game

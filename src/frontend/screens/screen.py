@@ -1,12 +1,33 @@
 # Built-in modules
 from abc import ABC, abstractmethod
+from enum import Enum, auto
 
 # Installed modules
 import pygame
 
 # Local modules
-from .actions import ScreenAction
 from ..assets import AssetsLoader
+
+
+class ScreenAction(Enum):
+    """Possible selections from the game menus."""
+    QUIT = auto()
+    
+    START_GAME = auto()
+    HIGHSCORES = auto()
+    INSTRUCTIONS = auto()
+
+    PAUSE = auto()
+    RESUME = auto()
+    
+    MAIN_MENU = auto()
+    BACK = auto()
+
+    RETRY = auto()
+    
+    CHEATS = auto()
+    
+    NONE = auto()
 
 
 class Screen(ABC):

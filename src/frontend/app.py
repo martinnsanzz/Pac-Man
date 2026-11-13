@@ -105,6 +105,8 @@ class App:
                 self.running = False
             case ScreenAction.BACK:
                 self.current_screen = self.main_menu
+            case ScreenAction.MAIN_MENU:
+                self.current_screen = self.main_menu
             case ScreenAction.START_GAME:
                 self.game = Game(self.WIDTH, self.HEIGHT,
                                  self.assets, self.game_config,

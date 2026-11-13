@@ -2,8 +2,7 @@
 import pygame
 
 # Local modules
-from .actions import ScreenAction
-from .screen import Screen
+from .screen import Screen, ScreenAction
 from ..assets import AssetsLoader
 
 

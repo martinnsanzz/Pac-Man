@@ -4,9 +4,8 @@
 import pygame
 
 # Local modules
-from .screen import Screen
+from .screen import Screen, ScreenAction
 from .game import Game
-from .actions import ScreenAction
 from ..assets import AssetsLoader
 
 
@@ -35,7 +34,7 @@ class Pause(Screen):
     PANEL_SIZE = (400, 300)
 
     OPTIONS: tuple[tuple[str, ScreenAction], ...] = (
-        ("Menu", ScreenAction.BACK),
+        ("Menu", ScreenAction.MAIN_MENU),
         ("Resume", ScreenAction.RESUME),
         ("Quit", ScreenAction.QUIT))
     BUTTON_SIZE = (260, 50)
