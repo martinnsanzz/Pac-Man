@@ -60,10 +60,15 @@ class MainMenu(Screen):
         """
         if event.type == pygame.KEYDOWN:
             if event.key in self.UP_KEYS:
+                if self.selected != 0:
+                    self.assets.sounds["MENU_MOVE"].play()
                 self.navigate(-1)
             elif event.key in self.DOWN_KEYS:
+                if self.selected != len(self.options) - 1:
+                    self.assets.sounds["MENU_MOVE"].play()
                 self.navigate(1)
             elif event.key == pygame.K_RETURN:
+                self.assets.sounds["MENU_SELECT"].play()
                 return self.options[self.selected][1]
         return ScreenAction.NONE
 
