@@ -7,6 +7,7 @@ import pygame
 
 # Local modules
 from .paths import SpritesPaths, FontsPaths, TilemapPath, HudPaths, SfxPaths
+from .terminal import TerminalPrinter
 
 
 class Fruit(IntEnum):
@@ -70,6 +71,10 @@ class AssetsLoader():
         self._load_fruits()
         self._load_sounds()
 
+    def play_sound(self, name: str) -> None:
+        if self.sounds.get(name):
+            self.sounds[name].play()
+
     def _load_tiles(self) -> None:
         """Cut the tilemap into 16 tiles, in reading order."""
         tilemap = pygame.image.load(TilemapPath.TILEMAP).convert_alpha()
@@ -101,9 +106,12 @@ class AssetsLoader():
 
     def _load_sounds(self) -> None:
         """Load the in-game sound effects."""
-        for key, path in _public_attrs(SfxPaths):
-            sound = pygame.mixer.Sound(path)
-            self.sounds[key] = sound
+        if pygame.mixer.get_init():
+            for key, path in _public_attrs(SfxPaths):
+                sound = pygame.mixer.Sound(path)
+                self.sounds[key] = sound
+        else:
+            TerminalPrinter.print_msg("No audio device, sounds disabled.")
 
     def get_font(self, name: str, size: int) -> pygame.font.Font:
         """Return the font `name` at `size`, creating it on first use."""
