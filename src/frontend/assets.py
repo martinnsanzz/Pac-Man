@@ -72,6 +72,7 @@ class AssetsLoader():
         self._load_sounds()
 
     def play_sound(self, name: str) -> None:
+        """Play the sound ``name`` if audio is available."""
         if self.sounds.get(name):
             self.sounds[name].play()
 
