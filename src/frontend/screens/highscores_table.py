@@ -77,6 +77,7 @@ class HighscoresTable(Screen):
     def handle_event(self, event: pygame.event.Event) -> ScreenAction:
         """Return BACK when Enter is pressed, NONE otherwise."""
         if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
+            self.assets.play_sound("MENU_SELECT")
             return ScreenAction.BACK
         return ScreenAction.NONE
 

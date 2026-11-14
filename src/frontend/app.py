@@ -8,7 +8,7 @@ import pygame
 from .screens import (MainMenu, ScreenAction, Screen,
                       Instructions, Game, HighscoresTable, Pause,
                       GameOver)
-from .paths import FontsPaths, SpritesPaths, TilemapPath
+from .paths import FontsPaths, SpritesPaths, TilemapPath, SfxPaths, HudPaths
 from .assets import AssetsLoader
 from .terminal import TerminalPrinter
 from ..exceptions import LoadAssetsError, PacManError
@@ -71,7 +71,8 @@ class App:
     def validate_assets() -> None:
         """Raise LoadAssetsError listing every missing asset."""
         missing: list[str] = []
-        for paths in (FontsPaths, SpritesPaths, TilemapPath):
+        for paths in (FontsPaths, SpritesPaths, TilemapPath, SfxPaths,
+                      HudPaths):
             missing += paths.validate()
         if missing:
             raise LoadAssetsError(

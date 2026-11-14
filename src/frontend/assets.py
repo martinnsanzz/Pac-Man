@@ -6,7 +6,8 @@ from typing import Any, Iterator
 import pygame
 
 # Local modules
-from .paths import SpritesPaths, FontsPaths, TilemapPath, HudPaths
+from .paths import SpritesPaths, FontsPaths, TilemapPath, HudPaths, SfxPaths
+from .terminal import TerminalPrinter
 
 
 class Fruit(IntEnum):
@@ -58,6 +59,7 @@ class AssetsLoader():
         self.fruit_sprites: dict[Fruit, pygame.Surface] = {}
         self.fruit_icons: dict[Fruit, pygame.Surface] = {}
         self.fonts: dict[tuple[str, int], pygame.font.Font] = {}
+        self.sounds: dict[str, pygame.mixer.Sound] = {}
 
     def load(self) -> None:
         """Loads all assets independently. It modifies class attributes
@@ -67,6 +69,12 @@ class AssetsLoader():
         self._load_sprites()
         self._load_hud_icons()
         self._load_fruits()
+        self._load_sounds()
+
+    def play_sound(self, name: str) -> None:
+        """Play the sound ``name`` if audio is available."""
+        if self.sounds.get(name):
+            self.sounds[name].play()
 
     def _load_tiles(self) -> None:
         """Cut the tilemap into 16 tiles, in reading order."""
@@ -96,6 +104,15 @@ class AssetsLoader():
             cell = self._cut(sheet, fruit.value, self.FRUIT_COLS)
             self.fruit_sprites[fruit] = self._scale(cell, self.SCALED_SIZE)
             self.fruit_icons[fruit] = self._scale(cell, self.SCALED_HUD)
+
+    def _load_sounds(self) -> None:
+        """Load the in-game sound effects."""
+        if pygame.mixer.get_init():
+            for key, path in _public_attrs(SfxPaths):
+                sound = pygame.mixer.Sound(path)
+                self.sounds[key] = sound
+        else:
+            TerminalPrinter.print_msg("No audio device, sounds disabled.")
 
     def get_font(self, name: str, size: int) -> pygame.font.Font:
         """Return the font `name` at `size`, creating it on first use."""

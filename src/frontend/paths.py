@@ -5,6 +5,7 @@ ROOT = Path(__file__).resolve().parents[2]
 ASSETS = ROOT / "assets"
 HUD = ASSETS / "hud"
 FONTS = ASSETS / "fonts"
+SFX = ASSETS / "sfx"
 
 
 class PathsBase():
@@ -73,3 +74,14 @@ class SpritesPaths(PathsBase):
     """
     PAC_MAN = (ASSETS / "player" / "PacMan-Anim").with_suffix(".gif")
     FRUITS = (ASSETS / "fruits" / "fruits_sheet").with_suffix(".png")
+
+
+class SfxPaths(PathsBase):
+    """Paths to SFX files.
+
+    Attributes:
+        MENU_MOVE: Path to the menu move sound `.mp3` file.
+        MENU_SELECT: Path to the menu selection sound `.mp3` file.
+    """
+    MENU_MOVE = (SFX / "menu_move").with_suffix(".mp3")
+    MENU_SELECT = (SFX / "menu_select").with_suffix(".mp3")
