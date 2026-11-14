@@ -38,7 +38,11 @@ class Instructions(Screen):
                      ("ENTER", "Select / go back")),
         "RULES": (("PAC-GUM", "Gives points"),
                   ("SUPER PAC-GUM", "Gives points and lets you eat ghosts")),
-        "CHEAT CODES": (("TODO", "Coming soon"),),
+        "CHEAT CODES": (("IMMORTAL", "Ghosts can't hurt you"),
+                        ("SKIPZONE", "Skip the current level"),
+                        ("MORELIFE", "Extra life"),
+                        ("ZOOMZOOM", "Pac-Man moves faster"),
+                        ("NOCHEATS", "Turn off all cheats"))
     }
 
     def __init__(self, screen_w: int, screen_h: int,
