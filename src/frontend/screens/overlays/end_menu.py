@@ -44,9 +44,12 @@ class EndMenu(OverlayMenu):
     # Name rules
     MAX_NAME_LEN = 10
 
-    # Fonts
-    INPUT_FONT_SIZE = 24
-    LABEL_FONT_SIZE = 36
+    # Panel size
+    PANEL_SIZE = (550, 300)
+
+    # Fonts size
+    SCORE_FONT_SIZE = 40
+    INPUT_FONT_SIZE = 20
 
     # Input box geometry
     INPUT_BOX_WIDTH = 180
@@ -65,6 +68,9 @@ class EndMenu(OverlayMenu):
 
     # Cursor
     CURSOR_BLINK_MS = 500
+
+    # Score color
+    SCORE_COLOR = (255, 215, 0)
 
     # Shake
     SHAKE_DURATION_MS = 300
@@ -92,6 +98,8 @@ class EndMenu(OverlayMenu):
              "DIGITAL808", self.INPUT_LABEL.font_size)
         self.highscore_font = assets.get_font(
                 "DIGITAL808", self.HIGHSCORE_LABEL.font_size)
+        self.score_font = assets.get_font(
+            "DIGITAL808", self.SCORE_FONT_SIZE)
         self.input_font = assets.get_font("BARCADE",
                                           self.INPUT_FONT_SIZE)
 
@@ -186,8 +194,8 @@ class EndMenu(OverlayMenu):
                           self.panel.bottom - self.BUTTON_GAP)
         box = base.move(self._shake_offset(), 0)
 
-        self._draw_box(surface, box)
         self._draw_labels(surface, base)
+        self._draw_box(surface, box)
         self._draw_text(surface, box)
 
     def _draw_box(self, surface: pygame.Surface, box: pygame.Rect) -> None:
@@ -201,15 +209,26 @@ class EndMenu(OverlayMenu):
     def _draw_labels(self, surface: pygame.Surface,
                      anchor: pygame.Rect) -> None:
         """Draw the name label left of the anchor, highscore label above."""
+        highscore = self.highscore_font.render(
+            self.HIGHSCORE_LABEL.text, True, self.HIGHSCORE_LABEL.color)
+        surface.blit(highscore, highscore.get_rect(
+            center=(self.panel.centerx, self.panel.centery)))
+
+        self._draw_score(surface, highscore)
+
         name = self.label_font.render(
             self.INPUT_LABEL.text, True, self.INPUT_LABEL.color)
         surface.blit(name, name.get_rect(
             midright=(anchor.left - self.LABEL_GAP, anchor.centery)))
 
-        highscore = self.highscore_font.render(
-            self.HIGHSCORE_LABEL.text, True, self.HIGHSCORE_LABEL.color)
-        surface.blit(highscore, highscore.get_rect(
-            midbottom=(anchor.centerx, anchor.top - self.LABEL_GAP)))
+    def _draw_score(self, surface: pygame.Surface,
+                    anchor: pygame.Surface) -> None:
+        score = self.score_font.render(
+            f"{self.game.score}", True, self.SCORE_COLOR)
+        surface.blit(score, score.get_rect(
+            center=(self.panel.centerx, self.panel.centery +
+                    anchor.get_height())
+        ))
 
     def _draw_text(self, surface: pygame.Surface, box: pygame.Rect) -> None:
         """Draw the typed name and the blinking cursor inside the box."""
@@ -265,7 +284,6 @@ class Win(EndMenu):
     TITLE_TEXT = "VICTORY"
     TITLE_COLOR = (60, 255, 110)
     SHADOW_COLOR = (0, 80, 30)
-    PANEL_SIZE = (550, 250)
 
     OPTIONS = (("Menu", ScreenAction.MAIN_MENU),
                ("Play again", ScreenAction.START_GAME),
