@@ -8,7 +8,7 @@ from .screen import Screen, ScreenAction
 from ..assets import AssetsLoader, Fruit
 from ..maze_renderer import MazeRenderer
 from ..hud import HUD
-from ...models import GameConfig
+from ...validation import GameConfig
 from ...backend import MazeGen
 
 
@@ -55,6 +55,8 @@ class Game(Screen):
                 return ScreenAction.GAME_OVER
             elif event.key == pygame.K_w:
                 return ScreenAction.WIN
+            elif event.key == pygame.K_1:
+                self.score += 100
         return ScreenAction.NONE
 
     def update(self, dt: float) -> None:

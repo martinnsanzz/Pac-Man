@@ -7,12 +7,12 @@ import pygame
 # Local modules
 from .screens import (MainMenu, ScreenAction, Screen,
                       Instructions, Game, HighscoresTable, Pause,
-                      GameOver, OverlayMenu, Win)
+                      GameOver, Win, EndMenu)
 from .paths import FontsPaths, SpritesPaths, TilemapPath, SfxPaths, HudPaths
 from .assets import AssetsLoader
 from .terminal import TerminalPrinter
 from ..exceptions import LoadAssetsError, PacManError
-from ..models import GameConfig
+from ..validation import GameConfig
 from ..backend import Highscores
 
 
@@ -21,13 +21,16 @@ class App:
 
     Attributes:
         game_config: Configuration of game extracted from config.json
-        clock: pygame clock.
+        clock: Pygame clock.
         screen: Pygame window to hold the drawings.
-        main_menu: Main menu window to return to.
         arcade_screen: Subwindow to hold arcade related drawings.
-        current_screen: Current menu or window to be displayed.
         arcade_size: Arcade window scaled by the user screen.
+        assets: Loader holding every font, sprite and sound.
         highscores: Persistent highscore table, loaded at startup.
+        main_menu: Main menu window to return to.
+        current_screen: Current menu or window to be displayed.
+        game: Running game, or None when no game is in progress.
+        running: False once the main loop must stop.
     """
     # Arcade screen
     WIDTH = 672
@@ -35,12 +38,15 @@ class App:
     FPS = 60
     BACKGROUND = (12, 14, 16)
 
-    OVERLAYS: dict[ScreenAction, type[OverlayMenu]] = {
-        ScreenAction.PAUSE: Pause,
+    # Screens
+    ENDMENUS: dict[ScreenAction, type[EndMenu]] = {
         ScreenAction.GAME_OVER: GameOver,
         ScreenAction.WIN: Win,
-        }
+    }
 
+    # ------------------------------------------------------------------
+    # Setup
+    # ------------------------------------------------------------------
     def __init__(self, game_config: GameConfig) -> None:
         """Open the window, load the assets and highscore"""
         self.validate_assets()
@@ -60,18 +66,8 @@ class App:
                                           self.HEIGHT,
                                           self.assets)
         self.current_screen: Screen = self.main_menu
-        self.running = True
-
         self.game: Game | None = None
-
-    @staticmethod
-    def _create_window() -> pygame.Surface:
-        """Open the resizable window and set its title and hide the
-        cursor.
-        """
-        pygame.display.set_caption("Pac-Man")
-        pygame.mouse.set_visible(False)
-        return pygame.display.set_mode((0, 0), pygame.RESIZABLE)
+        self.running = True
 
     @staticmethod
     def validate_assets() -> None:
@@ -85,6 +81,19 @@ class App:
                 "Missing assets needed to run pac-man:\n - "
                 + "\n - ".join(missing))
 
+    @staticmethod
+    def _create_window() -> pygame.Surface:
+        """Open the resizable window, set its title and hide the cursor."""
+        pygame.display.set_caption("Pac-Man")
+        pygame.mouse.set_visible(False)
+        return pygame.display.set_mode((0, 0), pygame.RESIZABLE)
+
+    def _compute_arcade_size(self) -> tuple[int, int]:
+        """Return the arcade size scaled to fit the window."""
+        win_w, win_h = self.screen.get_size()
+        factor = min(win_w / self.WIDTH, win_h / self.HEIGHT)
+        return int(self.WIDTH * factor), int(self.HEIGHT * factor)
+
     def _load_highscores(self) -> Highscores:
         """Load the highscore table; on failure print the error and go on."""
         highscores = Highscores(Path(self.game_config.highscores_path))
@@ -94,56 +103,17 @@ class App:
             TerminalPrinter.print_error(f"{e}\n")
         return highscores
 
+    # ------------------------------------------------------------------
+    # Main loop
+    # ------------------------------------------------------------------
     def run(self) -> None:
-        """Run the main loop until the window is closed.
-
-        Once the game stops running saves the highscore
-        to 'data/highscores.json'
-        """
+        """Run the main loop until the window is closed."""
         while self.running:
             dt = self.clock.tick(self.FPS) / 1000
             self._handle_events()
             self._update(dt)
             self._draw()
         pygame.quit()
-
-    def _compute_arcade_size(self) -> tuple[int, int]:
-        """Return the arcade size scaled to fit the window."""
-        win_w, win_h = self.screen.get_size()
-        factor = min(win_w / self.WIDTH, win_h / self.HEIGHT)
-        return int(self.WIDTH * factor), int(self.HEIGHT * factor)
-
-    def _switch(self, action: ScreenAction) -> None:
-        """Change the current screen according to the action."""
-        w, h, assets = self.WIDTH, self.HEIGHT, self.assets
-
-        match action:
-            case ScreenAction.QUIT:
-                self.running = False
-            case ScreenAction.BACK | ScreenAction.MAIN_MENU:
-                self.game = None
-                self.current_screen = self.main_menu
-            case ScreenAction.START_GAME:
-                self.game = Game(w, h, assets, self.game_config,
-                                 self.highscores.get_high_score())
-                self.current_screen = self.game
-            case ScreenAction.HIGHSCORES:
-                self.current_screen = HighscoresTable(w, h, assets,
-                                                      self.highscores)
-            case ScreenAction.INSTRUCTIONS:
-                self.current_screen = Instructions(w, h, assets)
-            case ScreenAction.PAUSE:
-                if self.game is not None:
-                    self.current_screen = Pause(w, h, assets, self.game)
-            case ScreenAction.GAME_OVER | ScreenAction.WIN:
-                if self.game is not None:
-                    self.highscores.insert("tmp", self.game.score)
-                    self.highscores.save()
-                    overlay = self.OVERLAYS[action]
-                    self.current_screen = overlay(w, h, assets, self.game)
-            case ScreenAction.RESUME:
-                if self.game is not None:
-                    self.current_screen = self.game
 
     def _handle_events(self) -> None:
         """Read the pygame events and forward them to the screen."""
@@ -153,6 +123,10 @@ class App:
             elif event.type == pygame.VIDEORESIZE:
                 self.arcade_size = self._compute_arcade_size()
             self._switch(self.current_screen.handle_event(event))
+
+    def _update(self, dt: float) -> None:
+        """Advance the current screen by dt seconds."""
+        self.current_screen.update(dt)
 
     def _draw(self) -> None:
         """Draw the current screen scaled and centered in the window."""
@@ -164,6 +138,79 @@ class App:
             scaled, scaled.get_rect(center=self.screen.get_rect().center))
         pygame.display.flip()
 
-    def _update(self, dt: float) -> None:
-        """Advance the current screen by dt seconds."""
-        self.current_screen.update(dt)
+    # ------------------------------------------------------------------
+    # Screen switching
+    # ------------------------------------------------------------------
+    def _switch(self, action: ScreenAction | None) -> None:
+        """Change the current screen according to the action."""
+        match action:
+            case ScreenAction.QUIT:
+                self.highscores.save()
+                self.running = False
+            case ScreenAction.BACK | ScreenAction.MAIN_MENU:
+                self._show_main_menu()
+            case ScreenAction.START_GAME:
+                self._start_game()
+            case ScreenAction.HIGHSCORES:
+                self._show_highscores()
+            case ScreenAction.INSTRUCTIONS:
+                self._show_instructions()
+            case ScreenAction.PAUSE:
+                self._show_pause()
+            case ScreenAction.GAME_OVER | ScreenAction.WIN:
+                self._show_end_menu(action)
+            case ScreenAction.NAME_SUBMITTED:
+                self._insert_high_score()
+            case ScreenAction.RESUME:
+                self._resume()
+
+    def _show_main_menu(self) -> None:
+        """Drop the current game and go back to the main menu."""
+        self.game = None
+        self.current_screen = self.main_menu
+
+    def _start_game(self) -> None:
+        """Create a new game and make it the current screen."""
+        self.game = Game(self.WIDTH, self.HEIGHT, self.assets,
+                         self.game_config, self.highscores.get_high_score())
+        self.current_screen = self.game
+
+    def _show_highscores(self) -> None:
+        """Show the highscore table."""
+        self.current_screen = HighscoresTable(self.WIDTH, self.HEIGHT,
+                                              self.assets, self.highscores)
+
+    def _show_instructions(self) -> None:
+        """Show the instructions screen."""
+        self.current_screen = Instructions(self.WIDTH, self.HEIGHT,
+                                           self.assets)
+
+    def _show_pause(self) -> None:
+        """Open the pause menu over the running game."""
+        if self.game is None:
+            return
+        self.current_screen = Pause(self.WIDTH, self.HEIGHT, self.assets,
+                                    self.game)
+
+    def _show_end_menu(self, action: ScreenAction) -> None:
+        """Open the game over or win menu over the finished game."""
+        if self.game is None:
+            return
+        menu = self.ENDMENUS[action]
+        is_highscore = self.highscores.is_highscore(self.game.score)
+        self.current_screen = menu(self.WIDTH, self.HEIGHT, self.assets,
+                                   self.game, is_highscore)
+
+    def _insert_high_score(self) -> None:
+        """Inserts current score to highscore if its valid"""
+        if self.game is None or not isinstance(self.current_screen,
+                                               EndMenu):
+            return
+        name = self.current_screen.name
+
+        self.highscores.insert(name, self.current_screen.game.score)
+
+    def _resume(self) -> None:
+        """Close the pause menu and go back to the game."""
+        if self.game is not None:
+            self.current_screen = self.game

@@ -2,9 +2,9 @@
 import pygame
 
 # Local modules
-from .screen import Screen, ScreenAction, Color
-from .game import Game
-from ..assets import AssetsLoader
+from ..screen import Screen, ScreenAction, Color
+from ..game import Game
+from ...assets import AssetsLoader
 
 
 class OverlayMenu(Screen):
@@ -22,27 +22,32 @@ class OverlayMenu(Screen):
         selected: Index in ``OPTIONS`` of the highlighted button.
         buttons: Button rectangles, in ``OPTIONS`` order, left to right.
     """
+    # Defined by subclasses
     TITLE_TEXT: str
     TITLE_COLOR: Color
     SHADOW_COLOR: Color
     OPTIONS: tuple[tuple[str, ScreenAction], ...]
 
+    # Keys
     LEFT_KEYS = (pygame.K_LEFT, pygame.K_a)
     RIGHT_KEYS = (pygame.K_RIGHT, pygame.K_d)
 
+    # Panel
     PANEL_SIZE = (500, 250)
     PANEL_COLOR = (20, 20, 40)
     BORDER_COLOR = (43, 95, 255)
     OVERLAY_COLOR = (0, 0, 0, 150)
 
+    # Title
+    TITLE_FONT_SIZE = 70
+    TITLE_TOP_PAD = 40
+    SHADOW_OFFSET = 4
+
+    # Buttons
     BUTTON_HEIGHT = 50
     BUTTON_MIN_WIDTH = 120
     BUTTON_PAD_X = 20
     BUTTON_GAP = 20
-
-    TITLE_FONT_SIZE = 70
-    TITLE_TOP_PAD = 40
-    SHADOW_OFFSET = 4
 
     def __init__(self, screen_w: int, screen_h: int,
                  assets: AssetsLoader, game: Game) -> None:
@@ -81,7 +86,7 @@ class OverlayMenu(Screen):
         self.selected = max(0, min(self.selected + step,
                                    len(self.OPTIONS) - 1))
 
-    def handle_event(self, event: pygame.event.Event) -> ScreenAction:
+    def handle_event(self, event: pygame.event.Event) -> ScreenAction | None:
         """Left/right move the selection; Enter triggers the selected option.
 
         Returns:
@@ -109,6 +114,10 @@ class OverlayMenu(Screen):
                          self.panel.top + self.TITLE_TOP_PAD),
                         shadow_color=self.SHADOW_COLOR,
                         shadow_offset=self.SHADOW_OFFSET)
+        self._draw_content(surface)
+
+    def _draw_content(self, surface: pygame.Surface) -> None:
+        """Draw what sits below the title. Subclasses can override."""
         self._display_buttons(surface)
 
     def _display_buttons(self, surface: pygame.Surface) -> None:
@@ -120,43 +129,3 @@ class OverlayMenu(Screen):
             pygame.draw.rect(surface, color, rect, 3)
             text = self.button_font.render(label, True, color)
             surface.blit(text, text.get_rect(center=rect.center))
-
-
-class Pause(OverlayMenu):
-    """Pause menu over the game. Escape resumes."""
-    TITLE_TEXT = "PAUSE"
-    TITLE_COLOR = (235, 217, 23)
-    SHADOW_COLOR = (99, 91, 2)
-
-    OPTIONS = (("Menu", ScreenAction.MAIN_MENU),
-               ("Resume", ScreenAction.RESUME),
-               ("Quit", ScreenAction.QUIT))
-
-    def handle_event(self, event: pygame.event.Event) -> ScreenAction:
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-            return ScreenAction.RESUME
-        return super().handle_event(event)
-
-
-class GameOver(OverlayMenu):
-    """Game over menu over the game."""
-    TITLE_TEXT = "GAME OVER"
-    TITLE_COLOR = (255, 40, 40)
-    SHADOW_COLOR = (90, 0, 0)
-    INPUT_BOX = True
-
-    OPTIONS = (("Menu", ScreenAction.MAIN_MENU),
-               ("Retry", ScreenAction.START_GAME),
-               ("Quit", ScreenAction.QUIT))
-
-
-class Win(OverlayMenu):
-    """Win menu over the game"""
-    TITLE_TEXT = "VICTORY"
-    TITLE_COLOR = (60, 255, 110)
-    SHADOW_COLOR = (0, 80, 30)
-    PANEL_SIZE = (550, 250)
-
-    OPTIONS = (("Menu", ScreenAction.MAIN_MENU),
-               ("Play again", ScreenAction.START_GAME),
-               ("Quit", ScreenAction.QUIT))

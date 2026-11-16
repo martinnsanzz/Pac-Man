@@ -34,14 +34,17 @@ class HighscoresTable(Screen):
         empty_text: Pre-rendered message shown when there are no entries.
         rows: One ``(rank, name, score)`` tuple of rendered text per entry.
     """
+    # Title
+    TITLE_FONT_SIZE = 50
     TITLE_Y_RATIO = 0.15
     TITLE_GAP = 70
+    HEADER_COLOR = (255, 255, 0)
+
+    # Rows
+    ROW_FONT_SIZE = 30
     ROW_HEIGHT = 40
     MARGIN_RATIO = 0.125
     RANK_X, NAME_X, SCORE_X = 0.15, 0.30, 0.65
-    TITLE_FONT_SIZE = 50
-    ROW_FONT_SIZE = 30
-    HEADER_COLOR = (255, 255, 0)
 
     def __init__(self, screen_w: int, screen_h: int,
                  assets: AssetsLoader, highscores: Highscores) -> None:

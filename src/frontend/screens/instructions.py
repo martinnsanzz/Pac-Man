@@ -18,20 +18,25 @@ class Instructions(Screen):
         sections: Pre-rendered (header, rows) pairs, each row being a
             (key, description) pair of surfaces.
     """
+    # Title
     TITLE_TEXT = "INSTRUCTIONS"
+    SUB_TITLE_SIZE = 50
     TITLE_Y_RATIO = 0.12
     TITLE_GAP = 50
-    SUB_TITLE_SIZE = 50
-    LINE_HEIGHT = 32
-    SECTION_GAP = 24
+
+    # Layout
     MARGIN_RATIO = 0.125
     DESC_X_RATIO = 0.45
     INDENT = 24
+    LINE_HEIGHT = 32
+    SECTION_GAP = 24
 
+    # Colors
     HEADER_COLOR = (255, 255, 0)
     SHADOW_COLOR = (99, 91, 2)
     KEY_COLOR = (0, 255, 255)
 
+    # Content
     CONTENT: dict[str, tuple[tuple[str, str], ...]] = {
         "CONTROLS": (("ARROWS / WASD", "Move Pac-Man"),
                      ("ESC", "Pause / resume"),

@@ -6,7 +6,7 @@ import json
 from pydantic import ValidationError
 
 # Local modules
-from ..models import HighscoreEntry
+from ..validation import HighscoreEntry
 from ..exceptions import HighScoreError
 
 MAX_ENTRIES = 10

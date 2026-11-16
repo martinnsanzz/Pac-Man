@@ -5,7 +5,7 @@ from typing import Any
 from pydantic import ValidationError
 
 # Local modules
-from ..models import GameConfig
+from ..validation import GameConfig
 from ..exceptions import PacManError
 
 

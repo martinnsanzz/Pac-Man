@@ -4,7 +4,7 @@ from .screen import Screen, ScreenAction
 from .instructions import Instructions
 from .highscores_table import HighscoresTable
 from .game import Game
-from .overlay_menus import OverlayMenu, Pause, GameOver, Win
+from .overlays import EndMenu, Pause, GameOver, Win
 
 __all__ = [
     "ScreenAction",
@@ -15,6 +15,6 @@ __all__ = [
     "Pause",
     "HighscoresTable",
     "GameOver",
-    "OverlayMenu",
+    "EndMenu",
     "Win"
 ]

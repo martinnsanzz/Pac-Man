@@ -29,6 +29,8 @@ class ScreenAction(Enum):
 
     WIN = auto()
 
+    NAME_SUBMITTED = auto()
+
     CHEATS = auto()
 
     NONE = auto()
@@ -68,7 +70,7 @@ class Screen(ABC):
         self.text_font = assets.get_font("BARCADE", self.TEXT_FONT_SIZE)
 
     @abstractmethod
-    def handle_event(self, event: pygame.event.Event) -> ScreenAction:
+    def handle_event(self, event: pygame.event.Event) -> ScreenAction | None:
         """Handle a single pygame event for the current screen.
 
         The keys accepted will be personalized for each screen.
