@@ -34,6 +34,6 @@ def test_different_config_name(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_valid_cli(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr("sys.argv", ["src", "configg.json"])
+    monkeypatch.setattr("sys.argv", ["src", "config.json"])
     args = load_arguments()
     assert args.file == "config.json"
