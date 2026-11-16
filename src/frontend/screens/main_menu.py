@@ -13,18 +13,20 @@ class MainMenu(Screen):
         options: Menu entries as (label, action) pairs, in display order.
         selected: Index of the currently highlighted option.
     """
+    # Keys
     UP_KEYS = (pygame.K_UP, pygame.K_w)
     DOWN_KEYS = (pygame.K_DOWN, pygame.K_s)
 
+    # Title
     TITLE_TEXT = "PAC MAN"
     TITLE_COLOR = (255, 255, 0)
+    TITLE_SHADOW = (120, 100, 0)
     TITLE_Y = 0.30
+
+    # Options
     OPTIONS_Y = 0.55
     LINE_HEIGHT = Screen.BUTTON_FONT_SIZE + 40
-
-    TITLE_SHADOW = (120, 100, 0)
     BUTTON_SIZE = (320, 56)
-    DARK_TEXT = (12, 14, 16)
 
     def __init__(self, screen_w: int, screen_h: int,
                  assets: AssetsLoader) -> None:

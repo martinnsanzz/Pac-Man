@@ -5,7 +5,7 @@ import re
 
 # Local modules
 from src.parsing import parse_game_config
-from src.models import GameConfig
+from src.validation import GameConfig
 from src.exceptions import PacManError
 
 VALID_CONFIG: dict[str, Any] = {

@@ -75,6 +75,9 @@ clean:
 	@echo "${RED}Removing '.pyc' files.${RESET}"
 	@find . -type f -name "*.pyc" -exec rm -rf {} +
 
+	@echo "${RED}Removing 'data' files.${RESET}"
+	@rm -rf data/*
+
 fclean: clean
 	@echo "${RED}Removing '.venv'.${RESET}"
 	@rm -rf $(VENV)
