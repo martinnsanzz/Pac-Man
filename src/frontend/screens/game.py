@@ -10,6 +10,7 @@ from ..maze_renderer import MazeRenderer
 from ..hud import HUD
 from ...models import GameConfig
 from ...backend import MazeGen
+from ..terminal import TerminalPrinter
 
 
 class Game(Screen):
@@ -50,7 +51,12 @@ class Game(Screen):
             elif event.key == pygame.K_t:
                 return ScreenAction.CHEATS
             elif event.key == pygame.K_g:
+                TerminalPrinter.print_error("HELLo")
                 return ScreenAction.GAME_OVER
+            elif event.key == pygame.K_w:
+                return ScreenAction.WIN
+            elif event.key == pygame.K_1:
+                self.score += 100
         return ScreenAction.NONE
 
     def update(self, dt: float) -> None:
