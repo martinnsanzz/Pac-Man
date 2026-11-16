@@ -7,7 +7,7 @@ import pygame
 # Local modules
 from .screens import (MainMenu, ScreenAction, Screen,
                       Instructions, Game, HighscoresTable, Pause,
-                      GameOver)
+                      GameOver, OverlayMenu, Win)
 from .paths import FontsPaths, SpritesPaths, TilemapPath, SfxPaths, HudPaths
 from .assets import AssetsLoader
 from .terminal import TerminalPrinter
@@ -34,6 +34,12 @@ class App:
     HEIGHT = 864
     FPS = 60
     BACKGROUND = (12, 14, 16)
+
+    OVERLAYS: dict[ScreenAction, type[OverlayMenu]] = {
+        ScreenAction.PAUSE: Pause,
+        ScreenAction.GAME_OVER: GameOver,
+        ScreenAction.WIN: Win,
+        }
 
     def __init__(self, game_config: GameConfig) -> None:
         """Open the window, load the assets and highscore"""
@@ -99,7 +105,6 @@ class App:
             self._handle_events()
             self._update(dt)
             self._draw()
-        self.highscores.save()
         pygame.quit()
 
     def _compute_arcade_size(self) -> tuple[int, int]:
@@ -127,10 +132,14 @@ class App:
                                                       self.highscores)
             case ScreenAction.INSTRUCTIONS:
                 self.current_screen = Instructions(w, h, assets)
-            case ScreenAction.PAUSE | ScreenAction.GAME_OVER:
+            case ScreenAction.PAUSE:
                 if self.game is not None:
-                    overlay = (Pause if action is ScreenAction.PAUSE
-                               else GameOver)
+                    self.current_screen = Pause(w, h, assets, self.game)
+            case ScreenAction.GAME_OVER | ScreenAction.WIN:
+                if self.game is not None:
+                    self.highscores.insert("tmp", self.game.score)
+                    self.highscores.save()
+                    overlay = self.OVERLAYS[action]
                     self.current_screen = overlay(w, h, assets, self.game)
             case ScreenAction.RESUME:
                 if self.game is not None:

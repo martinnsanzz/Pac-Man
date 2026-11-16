@@ -35,6 +35,7 @@ class Game(Screen):
         self.time_left = config.level_time_limit
         self.fruits_collected: list[Fruit] = []
 
+        #  temp to be deleted
         self.square_x = 0.0
         self.square_y = screen_h // 2
         self.square_dir = 1       # 1 = right, -1 = left
@@ -49,12 +50,16 @@ class Game(Screen):
                 return ScreenAction.PAUSE
             elif event.key == pygame.K_t:
                 return ScreenAction.CHEATS
+            #  temp to be deleted
             elif event.key == pygame.K_g:
                 return ScreenAction.GAME_OVER
+            elif event.key == pygame.K_w:
+                return ScreenAction.WIN
         return ScreenAction.NONE
 
     def update(self, dt: float) -> None:
         """Move the square and bounce it off both edges."""
+        #  temp to be deleted
         self.square_x += self.square_dir * self.SQUARE_SPEED * dt
 
         if self.square_x >= self.max_x:

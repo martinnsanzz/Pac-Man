@@ -29,12 +29,17 @@ class OverlayMenu(Screen):
 
     LEFT_KEYS = (pygame.K_LEFT, pygame.K_a)
     RIGHT_KEYS = (pygame.K_RIGHT, pygame.K_d)
+
     PANEL_SIZE = (500, 250)
     PANEL_COLOR = (20, 20, 40)
     BORDER_COLOR = (43, 95, 255)
     OVERLAY_COLOR = (0, 0, 0, 150)
-    BUTTON_SIZE = (140, 50)
+
+    BUTTON_HEIGHT = 50
+    BUTTON_MIN_WIDTH = 120
+    BUTTON_PAD_X = 20
     BUTTON_GAP = 20
+
     TITLE_FONT_SIZE = 70
     TITLE_TOP_PAD = 40
     SHADOW_OFFSET = 4
@@ -55,18 +60,20 @@ class OverlayMenu(Screen):
         self.buttons = self._init_buttons()
 
     def _init_buttons(self) -> list[pygame.Rect]:
-        """Build one rectangle per option, in a centred row at the bottom."""
-        width, _ = self.BUTTON_SIZE
-        total = (len(self.OPTIONS) * width
-                 + (len(self.OPTIONS) - 1) * self.BUTTON_GAP)
-        left = self.panel.centerx - total // 2
+        """Build one rectangle per option, sized to its label, in a row."""
+        widths = [max(self.BUTTON_MIN_WIDTH,
+                      self.button_font.size(label)[0] + 2 * self.BUTTON_PAD_X)
+                  for label, _ in self.OPTIONS]
+        total = sum(widths) + (len(widths) - 1) * self.BUTTON_GAP
+        x = self.panel.centerx - total // 2
         bottom = self.panel.bottom - self.BUTTON_GAP
 
         buttons = []
-        for i in range(len(self.OPTIONS)):
-            rect = pygame.Rect((0, 0), self.BUTTON_SIZE)
-            rect.bottomleft = (left + i * (width + self.BUTTON_GAP), bottom)
+        for width in widths:
+            rect = pygame.Rect(0, 0, width, self.BUTTON_HEIGHT)
+            rect.bottomleft = (x, bottom)
             buttons.append(rect)
+            x += width + self.BUTTON_GAP
         return buttons
 
     def navigate(self, step: int) -> None:
@@ -120,6 +127,7 @@ class Pause(OverlayMenu):
     TITLE_TEXT = "PAUSE"
     TITLE_COLOR = (235, 217, 23)
     SHADOW_COLOR = (99, 91, 2)
+
     OPTIONS = (("Menu", ScreenAction.MAIN_MENU),
                ("Resume", ScreenAction.RESUME),
                ("Quit", ScreenAction.QUIT))
@@ -135,7 +143,20 @@ class GameOver(OverlayMenu):
     TITLE_TEXT = "GAME OVER"
     TITLE_COLOR = (255, 40, 40)
     SHADOW_COLOR = (90, 0, 0)
-    BUTTON_SIZE = (120, 50)
+    INPUT_BOX = True
+
     OPTIONS = (("Menu", ScreenAction.MAIN_MENU),
                ("Retry", ScreenAction.START_GAME),
+               ("Quit", ScreenAction.QUIT))
+
+
+class Win(OverlayMenu):
+    """Win menu over the game"""
+    TITLE_TEXT = "VICTORY"
+    TITLE_COLOR = (60, 255, 110)
+    SHADOW_COLOR = (0, 80, 30)
+    PANEL_SIZE = (550, 250)
+
+    OPTIONS = (("Menu", ScreenAction.MAIN_MENU),
+               ("Play again", ScreenAction.START_GAME),
                ("Quit", ScreenAction.QUIT))

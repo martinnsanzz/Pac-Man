@@ -27,6 +27,8 @@ class ScreenAction(Enum):
 
     GAME_OVER = auto()
 
+    WIN = auto()
+
     CHEATS = auto()
 
     NONE = auto()
