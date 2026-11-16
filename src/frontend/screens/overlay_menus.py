@@ -144,7 +144,6 @@ class GameOver(OverlayMenu):
     TITLE_COLOR = (255, 40, 40)
     SHADOW_COLOR = (90, 0, 0)
     INPUT_BOX = True
-    
 
     OPTIONS = (("Menu", ScreenAction.MAIN_MENU),
                ("Retry", ScreenAction.START_GAME),
