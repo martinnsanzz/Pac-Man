@@ -52,7 +52,7 @@ class DevLog:
         """
         self.entries.append(LogEntry(text, kind))
         if len(self.entries) > self.MAX_ENTRIES:
-            self.entries.pop()
+            self.entries.pop(0)
 
     def add_char(self, char: str) -> None:
         """Append a typed character to the input line.
