@@ -68,6 +68,7 @@ class App:
         self.current_screen: Screen = self.main_menu
         self.game: Game | None = None
         self.running = True
+        self.on_dev_mode = False
 
     @staticmethod
     def validate_assets() -> None:
@@ -161,6 +162,9 @@ class App:
                 self._show_end_menu(action)
             case ScreenAction.NAME_SUBMITTED:
                 self._insert_high_score()
+            case ScreenAction.DEV_MODE:
+                self.on_dev_mode = True
+                self._enter_dev_mode()
             case ScreenAction.RESUME:
                 self._resume()
 
@@ -214,3 +218,6 @@ class App:
         """Close the pause menu and go back to the game."""
         if self.game is not None:
             self.current_screen = self.game
+
+    def _enter_dev_mode(self) -> None:
+        ...

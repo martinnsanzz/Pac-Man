@@ -30,6 +30,11 @@ class Pause(OverlayMenu):
             ``ScreenAction.RESUME`` if Escape was pressed, otherwise
             the action returned by the parent overlay menu.
         """
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+        keys = pygame.key.get_pressed()
+        
+        if keys[pygame.K_ESCAPE]:
             return ScreenAction.RESUME
+        elif (keys[pygame.K_LCTRL] or keys[pygame.K_RCTRL]) \
+            and keys[pygame.K_t]:
+            return ScreenAction.DEV_MODE
         return super().handle_event(event)
