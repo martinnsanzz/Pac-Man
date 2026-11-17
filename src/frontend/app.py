@@ -24,8 +24,9 @@ class App:
         clock: Pygame clock.
         screen: Pygame window to hold the drawings.
         arcade_screen: Subwindow to hold arcade related drawings.
-        canvas: Fixed CANVAS_WxCANVAS_H surface holding all surfaces.
+        canvas: Surface CANVAS_H tall, as wide as the window screen.
         canvas_size: Canvas scaled by the user screen.
+        canvas_w: Width size of the canvas surface.
         log_rect: Rect for the log window.
         arcade_rect: Rect for the arcade window.
         side_rect: Rect for the side window.
@@ -37,12 +38,13 @@ class App:
         running: False once the main loop must stop.
     """
     # Canvas
-    CANVAS_W = 1920
     CANVAS_H = 1080
+    LOG_GAP = 16
 
     # Arcade screen
     WIDTH = 672
     HEIGHT = 864
+    ARCADE_W = int(WIDTH * CANVAS_H / HEIGHT)
     FPS = 60
     BACKGROUND = (12, 14, 16)
 
@@ -64,10 +66,7 @@ class App:
         self.clock = pygame.time.Clock()
         self.screen = self._create_window()
         self.arcade_screen = pygame.Surface((self.WIDTH, self.HEIGHT))
-        self.canvas = pygame.Surface((self.CANVAS_W, self.CANVAS_H))
-        self.log_rect, self.arcade_rect, self.side_rect = \
-            self._compute_layout()
-        self.canvas_size = self._compute_canvas_size()
+        self._build_canvas()
 
         self.assets = AssetsLoader()
         self.assets.load()
@@ -100,14 +99,27 @@ class App:
         pygame.mouse.set_visible(False)
         return pygame.display.set_mode((0, 0), pygame.RESIZABLE)
 
+    def _build_canvas(self) -> None:
+        """Size the canvas to the window ratio and split it into areas.
+
+        Called at startup and on every resize so the arcade always fills the
+        window height and the side panels absorb the extra width.
+        """
+        win_w, win_h = self.screen.get_size()
+        self.canvas_w = max(int(win_w / win_h * self.CANVAS_H),
+                            self.ARCADE_W)
+        self.canvas = pygame.Surface((self.canvas_w, self.CANVAS_H))
+        self.log_rect, self.arcade_rect, self.side_rect = \
+            self._compute_layout()
+        self.canvas_size = self._compute_canvas_size()
+
     def _compute_canvas_size(self) -> tuple[int, int]:
         """Return the canvas size scaled to fit the window."""
         win_w, win_h = self.screen.get_size()
-        factor = min(win_w / self.CANVAS_W, win_h / self.CANVAS_H)
-        return int(self.CANVAS_W * factor), int(self.CANVAS_H * factor)
+        factor = min(win_w / self.canvas_w, win_h / self.CANVAS_H)
+        return int(self.canvas_w * factor), int(self.CANVAS_H * factor)
 
-    @classmethod
-    def _compute_layout(cls) -> tuple[pygame.Rect, pygame.Rect, pygame.Rect]:
+    def _compute_layout(self) -> tuple[pygame.Rect, pygame.Rect, pygame.Rect]:
         """Split the canvas into the log, arcade and side areas.
 
         The arcade keeps its ratio and fills the canvas height. The log and
@@ -116,13 +128,12 @@ class App:
         Returns:
             The log, arcade and side rects, in canvas coordinates.
         """
-        arcade_w = int(cls.WIDTH * cls.CANVAS_H / cls.HEIGHT)
-        arcade_x = (cls.CANVAS_W - arcade_w) // 2
+        arcade_x = (self.canvas_w - self.ARCADE_W) // 2
 
-        arcade = pygame.Rect(arcade_x, 0, arcade_w, cls.CANVAS_H)
-        log = pygame.Rect(0, 0, arcade.left, cls.CANVAS_H)
-        side = pygame.Rect(arcade.right, 0, cls.CANVAS_W - arcade.right,
-                           cls.CANVAS_H)
+        arcade = pygame.Rect(arcade_x, 0, self.ARCADE_W, self.CANVAS_H)
+        log = pygame.Rect(0, 0, arcade.left - self.LOG_GAP, self.CANVAS_H)
+        side = pygame.Rect(arcade.right, 0, self.canvas_w - arcade.right,
+                           self.CANVAS_H)
         return log, arcade, side
 
     def _load_highscores(self) -> Highscores:
@@ -152,7 +163,7 @@ class App:
             if event.type == pygame.QUIT:
                 self.running = False
             elif event.type == pygame.VIDEORESIZE:
-                self.canvas_size = self._compute_canvas_size()
+                self._build_canvas()
             self._switch(self.current_screen.handle_event(event))
 
     def _update(self, dt: float) -> None:
@@ -163,6 +174,7 @@ class App:
         """Draw the screen into the canvas and fit it to the window."""
         self.screen.fill((0, 0, 0))
         self.canvas.fill((0, 0, 0))
+        self.canvas.fill((128, 128, 128), self.log_rect)
         self.arcade_screen.fill(self.BACKGROUND)
         self.current_screen.draw(self.arcade_screen)
 
