@@ -46,6 +46,8 @@ class FontsPaths(PathsBase):
         .with_suffix(".TTF")
     DIGITAL808 = (FONTS / "digital808" / "Digital808").with_suffix(".TTF")
     BARCADE = (FONTS / "barcade" / "barcadenobar").with_suffix(".ttf")
+    CAIROPIXEL = (FONTS / "cairopixel" / "Cairopixel") \
+        .with_suffix(".ttf")
 
 
 class TilemapPath(PathsBase):

@@ -31,7 +31,7 @@ class ScreenAction(Enum):
 
     NAME_SUBMITTED = auto()
 
-    CHEATS = auto()
+    DEV_MODE = auto()
 
     NONE = auto()
 
