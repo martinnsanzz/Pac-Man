@@ -45,11 +45,12 @@ class EndMenu(OverlayMenu):
     MAX_NAME_LEN = 10
 
     # Panel size
-    PANEL_SIZE = (550, 300)
+    PANEL_SIZE = (550, 250)
+    CENTER_OFFSET = 15
 
     # Fonts size
     SCORE_FONT_SIZE = 40
-    INPUT_FONT_SIZE = 20
+    INPUT_FONT_SIZE = 32
 
     # Input box geometry
     INPUT_BOX_WIDTH = 180
@@ -62,8 +63,8 @@ class EndMenu(OverlayMenu):
     INPUT_BORDER_COLOR = (255, 255, 255)
 
     # Labels
-    INPUT_LABEL = LabelStyle("ENTER NAME:", 36, (255, 255, 255))
-    HIGHSCORE_LABEL = LabelStyle("NEW HIGHSCORE !!", 40, (255, 215, 0))
+    INPUT_LABEL = LabelStyle("ENTER NAME:", 32, (255, 255, 255))
+    HIGHSCORE_LABEL = LabelStyle("NEW HIGHSCORE !!", 32, (255, 215, 0))
     LABEL_GAP = 8
 
     # Cursor
@@ -100,7 +101,7 @@ class EndMenu(OverlayMenu):
                 "DIGITAL808", self.HIGHSCORE_LABEL.font_size)
         self.score_font = assets.get_font(
             "DIGITAL808", self.SCORE_FONT_SIZE)
-        self.input_font = assets.get_font("BARCADE",
+        self.input_font = assets.get_font("CAIROPIXEL",
                                           self.INPUT_FONT_SIZE)
 
     def handle_event(self, event: pygame.Event) -> ScreenAction | None:
@@ -212,7 +213,8 @@ class EndMenu(OverlayMenu):
         highscore = self.highscore_font.render(
             self.HIGHSCORE_LABEL.text, True, self.HIGHSCORE_LABEL.color)
         surface.blit(highscore, highscore.get_rect(
-            center=(self.panel.centerx, self.panel.centery)))
+            center=(self.panel.centerx,
+                    self.panel.centery + self.CENTER_OFFSET)))
 
         self._draw_score(surface, highscore)
 
@@ -227,7 +229,7 @@ class EndMenu(OverlayMenu):
             f"{self.game.score}", True, self.SCORE_COLOR)
         surface.blit(score, score.get_rect(
             center=(self.panel.centerx, self.panel.centery +
-                    anchor.get_height())
+                    anchor.get_height() + self.CENTER_OFFSET)
         ))
 
     def _draw_text(self, surface: pygame.Surface, box: pygame.Rect) -> None:
@@ -237,7 +239,7 @@ class EndMenu(OverlayMenu):
         surface.blit(text, text_rect)
 
         if pygame.time.get_ticks() // self.CURSOR_BLINK_MS % 2 == 0:
-            cursor = pygame.Rect(0, 0, 2, text.get_height())
+            cursor = pygame.Rect(0, 0, 2, text.get_height() - 6)
             cursor.midleft = (text_rect.right + 2,
                               box.centery)
             pygame.draw.rect(surface, self.TEXT_COLOR, cursor)
