@@ -13,7 +13,8 @@ from .assets import AssetsLoader
 from .terminal import TerminalPrinter
 from ..exceptions import LoadAssetsError, PacManError
 from ..validation import GameConfig
-from ..backend import Highscores
+from ..backend import Highscores, DevLog
+from .log_panel import LogPanel
 
 
 class App:
@@ -71,6 +72,9 @@ class App:
         self.assets = AssetsLoader()
         self.assets.load()
         self.highscores = self._load_highscores()
+
+        self.dev_log = DevLog()
+        self.log_panel = LogPanel(self.assets, self.dev_log)
 
         self.main_menu: Screen = MainMenu(self.WIDTH,
                                           self.HEIGHT,
@@ -174,7 +178,8 @@ class App:
         """Draw the screen into the canvas and fit it to the window."""
         self.screen.fill((0, 0, 0))
         self.canvas.fill((0, 0, 0))
-        self.canvas.fill((128, 128, 128), self.log_rect)
+
+        self.log_panel.draw(self.canvas, self.log_rect, self.on_dev_mode)
         self.arcade_screen.fill(self.BACKGROUND)
         self.current_screen.draw(self.arcade_screen)
 

@@ -9,6 +9,7 @@ import pygame
 from ..assets import AssetsLoader
 
 Color = tuple[int, int, int]
+RGBA = tuple[int, int, int, int]
 
 
 class ScreenAction(Enum):
