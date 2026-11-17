@@ -103,7 +103,7 @@ class HUD():
             x -= step
 
     def _display_level(self, surface: pygame.Surface,
-                      current_level: int, last_level: int) -> None:
+                       current_level: int, last_level: int) -> None:
         level_txt = f"{current_level}/{last_level}"
         level_info = self.num_font.render(level_txt, True, self.TXT_COLOR)
 

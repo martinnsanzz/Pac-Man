@@ -96,7 +96,7 @@ class EndMenu(OverlayMenu):
         self.input_font = assets.get_font("CAIROPIXEL",
                                           self.INPUT_FONT_SIZE)
 
-    def handle_event(self, event: pygame.Event) -> ScreenAction | None:
+    def handle_event(self, event: pygame.Event) -> ScreenAction:
         """Process an event, editing the name or delegating to the menu.
 
         While entering a name, only ``KEYDOWN`` events are handled:
@@ -115,7 +115,7 @@ class EndMenu(OverlayMenu):
         if not self.entering_name:
             return super().handle_event(event)
         if event.type != pygame.KEYDOWN:
-            return None
+            return ScreenAction.NONE
         if event.key == pygame.K_BACKSPACE:
             self.name = self.name[:-1]
         elif event.key == pygame.K_RETURN:
@@ -127,9 +127,9 @@ class EndMenu(OverlayMenu):
             and event.unicode.isprintable()
         ):
             self.name += event.unicode
-        return None
+        return ScreenAction.NONE
 
-    def _submit(self) -> ScreenAction | None:
+    def _submit(self) -> ScreenAction:
         """Validate the typed name and leave name-entry mode.
 
         A non-empty invalid name is cleared and entry continues. An
@@ -142,12 +142,12 @@ class EndMenu(OverlayMenu):
         if self.name and not self._is_valid():
             self.name = ""
             self.shake_start = pygame.time.get_ticks()
-            return None
+            return ScreenAction.NONE
         self.entering_name = False
         self.is_highscore = False
         if self.name:
             return ScreenAction.NAME_SUBMITTED
-        return None
+        return ScreenAction.NONE
 
     def _is_valid(self) -> bool:
         """Check the name and game score against ``HighscoreEntry``.

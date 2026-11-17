@@ -82,7 +82,6 @@ class Screen(ABC):
             The action of the selected option in the screen.
         """
 
-
     @abstractmethod
     def draw(self, surface: pygame.Surface) -> None:
         """Draw the current screen design on the surface.
@@ -102,7 +101,7 @@ class Screen(ABC):
         Returns:
             The action of the selected option in the screen.
         """
-        ...
+        return ScreenAction.NONE
 
     def _draw_back_button(self, surface: pygame.Surface) -> None:
         """Draw a centered "Back" button nead the bottom of the surface.

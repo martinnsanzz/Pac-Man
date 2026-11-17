@@ -17,7 +17,7 @@ class Level():
     def gen_maze(seed: int) -> list[list[int]]:
         generator = MazeGenerator(19, 20,
                                   (0, 0), (1, 1), False,
-                                seed)
+                                  seed)
         generator.generate()
         grid: list[list[int]] = generator.maze
         return grid

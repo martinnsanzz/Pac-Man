@@ -119,7 +119,8 @@ class App:
         pygame.quit()
 
     def _handle_events(self) -> ScreenAction:
-        """Forward events to the screen, return the first action it asked for."""
+        """Forward events to the screen, return the first action it
+        asked for."""
         action = ScreenAction.NONE
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
