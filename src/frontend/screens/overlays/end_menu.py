@@ -45,7 +45,8 @@ class EndMenu(OverlayMenu):
     MAX_NAME_LEN = 10
 
     # Panel size
-    PANEL_SIZE = (550, 300)
+    PANEL_SIZE = (550, 250)
+    CENTER_OFFSET = 15
 
     # Fonts size
     SCORE_FONT_SIZE = 40
@@ -212,7 +213,8 @@ class EndMenu(OverlayMenu):
         highscore = self.highscore_font.render(
             self.HIGHSCORE_LABEL.text, True, self.HIGHSCORE_LABEL.color)
         surface.blit(highscore, highscore.get_rect(
-            center=(self.panel.centerx, self.panel.centery)))
+            center=(self.panel.centerx,
+                    self.panel.centery + self.CENTER_OFFSET)))
 
         self._draw_score(surface, highscore)
 
@@ -227,7 +229,7 @@ class EndMenu(OverlayMenu):
             f"{self.game.score}", True, self.SCORE_COLOR)
         surface.blit(score, score.get_rect(
             center=(self.panel.centerx, self.panel.centery +
-                    anchor.get_height())
+                    anchor.get_height() + self.CENTER_OFFSET)
         ))
 
     def _draw_text(self, surface: pygame.Surface, box: pygame.Rect) -> None:
