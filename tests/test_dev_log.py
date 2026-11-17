@@ -10,6 +10,7 @@ def log() -> DevLog:
     """Fresh DevLog with no entries and an empty input line."""
     return DevLog()
 
+
 def type_text(log: DevLog, text: str) -> None:
     """Feed each character of text into the input line."""
     for char in text:
