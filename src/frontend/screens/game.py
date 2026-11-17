@@ -48,8 +48,6 @@ class Game(Screen):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 return ScreenAction.PAUSE
-            elif event.key == pygame.K_t:
-                return ScreenAction.CHEATS
             #  temp to be deleted
             elif event.key == pygame.K_g:
                 return ScreenAction.GAME_OVER

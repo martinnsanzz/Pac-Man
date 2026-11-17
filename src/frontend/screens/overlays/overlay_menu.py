@@ -1,3 +1,6 @@
+# Built-in modules
+from typing import NamedTuple
+
 # Installed modules
 import pygame
 
@@ -5,6 +8,13 @@ import pygame
 from ..screen import Screen, ScreenAction, Color
 from ..game import Game
 from ...assets import AssetsLoader
+
+
+class LabelStyle(NamedTuple):
+    """Text, font size and color of a label."""
+    text: str
+    font_size: int
+    color: tuple[int, int, int]
 
 
 class OverlayMenu(Screen):
@@ -25,7 +35,7 @@ class OverlayMenu(Screen):
     # Defined by subclasses
     TITLE_TEXT: str
     TITLE_COLOR: Color
-    SHADOW_COLOR: Color
+    TITLE_SHADOW: Color
     OPTIONS: tuple[tuple[str, ScreenAction], ...]
 
     # Keys
@@ -112,7 +122,7 @@ class OverlayMenu(Screen):
                         self.TITLE_COLOR,
                         (self.panel.centerx,
                          self.panel.top + self.TITLE_TOP_PAD),
-                        shadow_color=self.SHADOW_COLOR,
+                        shadow_color=self.TITLE_SHADOW,
                         shadow_offset=self.SHADOW_OFFSET)
         self._draw_content(surface)
 
