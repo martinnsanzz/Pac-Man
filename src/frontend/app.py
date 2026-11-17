@@ -24,7 +24,11 @@ class App:
         clock: Pygame clock.
         screen: Pygame window to hold the drawings.
         arcade_screen: Subwindow to hold arcade related drawings.
-        arcade_size: Arcade window scaled by the user screen.
+        canvas: Fixed CANVAS_WxCANVAS_H surface holding all surfaces.
+        canvas_size: Canvas scaled by the user screen.
+        log_rect: Rect for the log window.
+        arcade_rect: Rect for the arcade window.
+        side_rect: Rect for the side window.
         assets: Loader holding every font, sprite and sound.
         highscores: Persistent highscore table, loaded at startup.
         main_menu: Main menu window to return to.
@@ -32,6 +36,10 @@ class App:
         game: Running game, or None when no game is in progress.
         running: False once the main loop must stop.
     """
+    # Canvas
+    CANVAS_W = 1920
+    CANVAS_H = 1080
+
     # Arcade screen
     WIDTH = 672
     HEIGHT = 864
@@ -56,7 +64,10 @@ class App:
         self.clock = pygame.time.Clock()
         self.screen = self._create_window()
         self.arcade_screen = pygame.Surface((self.WIDTH, self.HEIGHT))
-        self.arcade_size = self._compute_arcade_size()
+        self.canvas = pygame.Surface((self.CANVAS_W, self.CANVAS_H))
+        self.log_rect, self.arcade_rect, self.side_rect = \
+            self._compute_layout()
+        self.canvas_size = self._compute_canvas_size()
 
         self.assets = AssetsLoader()
         self.assets.load()
@@ -89,11 +100,30 @@ class App:
         pygame.mouse.set_visible(False)
         return pygame.display.set_mode((0, 0), pygame.RESIZABLE)
 
-    def _compute_arcade_size(self) -> tuple[int, int]:
-        """Return the arcade size scaled to fit the window."""
+    def _compute_canvas_size(self) -> tuple[int, int]:
+        """Return the canvas size scaled to fit the window."""
         win_w, win_h = self.screen.get_size()
-        factor = min(win_w / self.WIDTH, win_h / self.HEIGHT)
-        return int(self.WIDTH * factor), int(self.HEIGHT * factor)
+        factor = min(win_w / self.CANVAS_W, win_h / self.CANVAS_H)
+        return int(self.CANVAS_W * factor), int(self.CANVAS_H * factor)
+
+    @classmethod
+    def _compute_layout(cls) -> tuple[pygame.Rect, pygame.Rect, pygame.Rect]:
+        """Split the canvas into the log, arcade and side areas.
+
+        The arcade keeps its ratio and fills the canvas height. The log and
+        side panels share the space left on each side.
+
+        Returns:
+            The log, arcade and side rects, in canvas coordinates.
+        """
+        arcade_w = int(cls.WIDTH * cls.CANVAS_H / cls.HEIGHT)
+        arcade_x = (cls.CANVAS_W - arcade_w) // 2
+
+        arcade = pygame.Rect(arcade_x, 0, arcade_w, cls.CANVAS_H)
+        log = pygame.Rect(0, 0, arcade.left, cls.CANVAS_H)
+        side = pygame.Rect(arcade.right, 0, cls.CANVAS_W - arcade.right,
+                           cls.CANVAS_H)
+        return log, arcade, side
 
     def _load_highscores(self) -> Highscores:
         """Load the highscore table; on failure print the error and go on."""
@@ -122,7 +152,7 @@ class App:
             if event.type == pygame.QUIT:
                 self.running = False
             elif event.type == pygame.VIDEORESIZE:
-                self.arcade_size = self._compute_arcade_size()
+                self.canvas_size = self._compute_canvas_size()
             self._switch(self.current_screen.handle_event(event))
 
     def _update(self, dt: float) -> None:
@@ -130,13 +160,20 @@ class App:
         self.current_screen.update(dt)
 
     def _draw(self) -> None:
-        """Draw the current screen scaled and centered in the window."""
+        """Draw the screen into the canvas and fit it to the window."""
         self.screen.fill((0, 0, 0))
+        self.canvas.fill((0, 0, 0))
         self.arcade_screen.fill(self.BACKGROUND)
         self.current_screen.draw(self.arcade_screen)
-        scaled = pygame.transform.scale(self.arcade_screen, self.arcade_size)
-        self.screen.blit(
-            scaled, scaled.get_rect(center=self.screen.get_rect().center))
+
+        arcade = pygame.transform.scale(self.arcade_screen,
+                                        self.arcade_rect.size)
+        self.canvas.blit(arcade, self.arcade_rect)
+
+        scaled = pygame.transform.scale(self.canvas, self.canvas_size)
+        self.screen.blit(scaled,
+                         scaled.get_rect(
+                             center=self.screen.get_rect().center))
         pygame.display.flip()
 
     # ------------------------------------------------------------------
