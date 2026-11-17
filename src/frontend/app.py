@@ -111,23 +111,30 @@ class App:
         """Run the main loop until the window is closed."""
         while self.running:
             dt = self.clock.tick(self.FPS) / 1000
-            self._handle_events()
-            self._update(dt)
+            action = self._handle_events()
+            if action == ScreenAction.NONE:
+                action = self._update(dt)
+            self._switch(action)
             self._draw()
         pygame.quit()
 
-    def _handle_events(self) -> None:
-        """Read the pygame events and forward them to the screen."""
+    def _handle_events(self) -> ScreenAction:
+        """Forward events to the screen, return the first action it
+        asked for."""
+        action = ScreenAction.NONE
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
             elif event.type == pygame.VIDEORESIZE:
                 self.arcade_size = self._compute_arcade_size()
-            self._switch(self.current_screen.handle_event(event))
+            result = self.current_screen.handle_event(event)
+            if action == ScreenAction.NONE:
+                action = result
+        return action
 
-    def _update(self, dt: float) -> None:
+    def _update(self, dt: float) -> ScreenAction:
         """Advance the current screen by dt seconds."""
-        self.current_screen.update(dt)
+        return self.current_screen.update(dt)
 
     def _draw(self) -> None:
         """Draw the current screen scaled and centered in the window."""

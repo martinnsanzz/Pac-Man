@@ -15,6 +15,7 @@ class GameConfig(BaseModel):
         highscore_path: Name of the file used to store the high score.
             Must end with ``.json``.
         lives: Number of lives the player starts with (1 to 10).
+        total_levels: Maximum amount of levels (1, 100).
         total_pacgum: Total number of pac-gums (1 to 100).
         pacgum_points: Points awarded per pac-gum (1 to 100).
         super_pacgum_points: Points awarded per super pac-gum (1 to 500).
@@ -26,6 +27,7 @@ class GameConfig(BaseModel):
 
     highscores_path: str = Field(default="data/highscores.json")
     lives: PositiveInt = Field(default=3, gt=0, le=10)
+    total_levels: PositiveInt = Field(default=10, ge=1, le=100)
     total_pacgum: PositiveInt = Field(default=42, gt=0, le=100)
     pacgum_points: PositiveInt = Field(default=10, le=100)
     super_pacgum_points: PositiveInt = Field(default=50, le=500)

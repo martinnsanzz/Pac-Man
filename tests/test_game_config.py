@@ -11,6 +11,7 @@ from src.exceptions import PacManError
 VALID_CONFIG: dict[str, Any] = {
     "highscores_path": "data/highscores.json",
     "lives": 3,
+    "total_levels": 9,
     "total_pacgum": 42,
     "pacgum_points": 10,
     "super_pacgum_points": 50,

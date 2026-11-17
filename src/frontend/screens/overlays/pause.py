@@ -40,7 +40,7 @@ class Pause(OverlayMenu):
         self.dev_mode_msg_font = assets.get_font(
                 "CAIROPIXEL", self.DEV_MODE_LABEL.font_size)
 
-    def handle_event(self, event: pygame.event.Event) -> ScreenAction | None:
+    def handle_event(self, event: pygame.event.Event) -> ScreenAction:
         """Resume on Escape, otherwise delegate to the parent menu.
 
         Args:
