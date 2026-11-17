@@ -1,11 +1,11 @@
 # Local modules
 from .highscores import Highscores
-from .maze_gen import MazeGen
 from .cheat_codes import Cheat, CheatCodes
+from .level import Level
 
 __all__ = [
     "Highscores",
-    "MazeGen",
     "Cheat",
     "CheatCodes",
+    "Level"
 ]

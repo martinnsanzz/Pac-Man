@@ -96,7 +96,7 @@ class OverlayMenu(Screen):
         self.selected = max(0, min(self.selected + step,
                                    len(self.OPTIONS) - 1))
 
-    def handle_event(self, event: pygame.event.Event) -> ScreenAction | None:
+    def handle_event(self, event: pygame.event.Event) -> ScreenAction:
         """Left/right move the selection; Enter triggers the selected option.
 
         Returns:

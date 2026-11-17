@@ -70,7 +70,7 @@ class Screen(ABC):
         self.text_font = assets.get_font("BARCADE", self.TEXT_FONT_SIZE)
 
     @abstractmethod
-    def handle_event(self, event: pygame.event.Event) -> ScreenAction | None:
+    def handle_event(self, event: pygame.event.Event) -> ScreenAction:
         """Handle a single pygame event for the current screen.
 
         The keys accepted will be personalized for each screen.
@@ -82,14 +82,6 @@ class Screen(ABC):
             The action of the selected option in the screen.
         """
 
-    def update(self, dt: float) -> None:
-        """Advance the screen state by dt seconds.
-
-        Does nothing by default; screens with moving parts override it.
-
-        Args:
-            dt: Seconds elapsed since the previous frame.
-        """
 
     @abstractmethod
     def draw(self, surface: pygame.Surface) -> None:
@@ -98,6 +90,19 @@ class Screen(ABC):
         Args:
             surface: The pygame surface to be drawn on.
         """
+
+    def update(self, dt: float) -> ScreenAction:
+        """Advance the screen state by dt seconds.
+
+        Does nothing by default; screens with moving parts override it.
+
+        Args:
+            dt: Seconds elapsed since the previous frame.
+
+        Returns:
+            The action of the selected option in the screen.
+        """
+        ...
 
     def _draw_back_button(self, surface: pygame.Surface) -> None:
         """Draw a centered "Back" button nead the bottom of the surface.
