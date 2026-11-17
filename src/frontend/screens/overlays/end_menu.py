@@ -1,5 +1,4 @@
 # Built-in modules
-from typing import NamedTuple
 import math
 
 # Installed modules
@@ -7,18 +6,11 @@ import pygame
 from pydantic import ValidationError
 
 # Local modules
-from .overlay_menu import OverlayMenu
+from .overlay_menu import OverlayMenu, LabelStyle
 from ..screen import ScreenAction
 from ..game import Game
 from ...assets import AssetsLoader
 from ....validation import HighscoreEntry
-
-
-class LabelStyle(NamedTuple):
-    """Text, font size and color of a label."""
-    text: str
-    font_size: int
-    color: tuple[int, int, int]
 
 
 class EndMenu(OverlayMenu):
@@ -269,10 +261,12 @@ class GameOver(EndMenu):
 
     Offers returning to the main menu, retrying, or quitting.
     """
+    # Title
     TITLE_TEXT = "GAME OVER"
     TITLE_COLOR = (255, 40, 40)
-    SHADOW_COLOR = (90, 0, 0)
+    TITLE_SHADOW = (90, 0, 0)
 
+    # Options
     OPTIONS = (("Menu", ScreenAction.MAIN_MENU),
                ("Retry", ScreenAction.START_GAME),
                ("Quit", ScreenAction.QUIT))
@@ -283,10 +277,12 @@ class Win(EndMenu):
 
     Offers returning to the main menu, playing again, or quitting.
     """
+    # Title
     TITLE_TEXT = "VICTORY"
     TITLE_COLOR = (60, 255, 110)
-    SHADOW_COLOR = (0, 80, 30)
+    TITLE_SHADOW = (0, 80, 30)
 
+    # Options
     OPTIONS = (("Menu", ScreenAction.MAIN_MENU),
                ("Play again", ScreenAction.START_GAME),
                ("Quit", ScreenAction.QUIT))
