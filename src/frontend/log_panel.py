@@ -60,19 +60,51 @@ class LogPanel:
         pygame.draw.rect(panel, self.BACKGROUND, panel.get_rect(),
                          border_radius=self.BORDER_RADIUS)
 
-        color = self.BORDER_ACTIVE if dev_mode else self.BORDER
-        pygame.draw.rect(panel, color, panel.get_rect(),
+        border_color = self.BORDER_ACTIVE if dev_mode else self.BORDER
+        pygame.draw.rect(panel, border_color, panel.get_rect(),
                          border_radius=self.BORDER_RADIUS,
                          width=self.BORDER_W)
 
         line_h = self.font.get_linesize() + self.LINE_SPACING
         y = panel.get_height() - self.PADDING
-        for entry in reversed(self.dev_log.entries):
+        max_w = panel.get_width() - 2 * self.PADDING
+
+        lines: list[tuple[str, Color]] = []
+        for entry in self.dev_log.entries:
+            for line in self._wrap(entry.text, max_w):
+                lines.append((line, self.COLORS[entry.kind]))
+
+        for text, color in reversed(lines):
             y -= line_h
             if y < self.PADDING:
                 break
-            text = self.font.render(entry.text, True,
-                                    self.COLORS[entry.kind])
-            panel.blit(text, (self.PADDING, y))
+            rendered = self.font.render(text, True, color)
+            panel.blit(rendered, (self.PADDING, y))
 
         surface.blit(panel, rect.topleft)
+
+    def _wrap(self, text: str, max_w: int) -> list[str]:
+        """Split text into lines that fit inside max_w pixels.
+
+        Words are added to the current line until the next one would
+        make it wider than max_w, then a new line starts.
+
+        Args:
+            text: The message to split.
+            max_w: Maximum line width in pixels.
+
+        Returns:
+            The lines in reading order, at least on, even for empty text.
+        """
+        words = text.split(" ")
+        current_line = words[0]
+        lines: list[str] = []
+        for word in words[1:]:
+            candidate = current_line + " " + word
+            if self.font.size(candidate)[0] <= max_w:
+                current_line = candidate
+            else:
+                lines.append(current_line)
+                current_line = word
+        lines.append(current_line)
+        return lines
