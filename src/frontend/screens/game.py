@@ -43,15 +43,6 @@ class Game(Screen):
         # Thrown away and rebuilt every level
         self.level = Level(self.config, self.current_level)
 
-        #  temp to be deleted
-        self.square_x = 0.0
-        self.square_y = screen_h // 2
-        self.square_dir = 1       # 1 = right, -1 = left
-        self.max_x = screen_w - self.SQUARE_SIZE
-        self.pacman_right = assets.sprites["PAC_MAN"]
-        self.pacman_left = pygame.transform.flip(self.pacman_right,
-                                                 True, False)
-
     # ------------------------------------------------------------------
     # Events
     # ------------------------------------------------------------------
@@ -64,8 +55,6 @@ class Game(Screen):
                 self.score += 100
             elif event.key == pygame.K_9:
                 return self._advance_level()
-            elif event.key == pygame.K_8:
-                self.level.decrease_time()
         return ScreenAction.NONE
 
     def _advance_level(self) -> ScreenAction:
@@ -80,9 +69,8 @@ class Game(Screen):
     # Update
     # ------------------------------------------------------------------
     def update(self, dt: float) -> ScreenAction:
-        """Move the square and bounce it off both edges."""
-        #  temp to be deleted
-        self._move_square(dt)
+        """Update level timer and check game status."""
+        self.level.decrease_timer(dt)
 
         return self._check_game_status()
 
@@ -91,27 +79,11 @@ class Game(Screen):
             return ScreenAction.GAME_OVER
         return ScreenAction.NONE
 
-    def _move_square(self, dt: float) -> None:
-        """Temp: move the square and flip its sprite at the edges."""
-        self.square_x += self.square_dir * self.SQUARE_SPEED * dt
-
-        if self.square_x >= self.max_x:
-            self.square_x = self.max_x
-            self.square_dir = -1
-            pygame.transform.flip(self.assets.sprites["PAC_MAN"], True, False)
-        elif self.square_x <= 0:
-            self.square_x = 0
-            self.square_dir = 1
-            pygame.transform.flip(self.assets.sprites["PAC_MAN"], False, False)
-
     # ------------------------------------------------------------------
     # Draw
     # ------------------------------------------------------------------
     def draw(self, surface: pygame.Surface) -> None:
         self._draw_level(surface)
-        sprite = self.pacman_right if self.square_dir == 1 \
-            else self.pacman_left
-        surface.blit(sprite, (int(self.square_x), self.square_y))
         self.hud.display_hud(surface, self.lives, self.fruits_collected,
                              self.score, self.highscore, self.level.time_left,
                              self.current_level, self.last_level)
