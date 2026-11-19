@@ -21,13 +21,18 @@ class LogPanel:
     FONT_NAME = "CAIROPIXEL"
     FONT_SIZE = 22
     PADDING = 16
-    LINE_SPACING = 4
+    LINE_SPACE = 4
     BACKGROUND: RGBA = (255, 255, 255, 18)
 
     BORDER: RGBA = (255, 255, 255, 50)
     BORDER_ACTIVE: RGBA = (255, 255, 255, 160)
     BORDER_W = 2
     BORDER_RADIUS = 12
+
+    PROMPT = "> "
+    CURSOR = "_"
+    INPUT_COLOR: Color = (255, 255, 255)
+    BLINK_MS = 500
 
     COLORS: dict[LogKind, Color] = {
             LogKind.INFO: (128, 128, 128),
@@ -65,8 +70,11 @@ class LogPanel:
                          border_radius=self.BORDER_RADIUS,
                          width=self.BORDER_W)
 
-        line_h = self.font.get_linesize() + self.LINE_SPACING
-        y = panel.get_height() - self.PADDING
+        line_h = self.font.get_linesize() + self.LINE_SPACE
+        if dev_mode:
+            y = self._draw_input(panel, line_h)
+        else:
+            y = panel.get_height() - self.PADDING
         max_w = panel.get_width() - 2 * self.PADDING
 
         lines: list[tuple[str, Color]] = []
@@ -108,3 +116,30 @@ class LogPanel:
                 current_line = word
         lines.append(current_line)
         return lines
+
+    def _draw_input(self, panel: pygame.Surface, line_h: int) -> int:
+        """Draw the input line and its separator at the bottom of panel.
+
+        Args:
+            panel: Panel surface to draw on, in its own coordinates.
+            line_h: Height of one line, spacing included.
+
+        Returns:
+            The y above the separator, messages must stay above it.
+        """
+        if (pygame.time.get_ticks() // self.BLINK_MS) % 2 == 0:
+            cursor = self.CURSOR
+        else:
+            cursor = ""
+        y = panel.get_height() - self.PADDING - line_h
+        prompt_render = self.font.render(
+                self.PROMPT + self.dev_log.text + cursor, True,
+                self.INPUT_COLOR)
+        panel.blit(prompt_render, (self.PADDING, y))
+
+        pygame.draw.line(panel,
+                         self.BORDER,
+                         (self.PADDING, y - self.LINE_SPACE),
+                         (panel.get_width() - self.PADDING,
+                          y - self.LINE_SPACE))
+        return y - self.LINE_SPACE
