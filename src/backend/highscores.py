@@ -100,8 +100,12 @@ class Highscores:
 
         Returns:
             True if the table isn't full or the score beats the lowest entry.
+            False if the score is 0 or less or the score doesn't beat the
+            lowest entry.
         """
-        if len(self.table) < MAX_ENTRIES:
+        if score <= 0:
+            return False
+        elif len(self.table) < MAX_ENTRIES:
             return True
         return score > self.table[-1].score
 
