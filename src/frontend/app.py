@@ -71,11 +71,11 @@ class App:
 
         self.assets = AssetsLoader()
         self.assets.load()
-        self.highscores = self._load_highscores()
 
         self.dev_log = DevLog()
         self.log_panel = LogPanel(self.assets, self.dev_log)
 
+        self.highscores = self._load_highscores()
         self.main_menu: Screen = MainMenu(self.WIDTH,
                                           self.HEIGHT,
                                           self.assets)
@@ -142,6 +142,18 @@ class App:
                            self.CANVAS_H)
         return log, arcade, side
 
+    def _save_highscores(self) -> None:
+        """Save the highscore table. On failure warn and kep playing.
+
+        The error is printed in the termianl and shown in the dev log, so
+        the game never crashes over a file it cannot write.
+        """
+        try:
+            self.highscores.save()
+        except PacManError as e:
+            TerminalPrinter.print_error(f"{e}\n")
+            self.dev_log.add(str(e), LogKind.WARNING)
+
     def _load_highscores(self) -> Highscores:
         """Load the highscore table; on failure print the error and go on."""
         highscores = Highscores(Path(self.game_config.highscores_path))
@@ -149,6 +161,7 @@ class App:
             highscores.load()
         except PacManError as e:
             TerminalPrinter.print_error(f"{e}\n")
+            self.dev_log.add(str(e), LogKind.WARNING)
         return highscores
 
     # ------------------------------------------------------------------
@@ -205,7 +218,6 @@ class App:
         """Change the current screen according to the action."""
         match action:
             case ScreenAction.QUIT:
-                self.highscores.save()
                 self.running = False
             case ScreenAction.BACK | ScreenAction.MAIN_MENU:
                 self._show_main_menu()
@@ -271,6 +283,7 @@ class App:
         name = self.current_screen.name
 
         self.highscores.insert(name, self.current_screen.game.score)
+        self._save_highscores()
 
     def _resume(self) -> None:
         """Close the pause menu and go back to the game."""
