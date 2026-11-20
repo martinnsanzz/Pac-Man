@@ -83,7 +83,7 @@ class Game(Screen):
     def draw(self, surface: pygame.Surface) -> None:
         self._draw_level(surface)
         self.player_renderer.display_player(surface, self.player)
-        
+
         self.hud_renderer.display_hud(surface, self.lives,
                                       self.fruits_collected,
                                       self.score, self.highscore,
