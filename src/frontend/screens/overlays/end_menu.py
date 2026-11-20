@@ -73,15 +73,6 @@ class EndMenu(OverlayMenu):
     def __init__(self, screen_w: int, screen_h: int,
                  assets: AssetsLoader, game: Game,
                  is_highscore: bool) -> None:
-        """Initialize the menu and load its fonts.
-
-        Args:
-            screen_w: Screen width in pixels.
-            screen_h: Screen height in pixels.
-            assets: Loader used to fetch the fonts.
-            game: Finished game, used for its score.
-            is_highscore: Whether to start in name-entry mode.
-        """
         super().__init__(screen_w, screen_h, assets, game)
         self.is_highscore = is_highscore
         self.entering_name = is_highscore

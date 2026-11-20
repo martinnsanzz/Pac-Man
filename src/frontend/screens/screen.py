@@ -41,8 +41,6 @@ class Screen(ABC):
 
     Attributes:
         assets: Loader used to get fonts and images.
-        screen_w: Width of the arcade surface.
-        screen_h: Height of the arcade surface.
         title_font: Font for the big titles (logo).
         button_font: Font for menu options and buttons.
         text_font: Font for regular text.
@@ -59,11 +57,8 @@ class Screen(ABC):
     BORDER_RADIUS = 15
     BACK_BUTTON_MARGIN = 50
 
-    def __init__(self, screen_w: int, screen_h: int,
-                 assets: AssetsLoader) -> None:
+    def __init__(self, assets: AssetsLoader) -> None:
         self.assets = assets
-        self.screen_w = screen_w
-        self.screen_h = screen_h
         self.title_font = assets.get_font("CRACKMAN", self.TITLE_FONT_SIZE)
         self.button_font = assets.get_font("ARCADECLASSIC",
                                            self.BUTTON_FONT_SIZE)

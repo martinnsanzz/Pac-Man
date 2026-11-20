@@ -23,8 +23,6 @@ class HighscoresTable(Screen):
     order of ``highscores.table``.
 
     Args:
-        screen_w: Screen width.
-        screen_h: Screen height.
         assets: Loader providing the title and row fonts.
         highscores: Source of the entries to display.
 
@@ -46,9 +44,9 @@ class HighscoresTable(Screen):
     MARGIN_RATIO = 0.125
     RANK_X, NAME_X, SCORE_X = 0.15, 0.30, 0.65
 
-    def __init__(self, screen_w: int, screen_h: int,
-                 assets: AssetsLoader, highscores: Highscores) -> None:
-        super().__init__(screen_w, screen_h, assets)
+    def __init__(self,assets: AssetsLoader,
+                 highscores: Highscores) -> None:
+        super().__init__(assets)
         title_font = assets.get_font("ARCADECLASSIC", self.TITLE_FONT_SIZE)
         self.row_font = assets.get_font("DIGITAL808", self.ROW_FONT_SIZE)
         self.title = title_font.render("HIGHSCORES", True, self.HEADER_COLOR)

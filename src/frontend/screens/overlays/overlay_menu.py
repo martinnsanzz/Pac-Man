@@ -61,7 +61,7 @@ class OverlayMenu(Screen):
 
     def __init__(self, screen_w: int, screen_h: int,
                  assets: AssetsLoader, game: Game) -> None:
-        super().__init__(screen_w, screen_h, assets)
+        super().__init__(assets)
         self.game = game
         self.title_font = assets.get_font("ARCADECLASSIC",
                                           self.TITLE_FONT_SIZE)

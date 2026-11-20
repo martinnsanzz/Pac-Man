@@ -6,31 +6,29 @@ import pygame
 # Local modules
 from .screen import Screen, ScreenAction
 from ..assets import AssetsLoader, Fruit
-from ..maze_renderer import MazeRenderer
-from ..hud import HUD
+from ..renderers import MazeRenderer, HudRenderer, PlayerRenderer
 from ...validation import GameConfig
-from ...backend import Level
+from ...backend import Level, Player
 
 
 class Game(Screen):
     """Game screen that will run all the core pac-man logic."""
-
-    # Temp square (to be deleted)
-    SQUARE_SIZE = 40
-    SQUARE_SPEED = 200            # pixels per second
-    SQUARE_COLOR = (255, 255, 0)
-
     # ------------------------------------------------------------------
     # Setup
     # ------------------------------------------------------------------
-    def __init__(self, screen_w: int, screen_h: int,
-                 assets: AssetsLoader, config: GameConfig,
+    def __init__(self, assets: AssetsLoader, config: GameConfig,
                  highscore: int) -> None:
-        super().__init__(screen_w, screen_h, assets)
+        super().__init__(assets)
         self.config = config
         self.assets = assets
-        self.hud = HUD(assets)
-        self.maze_renderer = MazeRenderer(assets, screen_w, screen_h)
+
+        # Objects
+        self.player = Player()
+
+        # Renderers
+        self.hud_renderer = HudRenderer(assets)
+        self.maze_renderer = MazeRenderer(assets)
+        self.player_renderer = PlayerRenderer(assets)
 
         # Persists across levels
         self.last_level = config.total_levels
@@ -84,9 +82,10 @@ class Game(Screen):
     # ------------------------------------------------------------------
     def draw(self, surface: pygame.Surface) -> None:
         self._draw_level(surface)
-        self.hud.display_hud(surface, self.lives, self.fruits_collected,
+        self.hud_renderer.display_hud(surface, self.lives, self.fruits_collected,
                              self.score, self.highscore, self.level.time_left,
                              self.current_level, self.last_level)
+        self.player_renderer.display_player(surface, self.player)
 
     def _draw_level(self, surface: pygame.Surface) -> None:
         """Draw the maze of the current level."""

@@ -2,13 +2,12 @@
 import pygame
 
 # Local modules
-from .assets import AssetsLoader
+from ..assets import AssetsLoader
+from ...backend import TileMap
+from ...constants import (TILE_SCALE, TILE_PX, WALL_N, WALL_E, \
+                          WALL_S, WALL_W, MAZE_WIDTH_PX, MAZE_HEIGHT_PX)
 
-N, E, S, W = 1, 2, 4, 8
-WALL_COLOR = (43, 95, 255)
-
-
-class MazeRenderer:
+class MazeRenderer():
     """Draw a maze grid as tiles, centered on a surface.
 
     Each cell value in the grid indexes into the tile set and is also read
@@ -18,31 +17,21 @@ class MazeRenderer:
     level.
 
     Attributes:
-        assets: Loader providing ``tiles``, ``SCALED_SIZE`` and ``SRC_SIZE``.
-        screen_w: Width in pixels of the target surface.
-        screen_h: Height in pixels of the target surface.
+        assets: Loader providing ``tiles``.
         tiles: Tile surfaces from the assets loader, indexed by cell value.
-        tile_px: Size in pixels of one scaled tile.
         wall_px: Wall thickness in pixels, derived from the tile scale.
     """
-
-    def __init__(self, assets: AssetsLoader,
-                 screen_w: int, screen_h: int) -> None:
+    WALL_COLOR = (43, 95, 255)
+    def __init__(self, assets: AssetsLoader) -> None:
         """Initialize the renderer with the values that don't depend on
         the grid.
 
         Args:
             assets: Loader providing ``tiles``, ``SCALED_SIZE`` and
                 ``SRC_SIZE``.
-            screen_w: Width in pixels of the target surface.
-            screen_h: Height in pixels of the target surface.
         """
-        self.assets = assets
-        self.screen_w = screen_w
-        self.screen_h = screen_h
         self.tiles = assets.tiles
-        self.tile_px = assets.SCALED_SIZE
-        self.wall_px = 2 * self.tile_px // assets.SRC_SIZE
+        self.wall_px = 2 * TILE_SCALE
 
     def render_maze(self, surface: pygame.Surface,
                     grid: list[list[int]]) -> None:
@@ -54,23 +43,24 @@ class MazeRenderer:
             surface: Surface to draw on.
             grid: 2D list of cell values, indexed as ``grid[row][col]``.
         """
-        maze_w = len(grid[0]) * self.tile_px
-        maze_h = len(grid) * self.tile_px
-        start_x = (self.screen_w - maze_w) // 2
-        start_y = (self.screen_h - maze_h) // 2
+        start_x, start_y = self._maze_origin(surface)
 
         for row_i, row in enumerate(grid):
             for col_i, val in enumerate(row):
-                surface.blit(self.tiles[val],
-                             (start_x + col_i * self.tile_px,
-                              start_y + row_i * self.tile_px))
+                px, py = TileMap.tile_to_pixel(col_i, row_i)
+                surface.blit(self.tiles[val], (start_x + px, start_y + py))
 
-        maze_rect = pygame.Rect(start_x, start_y, maze_w, maze_h)
+        maze_rect = pygame.Rect(start_x, start_y,
+                                MAZE_WIDTH_PX, MAZE_HEIGHT_PX)
         border = maze_rect.inflate(2 * self.wall_px, 2 * self.wall_px)
-        pygame.draw.rect(surface, (43, 95, 255), border, self.wall_px)
+        pygame.draw.rect(surface, self.WALL_COLOR, border, self.wall_px)
 
         self._fill_junctions(surface, grid, start_x, start_y)
 
+    def _maze_origin(self, surface: pygame.Surface) -> tuple[int, int]:
+        """Top-left of the maze when centered on the surface."""
+        return ((surface.get_width() - MAZE_WIDTH_PX) // 2,
+                (surface.get_height() - MAZE_HEIGHT_PX) // 2)
     def _fill_junctions(self, surface: pygame.Surface,
                         grid: list[list[int]],
                         start_x: int, start_y: int) -> None:
@@ -91,11 +81,11 @@ class MazeRenderer:
             for c in range(len(grid[0]) - 1):
                 tl, tr = grid[r][c], grid[r][c + 1]
                 bl, br = grid[r + 1][c], grid[r + 1][c + 1]
-                if (tl & (E | S)) or \
-                        (tr & (W | S)) or \
-                        (bl & (N | E)) or \
-                        (br & (N | W)):
-                    x = start_x + (c + 1) * self.tile_px
-                    y = start_y + (r + 1) * self.tile_px
-                    pygame.draw.rect(surface, WALL_COLOR,
+                if (tl & (WALL_E | WALL_S)) or \
+                        (tr & (WALL_W | WALL_S)) or \
+                        (bl & (WALL_N | WALL_E)) or \
+                        (br & (WALL_N | WALL_W)):
+                    x = start_x + (c + 1) * TILE_PX
+                    y = start_y + (r + 1) * TILE_PX
+                    pygame.draw.rect(surface, self.WALL_COLOR,
                                      (x - wp, y - wp, 2 * wp, 2 * wp))
