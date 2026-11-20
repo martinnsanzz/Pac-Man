@@ -44,7 +44,7 @@ class HighscoresTable(Screen):
     MARGIN_RATIO = 0.125
     RANK_X, NAME_X, SCORE_X = 0.15, 0.30, 0.65
 
-    def __init__(self,assets: AssetsLoader,
+    def __init__(self, assets: AssetsLoader,
                  highscores: Highscores) -> None:
         super().__init__(assets)
         title_font = assets.get_font("ARCADECLASSIC", self.TITLE_FONT_SIZE)

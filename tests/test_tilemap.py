@@ -2,7 +2,7 @@
 import pytest
 
 # Local modules
-from src.constants import TILE_PX, WALL_ALL 
+from src.constants import TILE_PX, WALL_ALL
 from src.backend.tilemap import TileMap
 
 GRID = [

@@ -82,10 +82,13 @@ class Game(Screen):
     # ------------------------------------------------------------------
     def draw(self, surface: pygame.Surface) -> None:
         self._draw_level(surface)
-        self.hud_renderer.display_hud(surface, self.lives, self.fruits_collected,
-                             self.score, self.highscore, self.level.time_left,
-                             self.current_level, self.last_level)
         self.player_renderer.display_player(surface, self.player)
+        
+        self.hud_renderer.display_hud(surface, self.lives,
+                                      self.fruits_collected,
+                                      self.score, self.highscore,
+                                      self.level.time_left,
+                                      self.current_level, self.last_level)
 
     def _draw_level(self, surface: pygame.Surface) -> None:
         """Draw the maze of the current level."""

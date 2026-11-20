@@ -4,8 +4,9 @@ import pygame
 # Local modules
 from ..assets import AssetsLoader
 from ...backend import TileMap
-from ...constants import (TILE_SCALE, TILE_PX, WALL_N, WALL_E, \
+from ...constants import (TILE_SCALE, TILE_PX, WALL_N, WALL_E,
                           WALL_S, WALL_W, MAZE_WIDTH_PX, MAZE_HEIGHT_PX)
+
 
 class MazeRenderer():
     """Draw a maze grid as tiles, centered on a surface.
@@ -22,6 +23,7 @@ class MazeRenderer():
         wall_px: Wall thickness in pixels, derived from the tile scale.
     """
     WALL_COLOR = (43, 95, 255)
+
     def __init__(self, assets: AssetsLoader) -> None:
         """Initialize the renderer with the values that don't depend on
         the grid.
@@ -61,6 +63,7 @@ class MazeRenderer():
         """Top-left of the maze when centered on the surface."""
         return ((surface.get_width() - MAZE_WIDTH_PX) // 2,
                 (surface.get_height() - MAZE_HEIGHT_PX) // 2)
+
     def _fill_junctions(self, surface: pygame.Surface,
                         grid: list[list[int]],
                         start_x: int, start_y: int) -> None:

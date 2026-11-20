@@ -1,5 +1,3 @@
-# Built-in modules
-
 # Installed modules
 import pygame
 
@@ -19,9 +17,9 @@ class PlayerRenderer():
         origin_x, origin_y = self._maze_origin(surface)
         cx, cy = TileMap.tile_center(player.pos_x, player.pos_y)
         half = CHARACTER_SIZE_PX // 2
-        
+
         surface.blit(self.player_sprite,
-                 (origin_x + cx - half, origin_y + cy - half))
+                     (origin_x + cx - half, origin_y + cy - half))
 
     def _maze_origin(self, surface: pygame.Surface) -> tuple[int, int]:
         """Top-left of the maze when centered on the surface."""

@@ -3,13 +3,14 @@ from enum import IntEnum
 from typing import Any, Iterator
 
 # Installed modules
-import pygame       
+import pygame
 
 # Local modules
 from .paths import SpritesPaths, FontsPaths, TilemapPath, HudPaths, SfxPaths
 from .terminal import TerminalPrinter
-from ..constants import (TILE_SRC_PX, TILE_PX, TILEMAP_SHEET_COLS, FRUIT_SHEET_COLS,
-                         CHARACTER_SIZE_PX, HUD_PX)
+from ..constants import (TILE_SRC_PX, TILE_PX, TILEMAP_SHEET_COLS,
+                         FRUIT_SHEET_COLS, CHARACTER_SIZE_PX, HUD_PX)
+
 
 class Fruit(IntEnum):
     """Enumerate the bonus items and their sprite indices.
