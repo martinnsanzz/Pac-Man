@@ -132,8 +132,13 @@ class LogPanel:
         else:
             cursor = ""
         y = panel.get_height() - self.PADDING - line_h
+        max_w = panel.get_width() - 2 * self.PADDING
+        visible = self.dev_log.text
+        while self.font.size(self.PROMPT + visible + self.CURSOR)[0] > max_w:
+            visible = visible[1:]
+
         prompt_render = self.font.render(
-                self.PROMPT + self.dev_log.text + cursor, True,
+                self.PROMPT + visible + cursor, True,
                 self.INPUT_COLOR)
         panel.blit(prompt_render, (self.PADDING, y))
 
