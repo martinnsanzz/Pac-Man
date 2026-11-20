@@ -3,6 +3,7 @@ from mazegen import MazeGenerator
 
 # Local modules
 from ..validation import GameConfig
+from ..constants import MAZE_COLS, MAZE_ROWS
 
 
 class Level():
@@ -20,7 +21,7 @@ class Level():
 
     @staticmethod
     def gen_maze(seed: int) -> list[list[int]]:
-        generator = MazeGenerator(19, 20,
+        generator = MazeGenerator(MAZE_COLS, MAZE_ROWS,
                                   (0, 0), (1, 1), False,
                                   seed)
         generator.generate()

@@ -62,9 +62,7 @@ class App:
         self.assets.load()
         self.highscores = self._load_highscores()
 
-        self.main_menu: Screen = MainMenu(self.WIDTH,
-                                          self.HEIGHT,
-                                          self.assets)
+        self.main_menu: Screen = MainMenu(self.assets)
         self.current_screen: Screen = self.main_menu
         self.game: Game | None = None
         self.running = True
@@ -182,19 +180,18 @@ class App:
 
     def _start_game(self) -> None:
         """Create a new game and make it the current screen."""
-        self.game = Game(self.WIDTH, self.HEIGHT, self.assets,
-                         self.game_config, self.highscores.get_high_score())
+        self.game = Game(self.assets, self.game_config,
+                         self.highscores.get_high_score())
         self.current_screen = self.game
 
     def _show_highscores(self) -> None:
         """Show the highscore table."""
-        self.current_screen = HighscoresTable(self.WIDTH, self.HEIGHT,
-                                              self.assets, self.highscores)
+        self.current_screen = HighscoresTable(self.assets,
+                                              self.highscores)
 
     def _show_instructions(self) -> None:
         """Show the instructions screen."""
-        self.current_screen = Instructions(self.WIDTH, self.HEIGHT,
-                                           self.assets)
+        self.current_screen = Instructions(self.assets)
 
     def _show_pause(self) -> None:
         """Open the pause menu over the running game."""

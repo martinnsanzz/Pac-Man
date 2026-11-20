@@ -5,10 +5,11 @@ from math import ceil
 import pygame
 
 # Local modules
-from .assets import AssetsLoader, Fruit
+from ..assets import AssetsLoader, Fruit
+from ...constants import HUD_PX
 
 
-class HUD():
+class HudRenderer():
     """Draw the in-game HUD: lives, collected fruits, score and timer.
 
     Args:
@@ -69,7 +70,7 @@ class HUD():
             lives: Number of remaining lives.
         """
         icon = self.assets.hud_icons["LIVE"]
-        step = self.assets.SCALED_HUD + self.PAD
+        step = HUD_PX + self.PAD
         x = self.PAD
         y = surface.get_height() - step
 
@@ -94,7 +95,7 @@ class HUD():
             collected_fruits: Collected fruits in collection order, oldest
                 first.
         """
-        step = self.assets.SCALED_HUD + self.PAD
+        step = HUD_PX + self.PAD
         x = surface.get_width() - step
         y = surface.get_height() - step
 
@@ -108,7 +109,7 @@ class HUD():
         level_info = self.num_font.render(level_txt, True, self.TXT_COLOR)
 
         x = surface.get_width() // 2
-        y = surface.get_height() - ((self.PAD * 2) + self.assets.SCALED_HUD)
+        y = surface.get_height() - ((self.PAD * 2) + HUD_PX)
 
         surface.blit(level_info, level_info.get_rect(midbottom=(x, y)))
 
