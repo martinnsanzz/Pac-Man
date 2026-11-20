@@ -13,7 +13,7 @@ from .assets import AssetsLoader
 from .terminal import TerminalPrinter
 from ..exceptions import LoadAssetsError, PacManError
 from ..validation import GameConfig
-from ..backend import Highscores, DevLog
+from ..backend import Highscores, DevLog, LogKind, CheatCodes, Cheat
 from .log_panel import LogPanel
 
 
@@ -83,6 +83,8 @@ class App:
         self.game: Game | None = None
         self.running = True
         self.on_dev_mode = False
+
+        self.cheats = CheatCodes()
 
     @staticmethod
     def validate_assets() -> None:
@@ -168,6 +170,9 @@ class App:
                 self.running = False
             elif event.type == pygame.VIDEORESIZE:
                 self._build_canvas()
+            if self.on_dev_mode:
+                self._handle_dev_input(event)
+                continue
             self._switch(self.current_screen.handle_event(event))
 
     def _update(self, dt: float) -> None:
@@ -217,7 +222,6 @@ class App:
             case ScreenAction.NAME_SUBMITTED:
                 self._insert_high_score()
             case ScreenAction.DEV_MODE:
-                self.on_dev_mode = True
                 self._enter_dev_mode()
             case ScreenAction.RESUME:
                 self._resume()
@@ -273,5 +277,72 @@ class App:
         if self.game is not None:
             self.current_screen = self.game
 
+    # ------------------------------------------------------------------
+    # Dev panel
+    # ------------------------------------------------------------------
+
     def _enter_dev_mode(self) -> None:
-        ...
+        """Open dev mode: keys now go to the log input line."""
+        self.on_dev_mode = True
+
+    def _exit_dev_mode(self) -> None:
+        """Closes dev mode and discard any half-typed input."""
+        self.dev_log.text = ""
+        self.on_dev_mode = False
+
+    def _handle_dev_input(self, event: pygame.event.Event) -> None:
+        """Send a key event to the log input line while dev mode is open.
+
+        Ctrl+T or Escape closes dev mode, Enter submits the line,
+        Backspace deletes and any other key types its character.
+
+        Args:
+            event: The pygame event to process.
+        """
+        if event.type != pygame.KEYDOWN:
+            return
+
+        ctrl_t = event.mod & pygame.KMOD_CTRL and event.key == pygame.K_t
+        if ctrl_t or event.key == pygame.K_ESCAPE:
+            self._exit_dev_mode()
+        elif event.key == pygame.K_RETURN:
+            self._submit_dev_text()
+        elif event.key == pygame.K_BACKSPACE:
+            self.dev_log.backspace()
+        else:
+            self.dev_log.add_char(event.unicode)
+
+    def _submit_dev_text(self) -> None:
+        """Submit the input line and log the result.
+
+        Text starting with / is checked as a cheat code.
+        Empty input does nothing.
+        """
+        text = self.dev_log.submit()
+        if text == "":
+            return
+        elif not text.startswith("/"):
+            self.dev_log.add(text, LogKind.MESSAGE)
+        else:
+            cheat = self.cheats.submit(text)
+            if cheat is None:
+                self.dev_log.add(f"Unknown code: {text}", LogKind.WARNING)
+            else:
+                self.dev_log.add(self._cheat_feedback(cheat), LogKind.CHEAT)
+
+    def _cheat_feedback(self, cheat: Cheat) -> str:
+        """Return the log message describing what a submitted cheat did.
+
+        Args:
+            cheat: The cheat that was submitted.
+
+        Returns:
+            "<CODE> used" for one-shots, otherwise "<CODE> ON"
+            or "<CODE> OFF" depending on its status.
+        """
+        if cheat in CheatCodes.ONE_SHOTS:
+            return f"<{cheat.name}> used"
+        elif self.cheats.is_active(cheat):
+            return f"<{cheat.name}> ON"
+        else:
+            return f"<{cheat.name}> OFF"
