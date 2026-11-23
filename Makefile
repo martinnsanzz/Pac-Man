@@ -96,7 +96,7 @@ lint-strict:
 	@echo "${YELLOW}Running flake8...${RESET}"
 	-@${UV} run flake8 . && echo "${GREEN}✓ flake8 passed${RESET}" || true
 
-	@echo "${YELLOW}Running mypy --strict...${RESET}"
+	@echo "${YELLOW}\nRunning mypy --strict...${RESET}"
 	-@${UV} run mypy ${MYPY_STRICT_FLAGS} && echo "${GREEN}✓ mypy --strict passed${RESET}"|| true
 
 .PHONY: help install run debug clean fclean lint lint-strict

@@ -114,7 +114,8 @@ class TestLoadSave:
         assert highscores.path.read_text() == "[]\n"
 
     def test_missing_file(self, highscores: Highscores) -> None:
-        highscores.load()
+        with pytest.raises(HighScoreError):
+            highscores.load()
         assert highscores.table == []
 
     @pytest.mark.parametrize("content", [
