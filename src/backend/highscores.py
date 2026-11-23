@@ -10,6 +10,7 @@ from ..validation import HighscoreEntry
 from ..exceptions import HighScoreError
 
 MAX_ENTRIES = 10
+DEFAULT_ERROR = "Creating a new highscore file"
 
 
 class Highscores:
@@ -25,25 +26,38 @@ class Highscores:
         self.path: Path = path
 
     def load(self) -> None:
-        """Load the table from the file.
+        """Load the table from the highscores file.
 
-        A missing file leaves the table empty. An unreadable or invalid
-        file also empties the table, then raises.
+        On success the table holds the file's entries, sorted and trimmed.
+        On any failure the table is left empty and HighScoreError is
+        raised.
 
         Raises:
-            HighScoreError: If it is not possible to load highscore file.
+            HighScoreError: If the file is missing or unreadable, is not
+                valid JSON, has the wrong structure, or contains entries
+                that fail validation.
         """
         try:
             raw = json.loads(self.path.read_text())
             entries = [HighscoreEntry.model_validate(item) for item in raw]
-        except FileNotFoundError:
+        except OSError:
+            raise HighScoreError(f"No '{self.path}' found. {DEFAULT_ERROR}")
+        except ValidationError as e:
+            msgs = [
+                f"{'.'.join(map(str, err['loc'])) or 'config'}: "
+                f"{err['msg'].removeprefix('Value error, ')}"
+                for err in e.errors()
+            ]
+            details = "\n".join(f"- {msg}" for msg in msgs)
+            raise HighScoreError(f"Could not load '{self.path}':\n"
+                                 f"{details}.\n{DEFAULT_ERROR}") from e
+        except (ValueError, TypeError) as e:
+            raise HighScoreError(f"Incorrect 'json' format on '{self.path}':\n"
+                                 f" -{e}.\n{DEFAULT_ERROR}") from e
+        finally:
             self.table = []
-        except (OSError, ValueError, TypeError) as e:
-            self.table = []
-            raise HighScoreError(f"Could not load '{self.path}': {e}.") from e
-        else:
-            self.table = entries
-            self._sort_and_trim()
+        self.table = entries
+        self._sort_and_trim()
 
     def save(self) -> None:
         """Write the current table to the file as JSON, one entry per line.

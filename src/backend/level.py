@@ -1,9 +1,13 @@
 # Installed modules
-from mazegen import MazeGenerator
+try:
+    import mazegen  # type: ignore [unused-ignore]
+except (ModuleNotFoundError, ImportError):
+    mazegen = None
 
 # Local modules
 from ..validation import GameConfig
 from ..constants import MAZE_COLS, MAZE_ROWS
+from ..exceptions import MazegenError
 
 
 class Level():
@@ -21,9 +25,13 @@ class Level():
 
     @staticmethod
     def gen_maze(seed: int) -> list[list[int]]:
-        generator = MazeGenerator(MAZE_COLS, MAZE_ROWS,
-                                  (0, 0), (1, 1), False,
-                                  seed)
+        if not mazegen:
+            raise MazegenError("Level can't be loaded. Missing mazegen "
+                               "library on 'venv'")
+
+        generator = mazegen.MazeGenerator(MAZE_COLS, MAZE_ROWS,
+                                          (0, 0), (1, 1), False,
+                                          seed)
         generator.generate()
         grid: list[list[int]] = generator.maze
         return grid

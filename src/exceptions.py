@@ -8,3 +8,7 @@ class LoadAssetsError(PacManError):
 
 class HighScoreError(PacManError):
     """Error class to raise when anything goes wrong with highscore"""
+
+
+class MazegenError(PacManError):
+    """Error class to raise if mazegen library fails"""
