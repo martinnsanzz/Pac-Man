@@ -116,7 +116,7 @@ generator.generate()
 grid = generator.maze
 ```
 
-- `width = 19` and `height = 20` are currently hardcoded.
+- Size of the maze is fixed at `width=12` and `height=13`
 - `generator.maze` is a 2D list of integers, indexed as `grid[row][col]`.
 - Each integer describes one cell (see below). The grid is passed unchanged to `MazeRenderer`.
 
@@ -139,7 +139,7 @@ Binary is read as `W S E N` (bit 3 to bit 0). A set bit means there is a wall on
 `assets/tilemap/tilemap.png` is a 64x64 px image holding 16 tiles of 16x16 px, in a 4x4 grid. `AssetsLoader._load_tiles` slices it in reading order (left to right, top to bottom):
 
 - `col = index % 4`, `row = index // 4`
-- the tile at `index` is cut with `subsurface` and scaled x2 to 32x32 px
+- the tile at `index` is cut with `subsurface` and scaled x3 to 48x48 px
 - `AssetsLoader.tiles[index]` is the tile for the cell value `index`
 
 The cell value is therefore used directly as the tile index:
@@ -167,7 +167,7 @@ The cell value is therefore used directly as the tile index:
 
 `MazeRenderer` draws the grid on a surface:
 
-1. **Layout:** the maze is centered on the surface. `start_x` and `start_y` are computed from the surface size and the maze size in tiles (`tile_px` = 32).
+1. **Layout:** the maze is centered on the surface. `start_x` and `start_y` are computed from the surface size and the maze size in tiles (`tile_px` = 48).
 2. **Tiles:** each cell is blitted at `start + (col, row) * tile_px`, using `tiles[value]`.
 3. **Border:** a rectangle around the whole maze, inflated by one wall thickness on each side. The thickness is `wall_px = 2 * tile_px // 16` (4 px).
 4. **Junctions:** the tiles do not draw the corners where four cells meet. For every interior corner, a `2 * wall_px` square in `WALL_COLOR` (`(43, 95, 255)`) is drawn if one of the four adjacent cells has a wall bit touching that corner:
@@ -175,6 +175,19 @@ The cell value is therefore used directly as the tile index:
    - top-right cell: `W` or `S`
    - bottom-left cell: `N` or `E`
    - bottom-right cell: `N` or `W`
+
+### Level Generation
+
+The game screen creates a `Level` object, passing it the **config** and the **current level number**.
+
+The first level is always generated with a fixed seed (`42`), so it is identical on every run.
+Every later level uses a random seed, as the subject requires.
+
+If the `mazegen` library is not installed, the game stops with a clear error message:
+
+    ------ERROR FOUND------
+    Level can't be loaded. Missing mazegen library in 'venv'
+
 
 ## 📖 Resources
 This is a list of multiple resources use throughout the life-cycle of the project
