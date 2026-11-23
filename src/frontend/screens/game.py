@@ -9,6 +9,7 @@ from ..assets import AssetsLoader, Fruit
 from ..renderers import MazeRenderer, HudRenderer, PlayerRenderer
 from ...validation import GameConfig
 from ...backend import Level, Player
+from ...constants import TILE_PX
 
 
 class Game(Screen):
@@ -22,15 +23,12 @@ class Game(Screen):
         self.config = config
         self.assets = assets
 
-        # Objects
-        self.player = Player()
-
         # Renderers
         self.hud_renderer = HudRenderer(assets)
         self.maze_renderer = MazeRenderer(assets)
         self.player_renderer = PlayerRenderer(assets)
 
-        # Persists across levels
+        # Game data
         self.last_level = config.total_levels
         self.current_level = 1
         self.lives = config.lives
@@ -38,8 +36,15 @@ class Game(Screen):
         self.highscore = highscore
         self.fruits_collected: list[Fruit] = [Fruit.APPLE] * 7  # temp
 
-        # Thrown away and rebuilt every level
+        # Level
         self.level = Level(self.config, self.current_level)
+
+        # Objects
+        self.player = self.init_player()
+
+    def init_player(self) -> Player:
+        col, row = self.level.spawn_point
+        return Player(((col + 0.5) * TILE_PX, (row + 0.5) * TILE_PX))
 
     # ------------------------------------------------------------------
     # Events
@@ -68,7 +73,8 @@ class Game(Screen):
     # ------------------------------------------------------------------
     def update(self, dt: float) -> ScreenAction:
         """Update level timer and check game status."""
-        self.level.decrease_timer(dt)
+        self.level.update(dt)
+        self.player.update(dt)
 
         return self._check_game_status()
 

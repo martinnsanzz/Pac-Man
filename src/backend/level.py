@@ -39,8 +39,17 @@ class Level():
         self.time_left = config.level_time_limit
         self.grid = self.gen_maze(level)
         self.start_time = 0.0
+        self.spawn_point = (MAZE_COLS // 2, MAZE_ROWS // 2)
 
-    def decrease_timer(self, dt: float) -> None:
+    def update(self, dt: float) -> None:
+        """Update the level state for a time step.
+
+        Args:
+            dt: Time elapsed since the previous update in seconds.
+        """
+        self._decrease_timer(dt)
+
+    def _decrease_timer(self, dt: float) -> None:
         """Advance the level timer by a time delta.
 
         Accumulate ``dt`` in ``start_time``. Once at least one second has

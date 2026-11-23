@@ -11,6 +11,7 @@ from .screens import (MainMenu, ScreenAction, Screen,
 from .paths import FontsPaths, SpritesPaths, TilemapPath, SfxPaths, HudPaths
 from .assets import AssetsLoader
 from .terminal import TerminalPrinter
+from ..constants import ARCADE_WIDTH, ARCADE_HEIGHT
 from ..exceptions import LoadAssetsError, PacManError
 from ..validation import GameConfig
 from ..backend import Highscores
@@ -32,9 +33,6 @@ class App:
         game: Running game, or None when no game is in progress.
         running: False once the main loop must stop.
     """
-    # Arcade screen
-    WIDTH = 672
-    HEIGHT = 864
     FPS = 60
     BACKGROUND = (12, 14, 16)
 
@@ -55,7 +53,7 @@ class App:
         pygame.init()
         self.clock = pygame.time.Clock()
         self.screen = self._create_window()
-        self.arcade_screen = pygame.Surface((self.WIDTH, self.HEIGHT))
+        self.arcade_screen = pygame.Surface((ARCADE_WIDTH, ARCADE_HEIGHT))
         self.arcade_size = self._compute_arcade_size()
 
         self.assets = AssetsLoader()
@@ -90,8 +88,8 @@ class App:
     def _compute_arcade_size(self) -> tuple[int, int]:
         """Return the arcade size scaled to fit the window."""
         win_w, win_h = self.screen.get_size()
-        factor = min(win_w / self.WIDTH, win_h / self.HEIGHT)
-        return int(self.WIDTH * factor), int(self.HEIGHT * factor)
+        factor = min(win_w / ARCADE_WIDTH, win_h / ARCADE_HEIGHT)
+        return int(ARCADE_WIDTH * factor), int(ARCADE_HEIGHT * factor)
 
     def _load_highscores(self) -> Highscores:
         """Load the highscore table; on failure print the error and go on."""
@@ -197,7 +195,7 @@ class App:
         """Open the pause menu over the running game."""
         if self.game is None:
             return
-        self.current_screen = Pause(self.WIDTH, self.HEIGHT, self.assets,
+        self.current_screen = Pause(ARCADE_WIDTH, ARCADE_HEIGHT, self.assets,
                                     self.game)
 
     def _show_end_menu(self, action: ScreenAction) -> None:
@@ -206,7 +204,7 @@ class App:
             return
         menu = self.ENDMENUS[action]
         is_highscore = self.highscores.is_highscore(self.game.score)
-        self.current_screen = menu(self.WIDTH, self.HEIGHT, self.assets,
+        self.current_screen = menu(ARCADE_WIDTH, ARCADE_HEIGHT, self.assets,
                                    self.game, is_highscore)
 
     def _insert_high_score(self) -> None:
