@@ -1,5 +1,3 @@
-# Built-in modules
-
 # Installed modules
 import pygame
 
@@ -8,7 +6,7 @@ from .screen import Screen, ScreenAction
 from ..assets import AssetsLoader, Fruit
 from ..renderers import MazeRenderer, HudRenderer, PlayerRenderer
 from ...validation import GameConfig
-from ...backend import Level, Player, PlayerDir
+from ...backend import Level, Player, PlayerDir, TileMap
 from ...constants import TILE_PX
 
 
@@ -44,7 +42,8 @@ class Game(Screen):
 
     def init_player(self) -> Player:
         col, row = self.level.spawn_point
-        return Player(((col + 0.5) * TILE_PX, (row + 0.5) * TILE_PX))
+        return Player((int((col + 0.5) * TILE_PX),
+                       int((row + 0.5) * TILE_PX)))
 
     # ------------------------------------------------------------------
     # Events
@@ -53,20 +52,27 @@ class Game(Screen):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 return ScreenAction.PAUSE
-            elif event.key in self.UP_KEYS:
-                self.player.direction = PlayerDir.UP
-            elif event.key in self.DOWN_KEYS:
-                self.player.direction = PlayerDir.DOWN
-            elif event.key in self.LEFT_KEYS:
-                self.player.direction = PlayerDir.LEFT
-            elif event.key in self.RIGHT_KEYS:
-                self.player.direction = PlayerDir.RIGHT
+
+            if self.player.direction == PlayerDir.NONE:
+                self._move_player(event.key)
+
             #  temp to be deleted
-            elif event.key == pygame.K_1:
+            if event.key == pygame.K_1:
                 self.score += 100
             elif event.key == pygame.K_9:
                 return self._advance_level()
         return ScreenAction.NONE
+
+    def _move_player(self, key: int) -> None:
+        """Set the player's direction from a pressed key."""
+        if key in self.UP_KEYS:
+            self.player.direction = PlayerDir.UP
+        elif key in self.DOWN_KEYS:
+            self.player.direction = PlayerDir.DOWN
+        elif key in self.LEFT_KEYS:
+            self.player.direction = PlayerDir.LEFT
+        elif key in self.RIGHT_KEYS:
+            self.player.direction = PlayerDir.RIGHT
 
     def _advance_level(self) -> ScreenAction:
         """Go to the next level, or win if the last one was just cleared."""
@@ -84,7 +90,22 @@ class Game(Screen):
         self.level.update(dt)
         self.player.update(dt)
 
+        if self.player.direction != PlayerDir.NONE:
+            self._check_player()
         return self._check_game_status()
+
+    def _check_player(self) -> None:
+        x, y = self.player.pos_x, self.player.pos_y
+        col, row = TileMap.pixel_to_tile(x, y)
+
+        if not self.level.has_wall(col, row, self.player.direction):
+            return
+
+        center = TileMap.tile_center(col, row)
+
+        if self.player.has_reached(center):
+            self.player.center_pos_to_cell(center)
+            self.player.direction = PlayerDir.NONE
 
     def _check_game_status(self) -> ScreenAction:
         if self.level.time_left <= 0:

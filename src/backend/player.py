@@ -1,5 +1,5 @@
 # Built-in modules
-from enum import Enum
+from enum import Enum, auto
 
 # Local modules
 from ..constants import TILE_PX
@@ -7,10 +7,11 @@ from ..constants import TILE_PX
 
 class PlayerDir(Enum):
     """Enumerate the directions in which the player can move."""
-    UP = (0, -1)
-    DOWN = (0, 1)
-    LEFT = (-1, 0)
-    RIGHT = (1, 0)
+    NONE = auto()
+    UP = auto()
+    DOWN = auto()
+    LEFT = auto()
+    RIGHT = auto()
 
 
 class Player():
@@ -23,7 +24,7 @@ class Player():
             no direction set.
         speed: Movement speed of the player.
     """
-    def __init__(self, start_pos: tuple[float, float],
+    def __init__(self, start_pos: tuple[int, int],
                  speed: int = 4) -> None:
         """Initialize the player at a starting position.
 
@@ -31,9 +32,10 @@ class Player():
             start_pos: Initial ``(x, y)`` position of the player in px.
             speed: Movement speed of the player. Defaults to 1.
         """
+        print(start_pos)
         self.pos_x = start_pos[0]
         self.pos_y = start_pos[1]
-        self.direction: PlayerDir | None = None
+        self.direction: PlayerDir = PlayerDir.NONE
         self.speed = speed
 
     def update(self, dt: float) -> None:
@@ -46,7 +48,7 @@ class Player():
 
     def _move_player(self, dt: float) -> None:
         """Move the player in its current direction for one time step."""
-        distance = self.speed * TILE_PX * dt
+        distance = int(self.speed * TILE_PX * dt)
 
         match self.direction:
             case PlayerDir.UP:
@@ -57,3 +59,25 @@ class Player():
                 self.pos_x -= distance
             case PlayerDir.RIGHT:
                 self.pos_x += distance
+
+    def has_reached(self, point: tuple[float, float]) -> bool:
+        """Return True once the player has reached or passed point
+        along its direction of travel."""
+        x, y = point
+
+        match self.direction:
+            case PlayerDir.UP:
+                return self.pos_y <= y
+            case PlayerDir.DOWN:
+                return self.pos_y >= y
+            case PlayerDir.LEFT:
+                return self.pos_x <= x
+            case PlayerDir.RIGHT:
+                return self.pos_x >= x
+            case _:
+                return False
+
+    def center_pos_to_cell(self, center_pos: tuple[int, int]) -> None:
+        """Center position of player to cell center"""
+        self.pos_x = center_pos[0]
+        self.pos_y = center_pos[1]
