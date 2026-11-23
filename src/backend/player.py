@@ -1,13 +1,16 @@
 # Built-in modules
-from enum import Enum, auto
+from enum import Enum
+
+# Local modules
+from ..constants import TILE_PX
 
 
 class PlayerDir(Enum):
     """Enumerate the directions in which the player can move."""
-    UP = auto()
-    DOWN = auto()
-    LEFT = auto()
-    RIGHT = auto()
+    UP = (0, -1)
+    DOWN = (0, 1)
+    LEFT = (-1, 0)
+    RIGHT = (1, 0)
 
 
 class Player():
@@ -21,7 +24,7 @@ class Player():
         speed: Movement speed of the player.
     """
     def __init__(self, start_pos: tuple[float, float],
-                 speed: int = 1) -> None:
+                 speed: int = 4) -> None:
         """Initialize the player at a starting position.
 
         Args:
@@ -39,4 +42,18 @@ class Player():
         Args:
             dt: Time elapsed since the previous update in seconds.
         """
-        ...
+        self._move_player(dt)
+
+    def _move_player(self, dt: float) -> None:
+        """Move the player in its current direction for one time step."""
+        distance = self.speed * TILE_PX * dt
+
+        match self.direction:
+            case PlayerDir.UP:
+                self.pos_y -= distance
+            case PlayerDir.DOWN:
+                self.pos_y += distance
+            case PlayerDir.LEFT:
+                self.pos_x -= distance
+            case PlayerDir.RIGHT:
+                self.pos_x += distance

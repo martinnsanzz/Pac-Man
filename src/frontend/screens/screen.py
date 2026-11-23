@@ -45,17 +45,26 @@ class Screen(ABC):
         button_font: Font for menu options and buttons.
         text_font: Font for regular text.
     """
+    # Input keys (arrows and WASD both work)
+    UP_KEYS = (pygame.K_UP, pygame.K_w)
+    DOWN_KEYS = (pygame.K_DOWN, pygame.K_s)
+    LEFT_KEYS = (pygame.K_LEFT, pygame.K_a)
+    RIGHT_KEYS = (pygame.K_RIGHT, pygame.K_d)
+
+    # Font sizes
     TITLE_FONT_SIZE = 100
     BUTTON_FONT_SIZE = 38
     TEXT_FONT_SIZE = 18
 
+    # Colors
     TEXT_COLOR: Color = (150, 150, 150)
     SELECTED_COLOR: Color = (255, 255, 255)
 
+    # Button box layout (pixels)
     BOX_PADDING_X = 80
     BOX_PADDING_Y = 10
     BORDER_RADIUS = 15
-    BACK_BUTTON_MARGIN = 50
+    BACK_BUTTON_MARGIN = 50  # distance of the back button from the edge
 
     def __init__(self, assets: AssetsLoader) -> None:
         self.assets = assets
