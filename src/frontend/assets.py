@@ -9,7 +9,7 @@ import pygame
 from .paths import SpritesPaths, FontsPaths, TilemapPath, HudPaths, SfxPaths
 from .terminal import TerminalPrinter
 from ..constants import (TILE_SRC_PX, TILE_PX, TILEMAP_SHEET_COLS,
-                         FRUIT_SHEET_COLS, CHARACTER_SIZE_PX, HUD_PX)
+                         FRUIT_SHEET_COLS, SPRITE_PX, HUD_PX)
 
 
 class Fruit(IntEnum):
@@ -84,7 +84,7 @@ class AssetsLoader():
             if key == "FRUITS":
                 continue
             sprite = pygame.image.load(path).convert_alpha()
-            self.sprites[key] = self._scale(sprite, CHARACTER_SIZE_PX)
+            self.sprites[key] = self._scale(sprite, SPRITE_PX)
 
     def _load_hud_icons(self) -> None:
         """Load one HUD icon per attribute of HudPaths."""
@@ -97,7 +97,7 @@ class AssetsLoader():
         sheet = pygame.image.load(SpritesPaths.FRUITS).convert_alpha()
         for fruit in Fruit:
             cell = self._cut(sheet, fruit.value, FRUIT_SHEET_COLS)
-            self.fruit_sprites[fruit] = self._scale(cell, CHARACTER_SIZE_PX)
+            self.fruit_sprites[fruit] = self._scale(cell, SPRITE_PX)
             self.fruit_icons[fruit] = self._scale(cell, HUD_PX)
 
     def _load_sounds(self) -> None:
@@ -125,6 +125,6 @@ class AssetsLoader():
         return sheet.subsurface(rect)
 
     @staticmethod
-    def _scale(surface: pygame.Surface, size: int) -> pygame.Surface:
+    def _scale(surface: pygame.Surface, size: int | float) -> pygame.Surface:
         """Return `surface` scaled to `size` x `size` pixels."""
         return pygame.transform.scale(surface, (size, size))

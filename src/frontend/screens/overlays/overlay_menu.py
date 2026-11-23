@@ -38,10 +38,6 @@ class OverlayMenu(Screen):
     TITLE_SHADOW: Color
     OPTIONS: tuple[tuple[str, ScreenAction], ...]
 
-    # Keys
-    LEFT_KEYS = (pygame.K_LEFT, pygame.K_a)
-    RIGHT_KEYS = (pygame.K_RIGHT, pygame.K_d)
-
     # Panel
     PANEL_SIZE = (500, 250)
     PANEL_COLOR = (20, 20, 40)

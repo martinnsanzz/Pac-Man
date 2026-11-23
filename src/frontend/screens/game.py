@@ -8,7 +8,7 @@ from .screen import Screen, ScreenAction
 from ..assets import AssetsLoader, Fruit
 from ..renderers import MazeRenderer, HudRenderer, PlayerRenderer
 from ...validation import GameConfig
-from ...backend import Level, Player
+from ...backend import Level, Player, PlayerDir
 from ...constants import TILE_PX
 
 
@@ -53,6 +53,14 @@ class Game(Screen):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 return ScreenAction.PAUSE
+            elif event.key in self.UP_KEYS:
+                self.player.direction = PlayerDir.UP
+            elif event.key in self.DOWN_KEYS:
+                self.player.direction = PlayerDir.DOWN
+            elif event.key in self.LEFT_KEYS:
+                self.player.direction = PlayerDir.LEFT
+            elif event.key in self.RIGHT_KEYS:
+                self.player.direction = PlayerDir.RIGHT
             #  temp to be deleted
             elif event.key == pygame.K_1:
                 self.score += 100

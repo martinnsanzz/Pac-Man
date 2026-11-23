@@ -2,15 +2,17 @@
 
 # Tiles (maze cells)
 TILE_SRC_PX: int = 16
-TILE_SCALE: int = 2
+TILE_SCALE: int = 3
 TILE_PX: int = TILE_SRC_PX * TILE_SCALE
 
 # Characters (player and ghosts, drawn unscaled)
-CHARACTER_SIZE_PX: int = 16
+SPRITE_SRC_PX: int = 16
+SPRITE_SCALE: float = 2
+SPRITE_PX = SPRITE_SRC_PX * SPRITE_SCALE
 
 # Maze
-MAZE_COLS: int = 19
-MAZE_ROWS: int = 20
+MAZE_COLS: int = 12
+MAZE_ROWS: int = 13
 MAZE_WIDTH_PX: int = MAZE_COLS * TILE_PX
 MAZE_HEIGHT_PX: int = MAZE_ROWS * TILE_PX
 
