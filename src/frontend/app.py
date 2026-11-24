@@ -43,6 +43,7 @@ class App:
     CANVAS_H = 1080
     LOG_GAP = 16
     ARCADE_W = int(ARCADE_WIDTH * CANVAS_H / ARCADE_HEIGHT)
+    ARCADE_DIM = 60
 
     # Display
     FPS = 60
@@ -204,6 +205,10 @@ class App:
         self.log_panel.draw(self.canvas, self.log_rect, self.on_dev_mode)
         self.arcade_screen.fill(self.BACKGROUND)
         self.current_screen.draw(self.arcade_screen)
+        if self.on_dev_mode:
+            self.arcade_screen.fill(
+                    (self.ARCADE_DIM, self.ARCADE_DIM, self.ARCADE_DIM),
+                    special_flags=pygame.BLEND_RGB_MULT)
 
         arcade = pygame.transform.scale(self.arcade_screen,
                                         self.arcade_rect.size)
