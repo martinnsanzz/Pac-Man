@@ -25,8 +25,10 @@ class Player():
         """
         self.pos_x = start_pos[0]
         self.pos_y = start_pos[1]
-        self.direction: PlayerDir = PlayerDir.NONE
         self.speed = speed
+        self.direction: PlayerDir = PlayerDir.NONE
+        self.queued_direction: PlayerDir = PlayerDir.NONE
+        self.input_buffer: list[int] = []
 
     def update(self, dt: float, level: Level) -> None:
         """Move the player for a time step, stopping at walls.

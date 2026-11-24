@@ -107,3 +107,9 @@ Values are in seconds. A 1/60 s scatter shows up as just a reversal.
 - Pac-Man is a bit faster than the ghosts until level 21, then the ghosts are faster.
 - Frightened Pac-Man speed (levels 1-4): 90%, 95%, then 100%.
 - Ghosts in a side tunnel are almost halved in speed.
+
+## Turn buffering
+A control feature **that accepts a directional input slightly before the character reaches an intersection**.
+Pac-Man will execute the turn at the correct tile boundary rather than missing
+it and continuing straight. This allows players to **press the key a bit early** without losing 
+the turn. It reduces the precision required at higher speeds.

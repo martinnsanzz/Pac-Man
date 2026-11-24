@@ -77,12 +77,14 @@ class Game(Screen):
 
             if self.player.direction == PlayerDir.NONE:
                 self._handle_player_input(event.key)
-
+            else:
+                self.player.input_buffer.append(event.key)
             #  temp to be deleted
             if event.key == pygame.K_1:
                 self.score += 100
             elif event.key == pygame.K_9:
                 return self._advance_level()
+        print(self.player.input_buffer)
         return ScreenAction.NONE
 
     def _handle_player_input(self, key: int) -> None:
