@@ -24,6 +24,7 @@ class LogPanel:
     LINE_SPACE = 4
     BACKGROUND: RGBA = (255, 255, 255, 18)
 
+    DIM_ALPHA = 60
     FADE_START = 0.5
     MIN_ALPHA = 40
     BORDER: RGBA = (255, 255, 255, 50)
@@ -95,6 +96,9 @@ class LogPanel:
             rendered = self.font.render(text, True, color)
             panel.blit(rendered, (self.PADDING, y))
 
+        if not dev_mode:
+            panel.fill((255, 255, 255, self.DIM_ALPHA),
+                       special_flags=pygame.BLEND_RGBA_MULT)
         panel.blit(self.fade_mask, (0, 0),
                    special_flags=pygame.BLEND_RGBA_MULT)
         surface.blit(panel, rect.topleft)
