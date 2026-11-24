@@ -5,17 +5,19 @@ except (ModuleNotFoundError, ImportError):
     mazegen = None
 
 # Local modules
-from .player import PlayerDir
+from .player_dir import PlayerDir
 from .tilemap import TileMap
 from ..validation import GameConfig
-from ..constants import MAZE_COLS, MAZE_ROWS, WALL_N, WALL_S, WALL_W, WALL_E
 from ..exceptions import MazegenError
+from ..constants import (MAZE_COLS, MAZE_ROWS, WALL_N, WALL_S,
+                         WALL_W, WALL_E, WALL_ALL)
 
 WALL_BIT: dict[PlayerDir, int] = {
     PlayerDir.UP: WALL_N,
     PlayerDir.DOWN: WALL_S,
     PlayerDir.LEFT: WALL_W,
     PlayerDir.RIGHT: WALL_E,
+    PlayerDir.NONE: WALL_ALL
 }
 
 

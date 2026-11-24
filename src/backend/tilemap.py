@@ -15,9 +15,9 @@ class TileMap():
         return x + TILE_PX // 2, y + TILE_PX // 2
 
     @staticmethod
-    def pixel_to_tile(x: int, y: int) -> tuple[int, int]:
+    def pixel_to_tile(x: float, y: float) -> tuple[int, int]:
         """Tile index based on the pixel position of the maze"""
-        return x // TILE_PX, y // TILE_PX
+        return int(x // TILE_PX), int(y // TILE_PX)
 
     @staticmethod
     def get_tile(grid: list[list[int]], col: int,
