@@ -1,9 +1,10 @@
 {
     "highscores_path": "data/highscore.json",
     "lives": 4,
+    "total_levels": 5,
     "total_pacgum": 42,
     "pacgum_points": 10,
     "super_pacgum_points": 50,
     "ghost_points": 200,
-    "level_time_limit": 90
+    "level_time_limit": 20
 }

@@ -5,10 +5,11 @@ from math import ceil
 import pygame
 
 # Local modules
-from .assets import AssetsLoader, Fruit
+from ..assets import AssetsLoader, Fruit
+from ...constants import HUD_PX
 
 
-class HUD():
+class HudRenderer():
     """Draw the in-game HUD: lives, collected fruits, score and timer.
 
     Args:
@@ -18,20 +19,28 @@ class HUD():
         assets: Loader providing the font, HUD icons and fruit icons.
         font: Font used to render every text element.
     """
-    PAD = 10
-    FONT_SIZE = 40
+    # Layout (pixels)
+    PAD = 10                  # spacing between HUD elements
+    COUNTER_Y_OFFSET = 5      # vertical nudge for the counters
+
+    # Text style
+    TEXT_FONT_SIZE = 40
+    NUM_FONT_SIZE = 56
     TXT_COLOR = (255, 255, 255)
-    MAX_LIFE_ICONS = 3
-    MAX_FRUITS_ICONS = 7
-    COUNTER_Y_OFFSET = 5
+
+    # Icon limits
+    MAX_LIFE_ICONS = 3        # most life icons drawn
+    MAX_FRUITS_ICONS = 7      # most fruit icons drawn
 
     def __init__(self, assets: AssetsLoader):
         self.assets = assets
-        self.font = assets.get_font("DIGITAL808", self.FONT_SIZE)
+        self.text_font = assets.get_font("DIGITAL808", self.TEXT_FONT_SIZE)
+        self.num_font = assets.get_font("DIGITAL808", self.NUM_FONT_SIZE)
 
     def display_hud(self, surface: pygame.Surface, lives: int,
                     fruits: list[Fruit], score: int, high_score: int,
-                    time_left: int) -> None:
+                    time_left: int, current_level: int,
+                    last_level: int) -> None:
         """Draw every HUD element onto `surface`.
 
         Args:
@@ -44,6 +53,7 @@ class HUD():
         """
         self._display_lives(surface, lives)
         self._display_fruits(surface, fruits)
+        self._display_level(surface, current_level, last_level)
         self._display_score(surface, score)
         self._display_high_score(surface, high_score)
         self._display_time_left(surface, time_left)
@@ -60,13 +70,13 @@ class HUD():
             lives: Number of remaining lives.
         """
         icon = self.assets.hud_icons["LIVE"]
-        step = self.assets.SCALED_HUD + self.PAD
+        step = HUD_PX + self.PAD
         x = self.PAD
         y = surface.get_height() - step
 
         if lives > self.MAX_LIFE_ICONS:
-            counter = self.font.render(f"x{lives}", True, self.TXT_COLOR)
-            surface.blit(counter, (x, y + self.COUNTER_Y_OFFSET))
+            counter = self.num_font.render(f"x{lives}", True, self.TXT_COLOR)
+            surface.blit(counter, (x, y - self.COUNTER_Y_OFFSET))
             x += counter.get_width() + self.PAD
 
         for _ in range(min(lives, self.MAX_LIFE_ICONS)):
@@ -85,13 +95,23 @@ class HUD():
             collected_fruits: Collected fruits in collection order, oldest
                 first.
         """
-        step = self.assets.SCALED_HUD + self.PAD
+        step = HUD_PX + self.PAD
         x = surface.get_width() - step
         y = surface.get_height() - step
 
         for fruit in reversed(collected_fruits[-self.MAX_FRUITS_ICONS:]):
             surface.blit(self.assets.fruit_icons[fruit], (x, y))
             x -= step
+
+    def _display_level(self, surface: pygame.Surface,
+                       current_level: int, last_level: int) -> None:
+        level_txt = f"{current_level}/{last_level}"
+        level_info = self.num_font.render(level_txt, True, self.TXT_COLOR)
+
+        x = surface.get_width() // 2
+        y = surface.get_height() - ((self.PAD * 2) + HUD_PX)
+
+        surface.blit(level_info, level_info.get_rect(midbottom=(x, y)))
 
     def _draw_stat(self, surface: pygame.Surface, label: str, value: str,
                    anchor: str, pos: tuple[int, int]) -> None:
@@ -105,8 +125,8 @@ class HUD():
                 (``"topleft"``, ``"midtop"`` or ``"topright"``).
             pos: Position of the label's ``anchor`` point, in pixels.
         """
-        label_surf = self.font.render(label, True, self.TXT_COLOR)
-        value_surf = self.font.render(value, True, self.TXT_COLOR)
+        label_surf = self.text_font.render(label, True, self.TXT_COLOR)
+        value_surf = self.num_font.render(value, True, self.TXT_COLOR)
         label_rect = label_surf.get_rect(**{anchor: pos})
         value_rect = value_surf.get_rect(midtop=label_rect.midbottom)
 

@@ -73,15 +73,6 @@ class EndMenu(OverlayMenu):
     def __init__(self, screen_w: int, screen_h: int,
                  assets: AssetsLoader, game: Game,
                  is_highscore: bool) -> None:
-        """Initialize the menu and load its fonts.
-
-        Args:
-            screen_w: Screen width in pixels.
-            screen_h: Screen height in pixels.
-            assets: Loader used to fetch the fonts.
-            game: Finished game, used for its score.
-            is_highscore: Whether to start in name-entry mode.
-        """
         super().__init__(screen_w, screen_h, assets, game)
         self.is_highscore = is_highscore
         self.entering_name = is_highscore
@@ -96,7 +87,7 @@ class EndMenu(OverlayMenu):
         self.input_font = assets.get_font("CAIROPIXEL",
                                           self.INPUT_FONT_SIZE)
 
-    def handle_event(self, event: pygame.Event) -> ScreenAction | None:
+    def handle_event(self, event: pygame.Event) -> ScreenAction:
         """Process an event, editing the name or delegating to the menu.
 
         While entering a name, only ``KEYDOWN`` events are handled:
@@ -115,7 +106,7 @@ class EndMenu(OverlayMenu):
         if not self.entering_name:
             return super().handle_event(event)
         if event.type != pygame.KEYDOWN:
-            return None
+            return ScreenAction.NONE
         if event.key == pygame.K_BACKSPACE:
             self.name = self.name[:-1]
         elif event.key == pygame.K_RETURN:
@@ -127,9 +118,9 @@ class EndMenu(OverlayMenu):
             and event.unicode.isprintable()
         ):
             self.name += event.unicode
-        return None
+        return ScreenAction.NONE
 
-    def _submit(self) -> ScreenAction | None:
+    def _submit(self) -> ScreenAction:
         """Validate the typed name and leave name-entry mode.
 
         A non-empty invalid name is cleared and entry continues. An
@@ -142,12 +133,12 @@ class EndMenu(OverlayMenu):
         if self.name and not self._is_valid():
             self.name = ""
             self.shake_start = pygame.time.get_ticks()
-            return None
+            return ScreenAction.NONE
         self.entering_name = False
         self.is_highscore = False
         if self.name:
             return ScreenAction.NAME_SUBMITTED
-        return None
+        return ScreenAction.NONE
 
     def _is_valid(self) -> bool:
         """Check the name and game score against ``HighscoreEntry``.

@@ -50,9 +50,8 @@ class Instructions(Screen):
                         ("NOCHEATS", "Turn off all cheats"))
     }
 
-    def __init__(self, screen_w: int, screen_h: int,
-                 assets: AssetsLoader) -> None:
-        super().__init__(screen_w, screen_h, assets)
+    def __init__(self, assets: AssetsLoader) -> None:
+        super().__init__(assets)
         self.sub_title_font = assets.get_font("ARCADECLASSIC",
                                               self.SUB_TITLE_SIZE)
         self.sections = self._build_sections()

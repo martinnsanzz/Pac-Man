@@ -38,10 +38,6 @@ class OverlayMenu(Screen):
     TITLE_SHADOW: Color
     OPTIONS: tuple[tuple[str, ScreenAction], ...]
 
-    # Keys
-    LEFT_KEYS = (pygame.K_LEFT, pygame.K_a)
-    RIGHT_KEYS = (pygame.K_RIGHT, pygame.K_d)
-
     # Panel
     PANEL_SIZE = (500, 250)
     PANEL_COLOR = (20, 20, 40)
@@ -61,7 +57,7 @@ class OverlayMenu(Screen):
 
     def __init__(self, screen_w: int, screen_h: int,
                  assets: AssetsLoader, game: Game) -> None:
-        super().__init__(screen_w, screen_h, assets)
+        super().__init__(assets)
         self.game = game
         self.title_font = assets.get_font("ARCADECLASSIC",
                                           self.TITLE_FONT_SIZE)
@@ -96,7 +92,7 @@ class OverlayMenu(Screen):
         self.selected = max(0, min(self.selected + step,
                                    len(self.OPTIONS) - 1))
 
-    def handle_event(self, event: pygame.event.Event) -> ScreenAction | None:
+    def handle_event(self, event: pygame.event.Event) -> ScreenAction:
         """Left/right move the selection; Enter triggers the selected option.
 
         Returns:

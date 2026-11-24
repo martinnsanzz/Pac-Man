@@ -28,9 +28,8 @@ class MainMenu(Screen):
     LINE_HEIGHT = Screen.BUTTON_FONT_SIZE + 40
     BUTTON_SIZE = (320, 56)
 
-    def __init__(self, screen_w: int, screen_h: int,
-                 assets: AssetsLoader) -> None:
-        super().__init__(screen_w, screen_h, assets)
+    def __init__(self, assets: AssetsLoader) -> None:
+        super().__init__(assets)
         self.options: tuple[tuple[str, ScreenAction], ...] = (
             ("Start", ScreenAction.START_GAME),
             ("Highscores", ScreenAction.HIGHSCORES),

@@ -1,15 +1,20 @@
 # Local modules
 from .highscores import Highscores
-from .maze_gen import MazeGen
 from .cheat_codes import Cheat, CheatCodes
 from .dev_log import DevLog, LogEntry, LogKind
+from .level import Level
+from .tilemap import TileMap
+from .player import Player, PlayerDir
 
 __all__ = [
     "Highscores",
-    "MazeGen",
     "Cheat",
     "CheatCodes",
     "DevLog",
     "LogEntry",
     "LogKind",
+    "Level",
+    "TileMap",
+    "Player",
+    "PlayerDir",
 ]

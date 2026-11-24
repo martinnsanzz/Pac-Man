@@ -11,6 +11,7 @@ from .screens import (MainMenu, ScreenAction, Screen,
 from .paths import FontsPaths, SpritesPaths, TilemapPath, SfxPaths, HudPaths
 from .assets import AssetsLoader
 from .terminal import TerminalPrinter
+from ..constants import ARCADE_WIDTH, ARCADE_HEIGHT
 from ..exceptions import LoadAssetsError, PacManError
 from ..validation import GameConfig
 from ..backend import Highscores, DevLog, LogKind, CheatCodes, Cheat
@@ -41,11 +42,9 @@ class App:
     # Canvas
     CANVAS_H = 1080
     LOG_GAP = 16
+    ARCADE_W = int(ARCADE_WIDTH * CANVAS_H / ARCADE_HEIGHT)
 
-    # Arcade screen
-    WIDTH = 672
-    HEIGHT = 864
-    ARCADE_W = int(WIDTH * CANVAS_H / HEIGHT)
+    # Display
     FPS = 60
     BACKGROUND = (12, 14, 16)
 
@@ -66,25 +65,23 @@ class App:
         pygame.init()
         self.clock = pygame.time.Clock()
         self.screen = self._create_window()
-        self.arcade_screen = pygame.Surface((self.WIDTH, self.HEIGHT))
         self._build_canvas()
+        self.arcade_screen = pygame.Surface((ARCADE_WIDTH, ARCADE_HEIGHT))
 
         self.assets = AssetsLoader()
         self.assets.load()
 
         self.dev_log = DevLog()
+        self.cheats = CheatCodes()
         self.log_panel = LogPanel(self.assets, self.dev_log)
 
         self.highscores = self._load_highscores()
-        self.main_menu: Screen = MainMenu(self.WIDTH,
-                                          self.HEIGHT,
-                                          self.assets)
+        self.main_menu: Screen = MainMenu(self.assets)
+
         self.current_screen: Screen = self.main_menu
         self.game: Game | None = None
         self.running = True
         self.on_dev_mode = False
-
-        self.cheats = CheatCodes()
 
     @staticmethod
     def validate_assets() -> None:
@@ -143,9 +140,9 @@ class App:
         return log, arcade, side
 
     def _save_highscores(self) -> None:
-        """Save the highscore table. On failure warn and kep playing.
+        """Save the highscore table. On failure warn and keep playing.
 
-        The error is printed in the termianl and shown in the dev log, so
+        The error is printed in the terminal and shown in the dev log, so
         the game never crashes over a file it cannot write.
         """
         try:
@@ -171,13 +168,17 @@ class App:
         """Run the main loop until the window is closed."""
         while self.running:
             dt = self.clock.tick(self.FPS) / 1000
-            self._handle_events()
-            self._update(dt)
+            action = self._handle_events()
+            if action == ScreenAction.NONE:
+                action = self._update(dt)
+            self._switch(action)
             self._draw()
         pygame.quit()
 
-    def _handle_events(self) -> None:
-        """Read the pygame events and forward them to the screen."""
+    def _handle_events(self) -> ScreenAction:
+        """Forward events to the screen, return the first action it
+        asked for."""
+        action = ScreenAction.NONE
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
@@ -186,11 +187,14 @@ class App:
             if self.on_dev_mode:
                 self._handle_dev_input(event)
                 continue
-            self._switch(self.current_screen.handle_event(event))
+            result = self.current_screen.handle_event(event)
+            if action == ScreenAction.NONE:
+                action = result
+        return action
 
-    def _update(self, dt: float) -> None:
+    def _update(self, dt: float) -> ScreenAction:
         """Advance the current screen by dt seconds."""
-        self.current_screen.update(dt)
+        return self.current_screen.update(dt)
 
     def _draw(self) -> None:
         """Draw the screen into the canvas and fit it to the window."""
@@ -245,25 +249,24 @@ class App:
 
     def _start_game(self) -> None:
         """Create a new game and make it the current screen."""
-        self.game = Game(self.WIDTH, self.HEIGHT, self.assets,
-                         self.game_config, self.highscores.get_high_score())
+        self.game = Game(self.assets, self.game_config,
+                         self.highscores.get_high_score())
         self.current_screen = self.game
 
     def _show_highscores(self) -> None:
         """Show the highscore table."""
-        self.current_screen = HighscoresTable(self.WIDTH, self.HEIGHT,
-                                              self.assets, self.highscores)
+        self.current_screen = HighscoresTable(self.assets,
+                                              self.highscores)
 
     def _show_instructions(self) -> None:
         """Show the instructions screen."""
-        self.current_screen = Instructions(self.WIDTH, self.HEIGHT,
-                                           self.assets)
+        self.current_screen = Instructions(self.assets)
 
     def _show_pause(self) -> None:
         """Open the pause menu over the running game."""
         if self.game is None:
             return
-        self.current_screen = Pause(self.WIDTH, self.HEIGHT, self.assets,
+        self.current_screen = Pause(ARCADE_WIDTH, ARCADE_HEIGHT, self.assets,
                                     self.game)
 
     def _show_end_menu(self, action: ScreenAction) -> None:
@@ -272,7 +275,7 @@ class App:
             return
         menu = self.ENDMENUS[action]
         is_highscore = self.highscores.is_highscore(self.game.score)
-        self.current_screen = menu(self.WIDTH, self.HEIGHT, self.assets,
+        self.current_screen = menu(ARCADE_WIDTH, ARCADE_HEIGHT, self.assets,
                                    self.game, is_highscore)
 
     def _insert_high_score(self) -> None:
