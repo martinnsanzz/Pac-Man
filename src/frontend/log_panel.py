@@ -24,6 +24,8 @@ class LogPanel:
     LINE_SPACE = 4
     BACKGROUND: RGBA = (255, 255, 255, 18)
 
+    FADE_START = 0.5
+    MIN_ALPHA = 40
     BORDER: RGBA = (255, 255, 255, 50)
     BORDER_ACTIVE: RGBA = (255, 255, 255, 160)
     BORDER_W = 2
@@ -50,6 +52,7 @@ class LogPanel:
         """
         self.dev_log = dev_log
         self.font = assets.get_font(self.FONT_NAME, self.FONT_SIZE)
+        self.fade_mask: pygame.Surface | None = None
 
     def draw(self, surface: pygame.Surface, rect: pygame.Rect,
              dev_mode: bool) -> None:
@@ -62,6 +65,9 @@ class LogPanel:
                 border and shows the input line.
         """
         panel = pygame.Surface(rect.size, pygame.SRCALPHA)
+        if self.fade_mask is None or self.fade_mask.get_size() != rect.size:
+            self.fade_mask = self._build_fade_mask(rect.size)
+
         pygame.draw.rect(panel, self.BACKGROUND, panel.get_rect(),
                          border_radius=self.BORDER_RADIUS)
 
@@ -89,6 +95,8 @@ class LogPanel:
             rendered = self.font.render(text, True, color)
             panel.blit(rendered, (self.PADDING, y))
 
+        panel.blit(self.fade_mask, (0, 0),
+                   special_flags=pygame.BLEND_RGBA_MULT)
         surface.blit(panel, rect.topleft)
 
     def _wrap(self, text: str, max_w: int) -> list[str]:
@@ -116,6 +124,47 @@ class LogPanel:
                 current_line = word
         lines.append(current_line)
         return lines
+
+    def _line_alpha(self, y: int, height: int) -> int:
+        """Return the opacity of a line drawn at y inside the panel.
+
+        Lines in the lower part of the panel are fully opaque, above
+        FADE_START they fade linearly down to MIN_ALPHA at the top.
+
+        Args:
+            y: Top of the line, in panel coordinates.
+            height: Height of the panel.
+
+        Returns:
+            An alpha between MIN_ALPHA and 255.
+        """
+        pos = y / height
+        limit = 1 - self.FADE_START
+
+        if pos >= limit:
+            return 255
+        else:
+            return int(self.MIN_ALPHA + (255 - self.MIN_ALPHA) * pos / limit)
+
+    def _build_fade_mask(self, size: tuple[int, int]) -> pygame.Surface:
+        """Build a white mask whose alpha fades from bottom to top.
+
+        Blended onto the panel with BLEND_RGBA_MULT, it fades the background,
+        border and text together, keeping their colors.
+
+        Args:
+            size: Width and height of the panel.
+
+        Returns:
+            The mask surface, one alpha value per pixel row.
+        """
+        width, height = size
+        mask = pygame.Surface(size, pygame.SRCALPHA)
+        for y in range(height):
+            pygame.draw.line(mask,
+                             (255, 255, 255, self._line_alpha(y, height)),
+                             (0, y), (width - 1, y))
+        return mask
 
     def _draw_input(self, panel: pygame.Surface, line_h: int) -> int:
         """Draw the input line and its separator at the bottom of panel.
