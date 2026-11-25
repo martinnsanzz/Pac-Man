@@ -18,7 +18,7 @@ def main() -> None:
 def run_program() -> None:
     """Load arguments, create a GameConfig model and run the app"""
     devlog = DevLog()
-    
+
     args = load_arguments()
     config = parse_game_config(load_json(args.file, devlog))
 
