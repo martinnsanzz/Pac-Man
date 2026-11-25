@@ -5,9 +5,20 @@ except (ModuleNotFoundError, ImportError):
     mazegen = None
 
 # Local modules
+from .player_dir import PlayerDir
+from .tilemap import TileMap
 from ..validation import GameConfig
-from ..constants import MAZE_COLS, MAZE_ROWS
 from ..exceptions import MazegenError
+from ..constants import (MAZE_COLS, MAZE_ROWS, WALL_N, WALL_S,
+                         WALL_W, WALL_E, WALL_ALL)
+
+WALL_BIT: dict[PlayerDir, int] = {
+    PlayerDir.UP: WALL_N,
+    PlayerDir.DOWN: WALL_S,
+    PlayerDir.LEFT: WALL_W,
+    PlayerDir.RIGHT: WALL_E,
+    PlayerDir.NONE: WALL_ALL
+}
 
 
 class Level():
@@ -94,3 +105,8 @@ class Level():
         generator.generate()
         grid: list[list[int]] = generator.maze
         return grid
+
+    def has_wall(self, col: int, row: int, direction: PlayerDir) -> bool:
+        """Return True if the cell has a wall on the given side."""
+        tile = TileMap.get_tile(self.grid, col, row)
+        return bool(tile & WALL_BIT[direction])
