@@ -33,11 +33,15 @@ class App:
         arcade_rect: Rect for the arcade window.
         side_rect: Rect for the side window.
         assets: Loader holding every font, sprite and sound.
+        dev_log: Warnings, messages and the input line of the dev log.
+        cheats: Cheat code lookup and the toggles currently active.
+        log_panel: Draws the dev log on the left side of the canvas.
         highscores: Persistent highscore table, loaded at startup.
         main_menu: Main menu window to return to.
         current_screen: Current menu or window to be displayed.
         game: Running game, or None when no game is in progress.
         running: False once the main loop must stop.
+        on_dev_mode: True while dev mode is open and keys go to the log.
     """
     # Canvas
     CANVAS_H = 1080
