@@ -8,14 +8,12 @@ import pygame
 from .screens import (MainMenu, ScreenAction, Screen,
                       Instructions, Game, HighscoresTable, Pause,
                       GameOver, Win, EndMenu)
-from .paths import FontsPaths, SpritesPaths, TilemapPath, SfxPaths, HudPaths
 from .assets import AssetsLoader
-from .terminal import TerminalPrinter
 from ..constants import ARCADE_WIDTH, ARCADE_HEIGHT
-from ..exceptions import LoadAssetsError, PacManError
+from ..exceptions import HighScoreError
 from ..validation import GameConfig
-from ..backend import Highscores, DevLog, LogKind, CheatCodes, Cheat
-from .log_panel import LogPanel
+from ..backend import Highscores, DevLog, LogKind, CheatCodes
+from .log_panel import LogPanel, LogInput
 
 
 class App:
@@ -43,6 +41,10 @@ class App:
         running: False once the main loop must stop.
         on_dev_mode: True while dev mode is open and keys go to the log.
     """
+
+    # ------------------------------------------------------------------
+    # Constants
+    # ------------------------------------------------------------------
     # Canvas
     CANVAS_H = 1080
     LOG_GAP = 16
@@ -62,9 +64,10 @@ class App:
     # ------------------------------------------------------------------
     # Setup
     # ------------------------------------------------------------------
-    def __init__(self, game_config: GameConfig) -> None:
-        """Open the window, load the assets and highscore"""
-        self.validate_assets()
+    def __init__(self, game_config: GameConfig,
+                 dev_log: DevLog) -> None:
+        """Open the window, load the assets and the highscores."""
+        AssetsLoader.validate_assets()
         self.game_config = game_config
 
         pygame.init()
@@ -76,7 +79,7 @@ class App:
         self.assets = AssetsLoader()
         self.assets.load()
 
-        self.dev_log = DevLog()
+        self.dev_log = dev_log
         self.cheats = CheatCodes()
         self.log_panel = LogPanel(self.assets, self.dev_log)
 
@@ -88,18 +91,9 @@ class App:
         self.running = True
         self.on_dev_mode = False
 
-    @staticmethod
-    def validate_assets() -> None:
-        """Raise LoadAssetsError listing every missing asset."""
-        missing: list[str] = []
-        for paths in (FontsPaths, SpritesPaths, TilemapPath, SfxPaths,
-                      HudPaths):
-            missing += paths.validate()
-        if missing:
-            raise LoadAssetsError(
-                "Missing assets needed to run pac-man:\n - "
-                + "\n - ".join(missing))
-
+    # ------------------------------------------------------------------
+    # Window and Canvas
+    # ------------------------------------------------------------------
     @staticmethod
     def _create_window() -> pygame.Surface:
         """Open the resizable window, set its title and hide the cursor."""
@@ -121,12 +115,6 @@ class App:
             self._compute_layout()
         self.canvas_size = self._compute_canvas_size()
 
-    def _compute_canvas_size(self) -> tuple[int, int]:
-        """Return the canvas size scaled to fit the window."""
-        win_w, win_h = self.screen.get_size()
-        factor = min(win_w / self.canvas_w, win_h / self.CANVAS_H)
-        return int(self.canvas_w * factor), int(self.CANVAS_H * factor)
-
     def _compute_layout(self) -> tuple[pygame.Rect, pygame.Rect, pygame.Rect]:
         """Split the canvas into the log, arcade and side areas.
 
@@ -144,30 +132,14 @@ class App:
                            self.CANVAS_H)
         return log, arcade, side
 
-    def _save_highscores(self) -> None:
-        """Save the highscore table. On failure warn and keep playing.
-
-        The error is printed in the terminal and shown in the dev log, so
-        the game never crashes over a file it cannot write.
-        """
-        try:
-            self.highscores.save()
-        except PacManError as e:
-            TerminalPrinter.print_error(f"{e}\n")
-            self.dev_log.add(str(e), LogKind.WARNING)
-
-    def _load_highscores(self) -> Highscores:
-        """Load the highscore table; on failure print the error and go on."""
-        highscores = Highscores(Path(self.game_config.highscores_path))
-        try:
-            highscores.load()
-        except PacManError as e:
-            TerminalPrinter.print_error(f"{e}\n")
-            self.dev_log.add(str(e), LogKind.WARNING)
-        return highscores
+    def _compute_canvas_size(self) -> tuple[int, int]:
+        """Return the canvas size scaled to fit the window."""
+        win_w, win_h = self.screen.get_size()
+        factor = min(win_w / self.canvas_w, win_h / self.CANVAS_H)
+        return int(self.canvas_w * factor), int(self.CANVAS_H * factor)
 
     # ------------------------------------------------------------------
-    # Main loop
+    # Main Loop
     # ------------------------------------------------------------------
     def run(self) -> None:
         """Run the main loop until the window is closed."""
@@ -181,8 +153,11 @@ class App:
         pygame.quit()
 
     def _handle_events(self) -> ScreenAction:
-        """Forward events to the screen, return the first action it
-        asked for."""
+        """Forward events to the current screen.
+
+        Returns:
+            The first action a screen asked for, or NONE.
+        """
         action = ScreenAction.NONE
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -225,7 +200,7 @@ class App:
         pygame.display.flip()
 
     # ------------------------------------------------------------------
-    # Screen switching
+    # Screen Switching
     # ------------------------------------------------------------------
     def _switch(self, action: ScreenAction | None) -> None:
         """Change the current screen according to the action."""
@@ -287,8 +262,36 @@ class App:
         self.current_screen = menu(ARCADE_WIDTH, ARCADE_HEIGHT, self.assets,
                                    self.game, is_highscore)
 
+    def _resume(self) -> None:
+        """Close the pause menu and go back to the game."""
+        if self.game is not None:
+            self.current_screen = self.game
+
+    # ------------------------------------------------------------------
+    # Highscores
+    # ------------------------------------------------------------------
+    def _load_highscores(self) -> Highscores:
+        """Load the highscore table; on failure warn in the dev log."""
+        highscores = Highscores(Path(self.game_config.highscores_path))
+        try:
+            highscores.load()
+        except HighScoreError as e:
+            self.dev_log.add(str(e), LogKind.WARNING)
+        return highscores
+
+    def _save_highscores(self) -> None:
+        """Save the highscore table. On failure warn and keep playing.
+
+        The error is shown in the dev log, so the game never crashes over
+        a file it cannot write.
+        """
+        try:
+            self.highscores.save()
+        except HighScoreError as e:
+            self.dev_log.add(str(e), LogKind.WARNING)
+
     def _insert_high_score(self) -> None:
-        """Inserts current score to highscore if its valid"""
+        """Insert the current score into the table and save it."""
         if self.game is None or not isinstance(self.current_screen,
                                                EndMenu):
             return
@@ -297,77 +300,22 @@ class App:
         self.highscores.insert(name, self.current_screen.game.score)
         self._save_highscores()
 
-    def _resume(self) -> None:
-        """Close the pause menu and go back to the game."""
-        if self.game is not None:
-            self.current_screen = self.game
-
     # ------------------------------------------------------------------
-    # Dev panel
+    # Dev Mode
     # ------------------------------------------------------------------
-
     def _enter_dev_mode(self) -> None:
         """Open dev mode: keys now go to the log input line."""
         self.on_dev_mode = True
 
     def _exit_dev_mode(self) -> None:
-        """Closes dev mode and discard any half-typed input."""
+        """Close dev mode and discard any half-typed input."""
         self.dev_log.text = ""
         self.on_dev_mode = False
 
     def _handle_dev_input(self, event: pygame.event.Event) -> None:
-        """Send a key event to the log input line while dev mode is open.
-
-        Ctrl+T or Escape closes dev mode, Enter submits the line,
-        Backspace deletes and any other key types its character.
-
-        Args:
-            event: The pygame event to process.
-        """
-        if event.type != pygame.KEYDOWN:
-            return
-
-        ctrl_t = event.mod & pygame.KMOD_CTRL and event.key == pygame.K_t
-        if ctrl_t or event.key == pygame.K_ESCAPE:
-            self._exit_dev_mode()
-        elif event.key == pygame.K_RETURN:
-            self._submit_dev_text()
-        elif event.key == pygame.K_BACKSPACE:
-            self.dev_log.backspace()
-        else:
-            self.dev_log.add_char(event.unicode)
-
-    def _submit_dev_text(self) -> None:
-        """Submit the input line and log the result.
-
-        Text starting with / is checked as a cheat code.
-        Empty input does nothing.
-        """
-        text = self.dev_log.submit()
-        if text == "":
-            return
-        elif not text.startswith("/"):
-            self.dev_log.add(text, LogKind.MESSAGE)
-        else:
-            cheat = self.cheats.submit(text)
-            if cheat is None:
-                self.dev_log.add(f"Unknown code: {text}", LogKind.WARNING)
-            else:
-                self.dev_log.add(self._cheat_feedback(cheat), LogKind.CHEAT)
-
-    def _cheat_feedback(self, cheat: Cheat) -> str:
-        """Return the log message describing what a submitted cheat did.
-
-        Args:
-            cheat: The cheat that was submitted.
-
-        Returns:
-            "<CODE> used" for one-shots, otherwise "<CODE> ON"
-            or "<CODE> OFF" depending on its status.
-        """
-        if cheat in CheatCodes.ONE_SHOTS:
-            return f"<{cheat.name}> used"
-        elif self.cheats.is_active(cheat):
-            return f"<{cheat.name}> ON"
-        else:
-            return f"<{cheat.name}> OFF"
+        """Pass a key event to the log panel and act on what it asks."""
+        match self.log_panel.handle_event(event):
+            case LogInput.CLOSE:
+                self._exit_dev_mode()
+            case LogInput.SUBMIT:
+                self.dev_log.process(self.cheats)

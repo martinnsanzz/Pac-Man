@@ -9,7 +9,7 @@ from ..validation import GameConfig
 from ..exceptions import PacManError
 
 
-def parse_game_config(config: dict[str, Any]) -> GameConfig:
+def parse_game_config(config: dict[str, Any] | None) -> GameConfig:
     """Validate a raw configuration dictionary as a ``GameConfig``.
 
     Unknown keys are ignored. Only the first validation error is reported.
@@ -25,7 +25,9 @@ def parse_game_config(config: dict[str, Any]) -> GameConfig:
             first invalid field and the reason.
     """
     try:
-        return GameConfig.model_validate(config, extra="ignore")
+        if config:
+            return GameConfig.model_validate(config, extra="ignore")
+        return GameConfig()
     except ValidationError as e:
         var = e.errors()[0]["loc"][0]
         msg = e.errors()[0]["msg"].removeprefix("Value error, ")

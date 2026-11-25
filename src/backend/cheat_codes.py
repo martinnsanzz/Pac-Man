@@ -74,3 +74,20 @@ class CheatCodes:
             True if the cheat is active, False otherwise.
         """
         return cheat in self.active
+
+    def feedback(self, cheat: Cheat) -> str:
+        """Return the log message describing what a submitted cheat did.
+
+        Args:
+            cheat: The cheat that was submitted.
+
+        Returns:
+            "<CODE> used" for one-shots, otherwise "<CODE> ON"
+            or "<CODE> OFF" depending on its status.
+        """
+        if cheat in CheatCodes.ONE_SHOTS:
+            return f"<{cheat.name}> used"
+        elif self.is_active(cheat):
+            return f"<{cheat.name}> ON"
+        else:
+            return f"<{cheat.name}> OFF"

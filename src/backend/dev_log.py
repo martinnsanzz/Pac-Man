@@ -1,6 +1,10 @@
 # Built-in modules
 from enum import Enum, auto
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .cheat_codes import CheatCodes
 
 
 class LogKind(Enum):
@@ -80,3 +84,21 @@ class DevLog:
         text = self.text.strip()
         self.text = ""
         return text
+
+    def process(self, cheats: "CheatCodes") -> None:
+        """Submit the input line and log the result.
+
+        Text starting with / is checked as a cheat code.
+        Empty input does nothing.
+        """
+        text = self.submit()
+        if text == "":
+            return
+        elif not text.startswith("/"):
+            self.add(text, LogKind.MESSAGE)
+        else:
+            cheat = cheats.submit(text)
+            if cheat is None:
+                self.add(f"Unknown code: {text}", LogKind.WARNING)
+            else:
+                self.add(cheats.feedback(cheat), LogKind.CHEAT)

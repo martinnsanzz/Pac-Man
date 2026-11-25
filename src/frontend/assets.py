@@ -10,6 +10,7 @@ from .paths import SpritesPaths, FontsPaths, TilemapPath, HudPaths, SfxPaths
 from .terminal import TerminalPrinter
 from ..constants import (TILE_SRC_PX, TILE_PX, TILEMAP_SHEET_COLS,
                          FRUIT_SHEET_COLS, SPRITE_PX, HUD_PX)
+from ..exceptions import LoadAssetsError
 
 
 class Fruit(IntEnum):
@@ -55,6 +56,18 @@ class AssetsLoader():
         self.fruit_icons: dict[Fruit, pygame.Surface] = {}
         self.fonts: dict[tuple[str, int], pygame.font.Font] = {}
         self.sounds: dict[str, pygame.mixer.Sound] = {}
+
+    @staticmethod
+    def validate_assets() -> None:
+        """Raise LoadAssetsError listing every missing asset."""
+        missing: list[str] = []
+        for paths in (FontsPaths, SpritesPaths, TilemapPath, SfxPaths,
+                      HudPaths):
+            missing += paths.validate()
+        if missing:
+            raise LoadAssetsError(
+                "Missing assets needed to run pac-man:\n - "
+                + "\n - ".join(missing))
 
     def load(self) -> None:
         """Loads all assets independently. It modifies class attributes
