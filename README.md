@@ -102,6 +102,35 @@ The file is created on the first save, in the folder the game is run from.
 - Corrupted or invalid file -> the table is emptied and a warning is printed in the terminal
 - File can-t be written -> a warning is printed in the terminal and the game keeps running
 
+### 🛠️ Dev Mode
+A log panel on the left side of the screen is always visible. It shows warnings
+(like a highscore file that can't be saved) and anything typed in dev mode.
+Older messages fade out at the top to make room for new ones.
+
+**Controls:**
+- `Esc` -> pause the game
+- `Ctrl + T` (in the pause menu) -> open dev mode, the game dims and the log lights up
+- `Enter` -> submit the typed line
+- `Esc` or `Ctrl + T` -> close dev mode and go back to the pause menu
+
+**Cheat codes:** type `/` followed by the code (case doesn't matter), then `Enter`.
+
+| Code | Effect | Type |
+|---|---|---|
+| `/IMMORTAL` | Ghosts can't hurt you | Toggle |
+| `/ZOOMZOOM` | Pac-Man moves faster | Toggle |
+| `/FREEZEUP` | Ghosts stop moving | Toggle |
+| `/SKIPZONE` | Skip the current level | One-shot |
+| `/MORELIFE` | Extra life | One-shot |
+| `/SUPERPAC` |ible | One-shot |
+| `/NOCHEATS` | Turn off every active cheat | One-shot |
+
+- **Toggle** cheats stay on until typed again or until
+`/NOCHEATS`
+- **One-shot** cheats apply once
+- Every code is confirmed in the log (`IMMORTAL ON`,`MORELIFE used`...), unknown codes show a warning
+- Text without `/` is shown as a plain message
+
 ### 🔋 Maze Generation
 
 > Work in progress: the maze is currently generated once, when the game is entered, with fixed parameters.

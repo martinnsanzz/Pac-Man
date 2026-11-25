@@ -14,7 +14,8 @@ from .terminal import TerminalPrinter
 from ..constants import ARCADE_WIDTH, ARCADE_HEIGHT
 from ..exceptions import LoadAssetsError, PacManError
 from ..validation import GameConfig
-from ..backend import Highscores
+from ..backend import Highscores, DevLog, LogKind, CheatCodes, Cheat
+from .log_panel import LogPanel
 
 
 class App:
@@ -25,14 +26,30 @@ class App:
         clock: Pygame clock.
         screen: Pygame window to hold the drawings.
         arcade_screen: Subwindow to hold arcade related drawings.
-        arcade_size: Arcade window scaled by the user screen.
+        canvas: Surface CANVAS_H tall, as wide as the window screen.
+        canvas_size: Canvas scaled by the user screen.
+        canvas_w: Width size of the canvas surface.
+        log_rect: Rect for the log window.
+        arcade_rect: Rect for the arcade window.
+        side_rect: Rect for the side window.
         assets: Loader holding every font, sprite and sound.
+        dev_log: Warnings, messages and the input line of the dev log.
+        cheats: Cheat code lookup and the toggles currently active.
+        log_panel: Draws the dev log on the left side of the canvas.
         highscores: Persistent highscore table, loaded at startup.
         main_menu: Main menu window to return to.
         current_screen: Current menu or window to be displayed.
         game: Running game, or None when no game is in progress.
         running: False once the main loop must stop.
+        on_dev_mode: True while dev mode is open and keys go to the log.
     """
+    # Canvas
+    CANVAS_H = 1080
+    LOG_GAP = 16
+    ARCADE_W = int(ARCADE_WIDTH * CANVAS_H / ARCADE_HEIGHT)
+    ARCADE_DIM = 60
+
+    # Display
     FPS = 60
     BACKGROUND = (12, 14, 16)
 
@@ -53,14 +70,19 @@ class App:
         pygame.init()
         self.clock = pygame.time.Clock()
         self.screen = self._create_window()
+        self._build_canvas()
         self.arcade_screen = pygame.Surface((ARCADE_WIDTH, ARCADE_HEIGHT))
-        self.arcade_size = self._compute_arcade_size()
 
         self.assets = AssetsLoader()
         self.assets.load()
-        self.highscores = self._load_highscores()
 
+        self.dev_log = DevLog()
+        self.cheats = CheatCodes()
+        self.log_panel = LogPanel(self.assets, self.dev_log)
+
+        self.highscores = self._load_highscores()
         self.main_menu: Screen = MainMenu(self.assets)
+
         self.current_screen: Screen = self.main_menu
         self.game: Game | None = None
         self.running = True
@@ -85,11 +107,54 @@ class App:
         pygame.mouse.set_visible(False)
         return pygame.display.set_mode((0, 0), pygame.RESIZABLE)
 
-    def _compute_arcade_size(self) -> tuple[int, int]:
-        """Return the arcade size scaled to fit the window."""
+    def _build_canvas(self) -> None:
+        """Size the canvas to the window ratio and split it into areas.
+
+        Called at startup and on every resize so the arcade always fills the
+        window height and the side panels absorb the extra width.
+        """
         win_w, win_h = self.screen.get_size()
-        factor = min(win_w / ARCADE_WIDTH, win_h / ARCADE_HEIGHT)
-        return int(ARCADE_WIDTH * factor), int(ARCADE_HEIGHT * factor)
+        self.canvas_w = max(int(win_w / win_h * self.CANVAS_H),
+                            self.ARCADE_W)
+        self.canvas = pygame.Surface((self.canvas_w, self.CANVAS_H))
+        self.log_rect, self.arcade_rect, self.side_rect = \
+            self._compute_layout()
+        self.canvas_size = self._compute_canvas_size()
+
+    def _compute_canvas_size(self) -> tuple[int, int]:
+        """Return the canvas size scaled to fit the window."""
+        win_w, win_h = self.screen.get_size()
+        factor = min(win_w / self.canvas_w, win_h / self.CANVAS_H)
+        return int(self.canvas_w * factor), int(self.CANVAS_H * factor)
+
+    def _compute_layout(self) -> tuple[pygame.Rect, pygame.Rect, pygame.Rect]:
+        """Split the canvas into the log, arcade and side areas.
+
+        The arcade keeps its ratio and fills the canvas height. The log and
+        side panels share the space left on each side.
+
+        Returns:
+            The log, arcade and side rects, in canvas coordinates.
+        """
+        arcade_x = (self.canvas_w - self.ARCADE_W) // 2
+
+        arcade = pygame.Rect(arcade_x, 0, self.ARCADE_W, self.CANVAS_H)
+        log = pygame.Rect(0, 0, arcade.left - self.LOG_GAP, self.CANVAS_H)
+        side = pygame.Rect(arcade.right, 0, self.canvas_w - arcade.right,
+                           self.CANVAS_H)
+        return log, arcade, side
+
+    def _save_highscores(self) -> None:
+        """Save the highscore table. On failure warn and keep playing.
+
+        The error is printed in the terminal and shown in the dev log, so
+        the game never crashes over a file it cannot write.
+        """
+        try:
+            self.highscores.save()
+        except PacManError as e:
+            TerminalPrinter.print_error(f"{e}\n")
+            self.dev_log.add(str(e), LogKind.WARNING)
 
     def _load_highscores(self) -> Highscores:
         """Load the highscore table; on failure print the error and go on."""
@@ -98,6 +163,7 @@ class App:
             highscores.load()
         except PacManError as e:
             TerminalPrinter.print_error(f"{e}\n")
+            self.dev_log.add(str(e), LogKind.WARNING)
         return highscores
 
     # ------------------------------------------------------------------
@@ -122,7 +188,10 @@ class App:
             if event.type == pygame.QUIT:
                 self.running = False
             elif event.type == pygame.VIDEORESIZE:
-                self.arcade_size = self._compute_arcade_size()
+                self._build_canvas()
+            if self.on_dev_mode:
+                self._handle_dev_input(event)
+                continue
             result = self.current_screen.handle_event(event)
             if action == ScreenAction.NONE:
                 action = result
@@ -133,13 +202,26 @@ class App:
         return self.current_screen.update(dt)
 
     def _draw(self) -> None:
-        """Draw the current screen scaled and centered in the window."""
+        """Draw the screen into the canvas and fit it to the window."""
         self.screen.fill((0, 0, 0))
+        self.canvas.fill((0, 0, 0))
+
+        self.log_panel.draw(self.canvas, self.log_rect, self.on_dev_mode)
         self.arcade_screen.fill(self.BACKGROUND)
         self.current_screen.draw(self.arcade_screen)
-        scaled = pygame.transform.scale(self.arcade_screen, self.arcade_size)
-        self.screen.blit(
-            scaled, scaled.get_rect(center=self.screen.get_rect().center))
+        if self.on_dev_mode:
+            self.arcade_screen.fill(
+                    (self.ARCADE_DIM, self.ARCADE_DIM, self.ARCADE_DIM),
+                    special_flags=pygame.BLEND_RGB_MULT)
+
+        arcade = pygame.transform.scale(self.arcade_screen,
+                                        self.arcade_rect.size)
+        self.canvas.blit(arcade, self.arcade_rect)
+
+        scaled = pygame.transform.scale(self.canvas, self.canvas_size)
+        self.screen.blit(scaled,
+                         scaled.get_rect(
+                             center=self.screen.get_rect().center))
         pygame.display.flip()
 
     # ------------------------------------------------------------------
@@ -149,7 +231,6 @@ class App:
         """Change the current screen according to the action."""
         match action:
             case ScreenAction.QUIT:
-                self.highscores.save()
                 self.running = False
             case ScreenAction.BACK | ScreenAction.MAIN_MENU:
                 self._show_main_menu()
@@ -166,7 +247,6 @@ class App:
             case ScreenAction.NAME_SUBMITTED:
                 self._insert_high_score()
             case ScreenAction.DEV_MODE:
-                self.on_dev_mode = True
                 self._enter_dev_mode()
             case ScreenAction.RESUME:
                 self._resume()
@@ -215,11 +295,79 @@ class App:
         name = self.current_screen.name
 
         self.highscores.insert(name, self.current_screen.game.score)
+        self._save_highscores()
 
     def _resume(self) -> None:
         """Close the pause menu and go back to the game."""
         if self.game is not None:
             self.current_screen = self.game
 
+    # ------------------------------------------------------------------
+    # Dev panel
+    # ------------------------------------------------------------------
+
     def _enter_dev_mode(self) -> None:
-        ...
+        """Open dev mode: keys now go to the log input line."""
+        self.on_dev_mode = True
+
+    def _exit_dev_mode(self) -> None:
+        """Closes dev mode and discard any half-typed input."""
+        self.dev_log.text = ""
+        self.on_dev_mode = False
+
+    def _handle_dev_input(self, event: pygame.event.Event) -> None:
+        """Send a key event to the log input line while dev mode is open.
+
+        Ctrl+T or Escape closes dev mode, Enter submits the line,
+        Backspace deletes and any other key types its character.
+
+        Args:
+            event: The pygame event to process.
+        """
+        if event.type != pygame.KEYDOWN:
+            return
+
+        ctrl_t = event.mod & pygame.KMOD_CTRL and event.key == pygame.K_t
+        if ctrl_t or event.key == pygame.K_ESCAPE:
+            self._exit_dev_mode()
+        elif event.key == pygame.K_RETURN:
+            self._submit_dev_text()
+        elif event.key == pygame.K_BACKSPACE:
+            self.dev_log.backspace()
+        else:
+            self.dev_log.add_char(event.unicode)
+
+    def _submit_dev_text(self) -> None:
+        """Submit the input line and log the result.
+
+        Text starting with / is checked as a cheat code.
+        Empty input does nothing.
+        """
+        text = self.dev_log.submit()
+        if text == "":
+            return
+        elif not text.startswith("/"):
+            self.dev_log.add(text, LogKind.MESSAGE)
+        else:
+            cheat = self.cheats.submit(text)
+            if cheat is None:
+                self.dev_log.add(f"Unknown code: {text}", LogKind.WARNING)
+            else:
+                self.dev_log.add(self._cheat_feedback(cheat), LogKind.CHEAT)
+
+    def _cheat_feedback(self, cheat: Cheat) -> str:
+        """Return the log message describing what a submitted cheat did.
+
+        Args:
+            cheat: The cheat that was submitted.
+
+        Returns:
+            "<CODE> used" for one-shots, otherwise "<CODE> ON"
+            or "<CODE> OFF" depending on its status.
+        """
+        if cheat in CheatCodes.ONE_SHOTS:
+            return f"<{cheat.name}> used"
+        elif self.cheats.is_active(cheat):
+            return f"<{cheat.name}> ON"
+        else:
+            return f"<{cheat.name}> OFF"
