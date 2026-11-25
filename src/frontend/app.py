@@ -10,9 +10,8 @@ from .screens import (MainMenu, ScreenAction, Screen,
                       GameOver, Win, EndMenu)
 from .paths import FontsPaths, SpritesPaths, TilemapPath, SfxPaths, HudPaths
 from .assets import AssetsLoader
-from .terminal import TerminalPrinter
 from ..constants import ARCADE_WIDTH, ARCADE_HEIGHT
-from ..exceptions import LoadAssetsError, PacManError
+from ..exceptions import LoadAssetsError, HighScoreError
 from ..validation import GameConfig
 from ..backend import Highscores, DevLog, LogKind, CheatCodes, Cheat
 from .log_panel import LogPanel
@@ -62,7 +61,8 @@ class App:
     # ------------------------------------------------------------------
     # Setup
     # ------------------------------------------------------------------
-    def __init__(self, game_config: GameConfig) -> None:
+    def __init__(self, game_config: GameConfig,
+                 dev_log: DevLog) -> None:
         """Open the window, load the assets and highscore"""
         self.validate_assets()
         self.game_config = game_config
@@ -76,7 +76,7 @@ class App:
         self.assets = AssetsLoader()
         self.assets.load()
 
-        self.dev_log = DevLog()
+        self.dev_log = dev_log
         self.cheats = CheatCodes()
         self.log_panel = LogPanel(self.assets, self.dev_log)
 
@@ -147,39 +147,26 @@ class App:
     def _save_highscores(self) -> None:
         """Save the highscore table. On failure warn and keep playing.
 
-        The error is printed in the terminal and shown in the dev log, so
+        The error is shown in the dev log, so
         the game never crashes over a file it cannot write.
         """
         try:
             self.highscores.save()
-        except PacManError as e:
-            TerminalPrinter.print_error(f"{e}\n")
+        except HighScoreError as e:
             self.dev_log.add(str(e), LogKind.WARNING)
 
     def _load_highscores(self) -> Highscores:
-        """Load the highscore table; on failure print the error and go on."""
+        """Load the highscore table; on failure show warning in the dev log."""
         highscores = Highscores(Path(self.game_config.highscores_path))
         try:
             highscores.load()
-        except PacManError as e:
-            TerminalPrinter.print_error(f"{e}\n")
+        except HighScoreError as e:
             self.dev_log.add(str(e), LogKind.WARNING)
         return highscores
 
     # ------------------------------------------------------------------
-    # Main loop
+    # Events
     # ------------------------------------------------------------------
-    def run(self) -> None:
-        """Run the main loop until the window is closed."""
-        while self.running:
-            dt = self.clock.tick(self.FPS) / 1000
-            action = self._handle_events()
-            if action == ScreenAction.NONE:
-                action = self._update(dt)
-            self._switch(action)
-            self._draw()
-        pygame.quit()
-
     def _handle_events(self) -> ScreenAction:
         """Forward events to the screen, return the first action it
         asked for."""
@@ -197,10 +184,30 @@ class App:
                 action = result
         return action
 
+    # ------------------------------------------------------------------
+    # Main Loop
+    # ------------------------------------------------------------------
+    def run(self) -> None:
+        """Run the main loop until the window is closed."""
+        while self.running:
+            dt = self.clock.tick(self.FPS) / 1000
+            action = self._handle_events()
+            if action == ScreenAction.NONE:
+                action = self._update(dt)
+            self._switch(action)
+            self._draw()
+        pygame.quit()
+
+    # ------------------------------------------------------------------
+    # Update
+    # ------------------------------------------------------------------
     def _update(self, dt: float) -> ScreenAction:
         """Advance the current screen by dt seconds."""
         return self.current_screen.update(dt)
 
+    # ------------------------------------------------------------------
+    # Draw
+    # ------------------------------------------------------------------
     def _draw(self) -> None:
         """Draw the screen into the canvas and fit it to the window."""
         self.screen.fill((0, 0, 0))
@@ -305,7 +312,6 @@ class App:
     # ------------------------------------------------------------------
     # Dev panel
     # ------------------------------------------------------------------
-
     def _enter_dev_mode(self) -> None:
         """Open dev mode: keys now go to the log input line."""
         self.on_dev_mode = True

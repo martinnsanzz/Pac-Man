@@ -19,7 +19,7 @@ class LogPanel:
         font: Font used for every line of the panel.
     """
     FONT_NAME = "CAIROPIXEL"
-    FONT_SIZE = 22
+    FONT_SIZE = 32
     PADDING = 16
     LINE_SPACE = 4
     BACKGROUND: RGBA = (255, 255, 255, 18)
