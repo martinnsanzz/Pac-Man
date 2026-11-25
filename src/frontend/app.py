@@ -172,6 +172,15 @@ class App:
                 action = result
         return action
 
+    def _handle_dev_input(self, event: pygame.event.Event) -> None:
+        """Pass a key event to the log panel and act on what it asks."""
+        match self.log_panel.handle_event(event):
+            case LogInput.CLOSE:
+                self.dev_log.text = ""
+                self.on_dev_mode = False
+            case LogInput.SUBMIT:
+                self.dev_log.process(self.cheats)
+
     def _update(self, dt: float) -> ScreenAction:
         """Advance the current screen by dt seconds."""
         return self.current_screen.update(dt)
@@ -222,7 +231,7 @@ class App:
             case ScreenAction.NAME_SUBMITTED:
                 self._insert_high_score()
             case ScreenAction.DEV_MODE:
-                self._enter_dev_mode()
+                self.on_dev_mode = True
             case ScreenAction.RESUME:
                 self._resume()
 
@@ -299,23 +308,3 @@ class App:
 
         self.highscores.insert(name, self.current_screen.game.score)
         self._save_highscores()
-
-    # ------------------------------------------------------------------
-    # Dev Mode
-    # ------------------------------------------------------------------
-    def _enter_dev_mode(self) -> None:
-        """Open dev mode: keys now go to the log input line."""
-        self.on_dev_mode = True
-
-    def _exit_dev_mode(self) -> None:
-        """Close dev mode and discard any half-typed input."""
-        self.dev_log.text = ""
-        self.on_dev_mode = False
-
-    def _handle_dev_input(self, event: pygame.event.Event) -> None:
-        """Pass a key event to the log panel and act on what it asks."""
-        match self.log_panel.handle_event(event):
-            case LogInput.CLOSE:
-                self._exit_dev_mode()
-            case LogInput.SUBMIT:
-                self.dev_log.process(self.cheats)
