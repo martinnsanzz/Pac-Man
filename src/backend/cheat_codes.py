@@ -1,19 +1,5 @@
-# Built-in modules
-from enum import Enum
-
-
-class Cheat(Enum):
-    """Cheats that can be activated by typing their code.
-
-    Each member's value is the code the player must type.
-    """
-    IMMORTAL = "IMMORTAL"
-    SKIPZONE = "SKIPZONE"
-    MORELIFE = "MORELIFE"
-    ZOOMZOOM = "ZOOMZOOM"
-    FREEZEUP = "FREEZEUP"
-    SUPERPAC = "SUPERPAC"
-    NOCHEATS = "NOCHEATS"
+# Local modules
+from .enums import Cheat
 
 
 class CheatCodes:
@@ -26,17 +12,26 @@ class CheatCodes:
     Attributes:
         active: Toggle cheats that are currently on.
     """
+    # Cheats applied once and never stored in ``active``
     ONE_SHOTS: frozenset[Cheat] = frozenset([Cheat.SKIPZONE,
                                              Cheat.MORELIFE,
                                              Cheat.NOCHEATS,
                                              Cheat.SUPERPAC])
 
+    # ------------------------------------------------------------------
+    # Setup
+    # ------------------------------------------------------------------
     def __init__(self) -> None:
+        """Create the cheat state with every toggle off."""
         self.active: set[Cheat] = set()
 
+    # ------------------------------------------------------------------
+    # Submitting codes
+    # ------------------------------------------------------------------
     def submit(self, text: str) -> Cheat | None:
         """Check the typed text against the codes.
 
+        The text must start with ``/``, and the code is case-insensitive.
         A valid toggle cheat is switched on or off. NOCHEATS turns every
         toggle off.
 
@@ -64,6 +59,9 @@ class CheatCodes:
                 self.active.discard(cheat)
         return cheat
 
+    # ------------------------------------------------------------------
+    # Queries
+    # ------------------------------------------------------------------
     def is_active(self, cheat: Cheat) -> bool:
         """Check whether a toggle cheat is currently on.
 

@@ -1,18 +1,12 @@
 # Built-in modules
-from enum import Enum, auto
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .cheat_codes import CheatCodes
 
-
-class LogKind(Enum):
-    """Category of a log entry, used by the UI to pick its color."""
-    INFO = auto()
-    WARNING = auto()
-    CHEAT = auto()
-    MESSAGE = auto()
+# Local modules
+from .enums import LogKind
 
 
 @dataclass
@@ -39,12 +33,19 @@ class DevLog:
         text: Characters typed so far in the input line.
     """
 
-    MAX_ENTRIES = 100
+    MAX_ENTRIES = 100   # oldest entries are dropped beyond this
 
+    # ------------------------------------------------------------------
+    # Setup
+    # ------------------------------------------------------------------
     def __init__(self) -> None:
+        """Create an empty log with an empty input line."""
         self.entries: list[LogEntry] = []
         self.text: str = ""
 
+    # ------------------------------------------------------------------
+    # Log entries
+    # ------------------------------------------------------------------
     def add(self, text: str, kind: LogKind) -> None:
         """Append a message to the log.
 
@@ -58,6 +59,9 @@ class DevLog:
         if len(self.entries) > self.MAX_ENTRIES:
             self.entries.pop(0)
 
+    # ------------------------------------------------------------------
+    # Input line
+    # ------------------------------------------------------------------
     def add_char(self, char: str) -> None:
         """Append a typed character to the input line.
 
@@ -70,7 +74,7 @@ class DevLog:
             self.text += char
 
     def backspace(self) -> None:
-        """Remove the last typed character, if exists."""
+        """Remove the last typed character, if there is one."""
         self.text = self.text[:-1]
 
     def submit(self) -> str:
@@ -85,11 +89,19 @@ class DevLog:
         self.text = ""
         return text
 
+    # ------------------------------------------------------------------
+    # Command handling
+    # ------------------------------------------------------------------
     def process(self, cheats: "CheatCodes") -> None:
         """Submit the input line and log the result.
 
-        Text starting with / is checked as a cheat code.
-        Empty input does nothing.
+        Text starting with ``/`` is checked as a cheat code and logged as
+        ``CHEAT`` feedback, or as a ``WARNING`` if the code is unknown.
+        Any other text is logged as a ``MESSAGE``. Empty input does
+        nothing.
+
+        Args:
+            cheats: Cheat codes used to check and apply ``/`` commands.
         """
         text = self.submit()
         if text == "":

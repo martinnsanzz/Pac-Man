@@ -11,7 +11,13 @@ from ...assets import AssetsLoader
 
 
 class LabelStyle(NamedTuple):
-    """Text, font size and color of a label."""
+    """Text, font size and color of a label.
+
+    Attributes:
+        text: The text to display.
+        font_size: Size of the font in pixels.
+        color: RGB color of the text.
+    """
     text: str
     font_size: int
     color: tuple[int, int, int]
@@ -20,7 +26,7 @@ class LabelStyle(NamedTuple):
 class OverlayMenu(Screen):
     """Base for menus drawn as a panel over the frozen game screen.
 
-    Subclasses must define ``TITLE_TEXT``, ``TITLE_COLOR``, ``SHADOW_COLOR``
+    Subclasses must define ``TITLE_TEXT``, ``TITLE_COLOR``, ``TITLE_SHADOW``
     and ``OPTIONS``. Each option is a (label, action) pair shown as a
     button in a row at the bottom of the panel.
 
@@ -55,8 +61,19 @@ class OverlayMenu(Screen):
     BUTTON_PAD_X = 20
     BUTTON_GAP = 20
 
+    # ------------------------------------------------------------------
+    # Setup
+    # ------------------------------------------------------------------
     def __init__(self, screen_w: int, screen_h: int,
                  assets: AssetsLoader, game: Game) -> None:
+        """Create the overlay, the centred panel and the buttons.
+
+        Args:
+            screen_w: Width in pixels of the target surface.
+            screen_h: Height in pixels of the target surface.
+            assets: Loader providing the fonts.
+            game: Game whose current frame is drawn behind the menu.
+        """
         super().__init__(assets)
         self.game = game
         self.title_font = assets.get_font("ARCADECLASSIC",
@@ -71,7 +88,12 @@ class OverlayMenu(Screen):
         self.buttons = self._init_buttons()
 
     def _init_buttons(self) -> list[pygame.Rect]:
-        """Build one rectangle per option, sized to its label, in a row."""
+        """Build one rectangle per option, sized to its label, in a row.
+
+        Returns:
+            The button rectangles in ``OPTIONS`` order, centred
+            horizontally at the bottom of the panel.
+        """
         widths = [max(self.BUTTON_MIN_WIDTH,
                       self.button_font.size(label)[0] + 2 * self.BUTTON_PAD_X)
                   for label, _ in self.OPTIONS]
@@ -87,13 +109,23 @@ class OverlayMenu(Screen):
             x += width + self.BUTTON_GAP
         return buttons
 
+    # ------------------------------------------------------------------
+    # Events
+    # ------------------------------------------------------------------
     def navigate(self, step: int) -> None:
-        """Move the selection by ``step``, clamped to the first/last button."""
+        """Move the selection by ``step``, clamped to the first/last button.
+
+        Args:
+            step: Number of buttons to move, negative for left.
+        """
         self.selected = max(0, min(self.selected + step,
                                    len(self.OPTIONS) - 1))
 
     def handle_event(self, event: pygame.event.Event) -> ScreenAction:
         """Left/right move the selection; Enter triggers the selected option.
+
+        Args:
+            event: The pygame event to process.
 
         Returns:
             The selected option's action on Enter, otherwise ``NONE``.
@@ -107,8 +139,15 @@ class OverlayMenu(Screen):
                 return self.OPTIONS[self.selected][1]
         return ScreenAction.NONE
 
+    # ------------------------------------------------------------------
+    # Draw
+    # ------------------------------------------------------------------
     def draw(self, surface: pygame.Surface) -> None:
-        """Draw the game, the dimmed overlay, the panel, title and buttons."""
+        """Draw the game, the dimmed overlay, the panel, title and buttons.
+
+        Args:
+            surface: Surface to draw on.
+        """
         self.game.draw(surface)
         surface.blit(self.overlay, (0, 0))
         pygame.draw.rect(surface, self.PANEL_COLOR, self.panel)
@@ -123,11 +162,19 @@ class OverlayMenu(Screen):
         self._draw_content(surface)
 
     def _draw_content(self, surface: pygame.Surface) -> None:
-        """Draw what sits below the title. Subclasses can override."""
+        """Draw what sits below the title. Subclasses can override.
+
+        Args:
+            surface: Surface to draw on.
+        """
         self._display_buttons(surface)
 
     def _display_buttons(self, surface: pygame.Surface) -> None:
-        """Draw every button, highlighting the selected one."""
+        """Draw every button, highlighting the selected one.
+
+        Args:
+            surface: Surface to draw on.
+        """
         for i, (label, _) in enumerate(self.OPTIONS):
             rect = self.buttons[i]
             color = (self.SELECTED_COLOR if i == self.selected

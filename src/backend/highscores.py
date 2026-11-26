@@ -21,10 +21,24 @@ class Highscores:
             at most MAX_ENTRIES long.
         path: Location of the highscore JSON file.
     """
+
+    # ------------------------------------------------------------------
+    # Setup
+    # ------------------------------------------------------------------
     def __init__(self, path: Path) -> None:
+        """Create an empty table bound to a file.
+
+        The file is not read here; call ``load`` to fill the table.
+
+        Args:
+            path: Location of the highscore JSON file.
+        """
         self.table: list[HighscoreEntry] = []
         self.path: Path = path
 
+    # ------------------------------------------------------------------
+    # File handling
+    # ------------------------------------------------------------------
     def load(self) -> None:
         """Load the table from the highscores file.
 
@@ -62,6 +76,8 @@ class Highscores:
     def save(self) -> None:
         """Write the current table to the file as JSON, one entry per line.
 
+        Creates the parent directories if they don't exist.
+
         Raises:
             HighScoreError: If the file can't be written.
         """
@@ -77,6 +93,9 @@ class Highscores:
                 f"Could not save highscores to '{self.path}': {e}."
             ) from e
 
+    # ------------------------------------------------------------------
+    # Table changes
+    # ------------------------------------------------------------------
     def insert(self, name: str, score: int) -> bool:
         """Add a score to the table if it makes the top MAX_ENTRIES.
 
@@ -97,6 +116,9 @@ class Highscores:
         self._sort_and_trim()
         return True
 
+    # ------------------------------------------------------------------
+    # Queries
+    # ------------------------------------------------------------------
     def get_high_score(self) -> int:
         """Return the highest score in the table.
 
@@ -123,6 +145,9 @@ class Highscores:
             return True
         return score > self.table[-1].score
 
+    # ------------------------------------------------------------------
+    # Helpers
+    # ------------------------------------------------------------------
     def _sort_and_trim(self) -> None:
         """Keep the table sorted high to low and at most MAX_ENTRIES long."""
         self.table.sort(key=lambda entry: entry.score, reverse=True)

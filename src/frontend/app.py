@@ -183,7 +183,7 @@ class App:
 
     def _update(self, dt: float) -> ScreenAction:
         """Advance the current screen by dt seconds."""
-        return self.current_screen.update(dt)
+        return self.current_screen.update(dt, self.dev_log)
 
     def _draw(self) -> None:
         """Draw the screen into the canvas and fit it to the window."""

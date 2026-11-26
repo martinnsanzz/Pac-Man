@@ -11,6 +11,13 @@ from ...backend import Highscores
 
 
 class Row(NamedTuple):
+    """One rendered highscore row.
+
+    Attributes:
+        rank: Rendered rank text, e.g. "1.".
+        name: Rendered player name.
+        score: Rendered score.
+    """
     rank: pygame.Surface
     name: pygame.Surface
     score: pygame.Surface
@@ -34,18 +41,27 @@ class HighscoresTable(Screen):
     """
     # Title
     TITLE_FONT_SIZE = 50
-    TITLE_Y_RATIO = 0.15
-    TITLE_GAP = 70
+    TITLE_Y_RATIO = 0.15      # title height as a fraction of the screen
+    TITLE_GAP = 70            # px between the title and the first row
     HEADER_COLOR = (255, 255, 0)
 
     # Rows
     ROW_FONT_SIZE = 30
     ROW_HEIGHT = 40
-    MARGIN_RATIO = 0.125
-    RANK_X, NAME_X, SCORE_X = 0.15, 0.30, 0.65
+    MARGIN_RATIO = 0.125      # left margin as a fraction of the screen
+    RANK_X, NAME_X, SCORE_X = 0.15, 0.30, 0.65   # column positions (ratios)
 
+    # ------------------------------------------------------------------
+    # Setup
+    # ------------------------------------------------------------------
     def __init__(self, assets: AssetsLoader,
                  highscores: Highscores) -> None:
+        """Render the title, the empty message and the rows once.
+
+        Args:
+            assets: Loader providing the title and row fonts.
+            highscores: Source of the entries to display.
+        """
         super().__init__(assets)
         title_font = assets.get_font("ARCADECLASSIC", self.TITLE_FONT_SIZE)
         self.row_font = assets.get_font("DIGITAL808", self.ROW_FONT_SIZE)
@@ -75,13 +91,27 @@ class HighscoresTable(Screen):
             rows.append(Row(rank_text, name_text, score_text))
         return rows
 
+    # ------------------------------------------------------------------
+    # Events
+    # ------------------------------------------------------------------
     def handle_event(self, event: pygame.event.Event) -> ScreenAction:
-        """Return BACK when Enter is pressed, NONE otherwise."""
+        """Return BACK when Enter is pressed, NONE otherwise.
+
+        Args:
+            event: The pygame event to process.
+
+        Returns:
+            ``ScreenAction.BACK`` if Enter was pressed, otherwise
+            ``ScreenAction.NONE``.
+        """
         if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
             self.assets.play_sound("MENU_SELECT")
             return ScreenAction.BACK
         return ScreenAction.NONE
 
+    # ------------------------------------------------------------------
+    # Draw
+    # ------------------------------------------------------------------
     def draw(self, surface: pygame.Surface) -> None:
         """Draw the title, the rows or an empty message, and the back button.
 

@@ -247,6 +247,8 @@ This is a list of multiple resources use throughout the life-cycle of the projec
 
 ### 📋 Other Stuff
 - [The Pac-Man Dossier by Jamey Pittman](https://pacman.holenet.info/)
+- [Input buffering](https://www.geeksforgeeks.org/compiler-design/input-buffering-in-compiler-design/)
+- [How To Play](https://pacmanonline.org/guide)
 
 ## 🤖 AI Usage
 

@@ -21,14 +21,22 @@ class MainMenu(Screen):
     TITLE_TEXT = "PAC MAN"
     TITLE_COLOR = (255, 255, 0)
     TITLE_SHADOW = (120, 100, 0)
-    TITLE_Y = 0.30
+    TITLE_Y = 0.30            # title height as a fraction of the screen
 
     # Options
-    OPTIONS_Y = 0.55
+    OPTIONS_Y = 0.55          # first option height, fraction of the screen
     LINE_HEIGHT = Screen.BUTTON_FONT_SIZE + 40
     BUTTON_SIZE = (320, 56)
 
+    # ------------------------------------------------------------------
+    # Setup
+    # ------------------------------------------------------------------
     def __init__(self, assets: AssetsLoader) -> None:
+        """Create the menu with its options and the first one selected.
+
+        Args:
+            assets: Loader providing the fonts and sounds.
+        """
         super().__init__(assets)
         self.options: tuple[tuple[str, ScreenAction], ...] = (
             ("Start", ScreenAction.START_GAME),
@@ -37,6 +45,9 @@ class MainMenu(Screen):
             ("Exit", ScreenAction.QUIT))
         self.selected: int = 0
 
+    # ------------------------------------------------------------------
+    # Events
+    # ------------------------------------------------------------------
     def navigate(self, step: int) -> None:
         """Move the selection by `step`, clamped to the first/last option.
 
@@ -50,14 +61,15 @@ class MainMenu(Screen):
     def handle_event(self, event: pygame.event.Event) -> ScreenAction:
         """Handle a single pygame event for the main menu.
 
-        Arrow or 'W/S' keys move the selection, Enter confirms it.
+        Arrow or 'W/S' keys move the selection, Enter confirms it. A move
+        sound plays only if the selection actually changes.
 
         Args:
             event: The pygame event to process.
 
         Returns:
             The action of the selected option when Enter is pressed,
-            otherwise Action.PASS.
+            otherwise ``ScreenAction.NONE``.
         """
         if event.type != pygame.KEYDOWN:
             return ScreenAction.NONE
@@ -75,6 +87,9 @@ class MainMenu(Screen):
             return self.options[self.selected][1]
         return ScreenAction.NONE
 
+    # ------------------------------------------------------------------
+    # Draw
+    # ------------------------------------------------------------------
     def draw(self, surface: pygame.Surface) -> None:
         """Draw the title and the menu options on the surface.
 
@@ -91,6 +106,9 @@ class MainMenu(Screen):
     def _draw_options(self, surface: pygame.Surface) -> None:
         """Draw every option as an outlined button, highlighting the
         selected one.
+
+        Args:
+            surface: The pygame surface to be drawn on.
         """
         width, height = surface.get_size()
         start_y = int(height * self.OPTIONS_Y)

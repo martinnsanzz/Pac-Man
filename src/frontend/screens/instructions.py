@@ -7,6 +7,7 @@ from ..assets import AssetsLoader
 
 # TODO: read values of pacgums from config
 
+# One rendered line: (key text, description text)
 Row = tuple[pygame.Surface, pygame.Surface]
 
 
@@ -21,13 +22,13 @@ class Instructions(Screen):
     # Title
     TITLE_TEXT = "INSTRUCTIONS"
     SUB_TITLE_SIZE = 50
-    TITLE_Y_RATIO = 0.12
-    TITLE_GAP = 50
+    TITLE_Y_RATIO = 0.12      # title height as a fraction of the screen
+    TITLE_GAP = 50            # px between the title and the first section
 
     # Layout
-    MARGIN_RATIO = 0.125
-    DESC_X_RATIO = 0.45
-    INDENT = 24
+    MARGIN_RATIO = 0.125      # side margin as a fraction of the screen
+    DESC_X_RATIO = 0.45       # description column, fraction of the screen
+    INDENT = 24               # px the keys are indented from the margin
     LINE_HEIGHT = 32
     SECTION_GAP = 24
 
@@ -36,7 +37,7 @@ class Instructions(Screen):
     SHADOW_COLOR = (99, 91, 2)
     KEY_COLOR = (0, 255, 255)
 
-    # Content
+    # Content: section header -> (key, description) lines
     CONTENT: dict[str, tuple[tuple[str, str], ...]] = {
         "CONTROLS": (("ARROWS / WASD", "Move Pac-Man"),
                      ("ESC", "Pause / resume"),
@@ -50,14 +51,27 @@ class Instructions(Screen):
                         ("NOCHEATS", "Turn off all cheats"))
     }
 
+    # ------------------------------------------------------------------
+    # Setup
+    # ------------------------------------------------------------------
     def __init__(self, assets: AssetsLoader) -> None:
+        """Load the title font and render every section once.
+
+        Args:
+            assets: Loader providing the fonts.
+        """
         super().__init__(assets)
         self.sub_title_font = assets.get_font("ARCADECLASSIC",
                                               self.SUB_TITLE_SIZE)
         self.sections = self._build_sections()
 
     def _build_sections(self) -> list[tuple[pygame.Surface, list[Row]]]:
-        """Render every header, key and description once."""
+        """Render every header, key and description once.
+
+        Returns:
+            One ``(header, rows)`` pair per entry in ``CONTENT``, where
+            each row is a rendered ``(key, description)`` pair.
+        """
         sections = []
         for header, rows in self.CONTENT.items():
             header_text = self.sub_title_font.render(header, True,
@@ -71,13 +85,27 @@ class Instructions(Screen):
             sections.append((header_text, rendered))
         return sections
 
+    # ------------------------------------------------------------------
+    # Events
+    # ------------------------------------------------------------------
     def handle_event(self, event: pygame.event.Event) -> ScreenAction:
-        """Return BACK when Enter is pressed, NONE otherwise."""
+        """Return BACK when Enter is pressed, NONE otherwise.
+
+        Args:
+            event: The pygame event to process.
+
+        Returns:
+            ``ScreenAction.BACK`` if Enter was pressed, otherwise
+            ``ScreenAction.NONE``.
+        """
         if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
             self.assets.play_sound("MENU_SELECT")
             return ScreenAction.BACK
         return ScreenAction.NONE
 
+    # ------------------------------------------------------------------
+    # Draw
+    # ------------------------------------------------------------------
     def draw(self, surface: pygame.Surface) -> None:
         """Draw the title, every section and the back button.
 
