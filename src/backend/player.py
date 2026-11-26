@@ -18,7 +18,7 @@ class Player():
             at the next tile center that allows it, or ``PlayerDir.NONE``.
         speed: Movement speed of the player in tiles per second.
     """
-    TURN_TOLERANCE_PX = 6   # how early before a center a turn may happen
+    TURN_TOLERANCE_PX = 10   # how early before a center a turn may happen
 
     # ------------------------------------------------------------------
     # Setup

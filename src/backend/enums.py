@@ -31,6 +31,7 @@ class PlayerDir(Enum):
         """
         return _OPPOSITES.get(self, PlayerDir.NONE)
 
+
 # Pairs of opposite directions, used by ``PlayerDir.opposite``.
 _OPPOSITES: dict[PlayerDir, PlayerDir] = {
     PlayerDir.UP: PlayerDir.DOWN,

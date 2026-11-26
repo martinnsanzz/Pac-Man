@@ -38,7 +38,7 @@ class Level():
         PlayerDir.LEFT: WALL_W,
         PlayerDir.RIGHT: WALL_E,
         PlayerDir.NONE: WALL_ALL
-}
+    }
 
     # ------------------------------------------------------------------
     # Setup
