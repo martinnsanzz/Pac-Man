@@ -5,6 +5,7 @@ from argparse import ArgumentError
 from .exceptions import PacManError
 from .frontend import TerminalPrinter, App
 from .parsing import parse_game_config, load_arguments, load_json
+from .backend import DevLog
 
 
 def main() -> None:
@@ -16,7 +17,9 @@ def main() -> None:
 
 def run_program() -> None:
     """Load arguments, create a GameConfig model and run the app"""
-    args = load_arguments()
-    config = parse_game_config(load_json(args.file))
+    devlog = DevLog()
 
-    App(config).run()
+    args = load_arguments()
+    config = parse_game_config(load_json(args.file, devlog))
+
+    App(config, devlog).run()

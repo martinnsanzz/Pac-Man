@@ -5,6 +5,7 @@ from pathlib import Path
 
 # Local modules
 from ..exceptions import PacManError
+from ..backend import DevLog, LogKind
 
 
 def is_comment(line: str) -> bool:
@@ -61,7 +62,7 @@ def extract_data(lines: list[str]) -> list[str]:
     return raw
 
 
-def load_json(file: Path) -> dict[str, Any]:
+def load_json(file: Path, dev_log: DevLog) -> dict[str, Any] | None:
     """Load and parse a JSON file into a dictionary.
 
     Read the file as UTF-8, discard blank lines and surrounding whitespace,
@@ -90,7 +91,9 @@ def load_json(file: Path) -> dict[str, Any]:
 
         parsed = loads("".join(raw_data))
     except OSError as e:
-        raise PacManError(f"{e.strerror} '{file}'") from e
+        dev_log.add(f"{e.strerror} '{file}'. Using default values for game",
+                    LogKind.WARNING)
+        return None
     except UnicodeDecodeError as e:
         raise PacManError(f"Decode error found on '{file}'.\n"
                           "File must be 'utf-8'") from e
