@@ -78,6 +78,12 @@ Only the first invalid field is reported, with the reason.
 
 The validated values are stored in a single typed `GameConfig` object, with each key as an attribute. It is built once at startup, after validation and after defaults are filled in.
 
+#### Missing config
+
+If `config.json` is missing on the repository or file can't be read the program will print
+a *warning message* to the dev console, and it will use **default values** instead of 
+finishing the program.
+
 ### 🏆 Highscores
 Highscores are saved in a JSON file. Its name is set by `highscore_filename` in the config file (default: `highscore.json`).
 The file is created on the first save, in the folder the game is run from.
