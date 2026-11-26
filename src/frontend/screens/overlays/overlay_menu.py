@@ -67,7 +67,7 @@ class OverlayMenu(Screen):
         self.panel = pygame.Rect((0, 0), self.PANEL_SIZE)
         self.panel.center = (screen_w // 2, screen_h // 2)
 
-        self.selected = 0
+        self.selected = 1
         self.buttons = self._init_buttons()
 
     def _init_buttons(self) -> list[pygame.Rect]:
