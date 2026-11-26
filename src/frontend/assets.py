@@ -30,7 +30,14 @@ class Fruit(IntEnum):
 
 
 def _public_attrs(cls: type) -> Iterator[tuple[str, Any]]:
-    """Yield (name, value) for each public, non-callable class attribute."""
+    """Yield (name, value) for each public, non-callable class attribute.
+
+    Args:
+        cls: Class whose attributes are listed, such as a paths class.
+
+    Yields:
+        ``(name, value)`` pairs, in definition order.
+    """
     for key, value in vars(cls).items():
         if not key.startswith("__") and not callable(value):
             yield key, value
@@ -41,12 +48,21 @@ class AssetsLoader():
     or surface
 
     Attributes:
-        tiles: List containing all 16 tiles within the tilemap 16x16 px each
-               as a pygame surface.
+        tiles: List containing all 16 tiles within the tilemap as pygame
+            surfaces, scaled to ``TILE_PX``.
         sprites: dict containing all sprites for the game as pygame Surfaces.
-        fonts: dict containing all fonts for the game as pygame Font.
+        hud_icons: dict containing the HUD icons as pygame Surfaces.
+        fruit_sprites: Fruit sprites for the game, one per ``Fruit``.
+        fruit_icons: Fruit icons for the HUD, one per ``Fruit``.
+        fonts: dict containing all fonts for the game as pygame Font,
+            keyed by ``(name, size)``.
+        sounds: dict containing the sound effects as pygame Sound. Empty
+            if there is no audio device.
     """
 
+    # ------------------------------------------------------------------
+    # Setup
+    # ------------------------------------------------------------------
     def __init__(self) -> None:
         """Declare the attributes and initialize them to nothing"""
         self.tiles: list[pygame.Surface] = []
@@ -59,7 +75,12 @@ class AssetsLoader():
 
     @staticmethod
     def validate_assets() -> None:
-        """Raise LoadAssetsError listing every missing asset."""
+        """Raise LoadAssetsError listing every missing asset.
+
+        Raises:
+            LoadAssetsError: If any font, sprite, tilemap, sound or HUD
+                file is missing.
+        """
         missing: list[str] = []
         for paths in (FontsPaths, SpritesPaths, TilemapPath, SfxPaths,
                       HudPaths):
@@ -69,20 +90,19 @@ class AssetsLoader():
                 "Missing assets needed to run pac-man:\n - "
                 + "\n - ".join(missing))
 
+    # ------------------------------------------------------------------
+    # Loading
+    # ------------------------------------------------------------------
     def load(self) -> None:
         """Loads all assets independently. It modifies class attributes
-        directly.
+        directly. Fonts are not loaded here, ``get_font`` creates them on
+        first use.
         """
         self._load_tiles()
         self._load_sprites()
         self._load_hud_icons()
         self._load_fruits()
         self._load_sounds()
-
-    def play_sound(self, name: str) -> None:
-        """Play the sound ``name`` if audio is available."""
-        if self.sounds.get(name):
-            self.sounds[name].play()
 
     def _load_tiles(self) -> None:
         """Cut the tilemap into 16 tiles, in reading order."""
@@ -114,7 +134,10 @@ class AssetsLoader():
             self.fruit_icons[fruit] = self._scale(cell, HUD_PX)
 
     def _load_sounds(self) -> None:
-        """Load the in-game sound effects."""
+        """Load the in-game sound effects.
+
+        If there is no audio device, print a message and load nothing.
+        """
         if pygame.mixer.get_init():
             for key, path in _public_attrs(SfxPaths):
                 sound = pygame.mixer.Sound(path)
@@ -122,16 +145,49 @@ class AssetsLoader():
         else:
             TerminalPrinter.print_msg("No audio device, sounds disabled.")
 
+    # ------------------------------------------------------------------
+    # Access
+    # ------------------------------------------------------------------
+    def play_sound(self, name: str) -> None:
+        """Play the sound ``name`` if audio is available.
+
+        Args:
+            name: Key of the sound in ``sounds``. Unknown names, or any
+                name when there is no audio device, do nothing.
+        """
+        if self.sounds.get(name):
+            self.sounds[name].play()
+
     def get_font(self, name: str, size: int) -> pygame.font.Font:
-        """Return the font `name` at `size`, creating it on first use."""
+        """Return the font `name` at `size`, creating it on first use.
+
+        Args:
+            name: Attribute name of the font in ``FontsPaths``.
+            size: Font size in pixels.
+
+        Returns:
+            The cached font for ``(name, size)``.
+        """
         key = (name, size)
         if key not in self.fonts:
             self.fonts[key] = pygame.font.Font(getattr(FontsPaths, name), size)
         return self.fonts[key]
 
+    # ------------------------------------------------------------------
+    # Image helpers
+    # ------------------------------------------------------------------
     def _cut(self, sheet: pygame.Surface, index: int,
              cols: int) -> pygame.Surface:
-        """Return cell `index` of a sheet of SRC_SIZE squares, `cols` wide."""
+        """Return cell `index` of a sheet of TILE_SRC_PX squares.
+
+        Args:
+            sheet: Sprite sheet to cut from.
+            index: Cell number, counted left to right, top to bottom.
+            cols: Number of cells per row in the sheet.
+
+        Returns:
+            A subsurface of the sheet holding that cell.
+        """
         rect = pygame.Rect((index % cols) * TILE_SRC_PX,
                            (index // cols) * TILE_SRC_PX,
                            TILE_SRC_PX, TILE_SRC_PX)
@@ -139,5 +195,13 @@ class AssetsLoader():
 
     @staticmethod
     def _scale(surface: pygame.Surface, size: int | float) -> pygame.Surface:
-        """Return `surface` scaled to `size` x `size` pixels."""
+        """Return `surface` scaled to `size` x `size` pixels.
+
+        Args:
+            surface: Image to scale.
+            size: Target width and height in pixels.
+
+        Returns:
+            A new, scaled surface.
+        """
         return pygame.transform.scale(surface, (size, size))

@@ -30,6 +30,7 @@ class EndMenu(OverlayMenu):
             when the input box is not shaking.
         label_font: Font used for the "ENTER NAME:" label.
         highscore_font: Font used for the "NEW HIGHSCORE !!" label.
+        score_font: Font used for the final score.
         input_font: Font used for the typed name.
     """
 
@@ -70,23 +71,38 @@ class EndMenu(OverlayMenu):
     SHAKE_AMPLITUDE_PX = 8
     SHAKE_FREQUENCY = 0.05  # radians per millisecond
 
+    # ------------------------------------------------------------------
+    # Setup
+    # ------------------------------------------------------------------
     def __init__(self, screen_w: int, screen_h: int,
                  assets: AssetsLoader, game: Game,
                  is_highscore: bool) -> None:
+        """Create the menu and load its fonts.
+
+        Args:
+            screen_w: Width in pixels of the target surface.
+            screen_h: Height in pixels of the target surface.
+            assets: Loader providing the fonts.
+            game: The finished game, used for its score.
+            is_highscore: Whether the score earns a name entry step.
+        """
         super().__init__(screen_w, screen_h, assets, game)
         self.is_highscore = is_highscore
         self.entering_name = is_highscore
         self.name = ""
         self.shake_start: int | None = None
         self.label_font = assets.get_font(
-             "DIGITAL808", self.INPUT_LABEL.font_size)
+            "DIGITAL808", self.INPUT_LABEL.font_size)
         self.highscore_font = assets.get_font(
-                "DIGITAL808", self.HIGHSCORE_LABEL.font_size)
+            "DIGITAL808", self.HIGHSCORE_LABEL.font_size)
         self.score_font = assets.get_font(
             "DIGITAL808", self.SCORE_FONT_SIZE)
-        self.input_font = assets.get_font("CAIROPIXEL",
-                                          self.INPUT_FONT_SIZE)
+        self.input_font = assets.get_font(
+            "CAIROPIXEL", self.INPUT_FONT_SIZE)
 
+    # ------------------------------------------------------------------
+    # Events
+    # ------------------------------------------------------------------
     def handle_event(self, event: pygame.Event) -> ScreenAction:
         """Process an event, editing the name or delegating to the menu.
 
@@ -101,7 +117,8 @@ class EndMenu(OverlayMenu):
         Returns:
             ``ScreenAction.NAME_SUBMITTED`` when a valid name is
             submitted, the parent menu's action when not entering a
-            name, or None if no screen change is requested.
+            name, or ``ScreenAction.NONE`` if no screen change is
+            requested.
         """
         if not self.entering_name:
             return super().handle_event(event)
@@ -128,7 +145,7 @@ class EndMenu(OverlayMenu):
 
         Returns:
             ``ScreenAction.NAME_SUBMITTED`` if a valid name was
-            entered, otherwise None.
+            entered, otherwise ``ScreenAction.NONE``.
         """
         if self.name and not self._is_valid():
             self.name = ""
@@ -153,6 +170,9 @@ class EndMenu(OverlayMenu):
             return False
         return True
 
+    # ------------------------------------------------------------------
+    # Draw
+    # ------------------------------------------------------------------
     def _draw_content(self, surface: pygame.Surface) -> None:
         """Draw the name input, or the regular menu once entry is done.
 
@@ -208,6 +228,13 @@ class EndMenu(OverlayMenu):
 
     def _draw_score(self, surface: pygame.Surface,
                     anchor: pygame.Surface) -> None:
+        """Draw the final score below the highscore label.
+
+        Args:
+            surface: Surface to draw on.
+            anchor: Rendered highscore label, whose height sets the
+                vertical distance of the score.
+        """
         score = self.score_font.render(
             f"{self.game.score}", True, self.SCORE_COLOR)
         surface.blit(score, score.get_rect(
@@ -227,6 +254,9 @@ class EndMenu(OverlayMenu):
                               box.centery)
             pygame.draw.rect(surface, self.TEXT_COLOR, cursor)
 
+    # ------------------------------------------------------------------
+    # Shake effect
+    # ------------------------------------------------------------------
     def _shake_offset(self) -> int:
         """Return the current horizontal shake offset in pixels.
 

@@ -5,20 +5,12 @@ except (ModuleNotFoundError, ImportError):
     mazegen = None
 
 # Local modules
-from .player_dir import PlayerDir
+from .enums import PlayerDir
 from .tilemap import TileMap
 from ..validation import GameConfig
 from ..exceptions import MazegenError
 from ..constants import (MAZE_COLS, MAZE_ROWS, WALL_N, WALL_S,
                          WALL_W, WALL_E, WALL_ALL)
-
-WALL_BIT: dict[PlayerDir, int] = {
-    PlayerDir.UP: WALL_N,
-    PlayerDir.DOWN: WALL_S,
-    PlayerDir.LEFT: WALL_W,
-    PlayerDir.RIGHT: WALL_E,
-    PlayerDir.NONE: WALL_ALL
-}
 
 
 class Level():
@@ -26,7 +18,7 @@ class Level():
 
     The maze is generated on construction through the ``mazegen``
     library. The remaining time is decreased in whole seconds by
-    accumulating frame deltas via ``decrease_timer``.
+    accumulating frame deltas in ``update``.
 
     Attributes:
         time_left: Remaining time for the level, initialised from
@@ -35,14 +27,29 @@ class Level():
         grid: Two-dimensional maze grid produced by ``gen_maze``.
         start_time: Time in seconds accumulated towards the next
             one-second timer tick.
+        spawn_point: ``(col, row)`` cell where the player starts, at the
+            middle of the maze.
     """
+
+    # Wall bit of each direction in a cell value. NONE maps to every wall.
+    WALL_BIT: dict[PlayerDir, int] = {
+        PlayerDir.UP: WALL_N,
+        PlayerDir.DOWN: WALL_S,
+        PlayerDir.LEFT: WALL_W,
+        PlayerDir.RIGHT: WALL_E,
+        PlayerDir.NONE: WALL_ALL
+}
+
+    # ------------------------------------------------------------------
+    # Setup
+    # ------------------------------------------------------------------
     def __init__(self, config: GameConfig, level: int) -> None:
         """Initialize the level timer and generate its maze.
 
         Args:
             config: Game configuration providing ``level_time_limit``.
-            level: Level number used to select the maze seed, or None for
-                a randomly seeded maze.
+            level: Level number used to select the maze seed. Level 1
+                always gets the same maze, any other level a random one.
 
         Raises:
             MazegenError: If the ``mazegen`` library is not available.
@@ -52,6 +59,9 @@ class Level():
         self.start_time = 0.0
         self.spawn_point = (MAZE_COLS // 2, MAZE_ROWS // 2)
 
+    # ------------------------------------------------------------------
+    # Timer
+    # ------------------------------------------------------------------
     def update(self, dt: float) -> None:
         """Update the level state for a time step.
 
@@ -76,6 +86,9 @@ class Level():
             self.start_time -= 1.0
             self.time_left -= 1
 
+    # ------------------------------------------------------------------
+    # Maze generation
+    # ------------------------------------------------------------------
     @staticmethod
     def gen_maze(level: int) -> list[list[int]]:
         """Generate a maze grid for the given level.
@@ -85,7 +98,7 @@ class Level():
         receives no seed.
 
         Args:
-            level: Level number, or None for an unseeded maze.
+            level: Level number.
 
         Returns:
             The generated maze as a two-dimensional list of integers, with
@@ -106,7 +119,22 @@ class Level():
         grid: list[list[int]] = generator.maze
         return grid
 
+    # ------------------------------------------------------------------
+    # Walls
+    # ------------------------------------------------------------------
     def has_wall(self, col: int, row: int, direction: PlayerDir) -> bool:
-        """Return True if the cell has a wall on the given side."""
+        """Return True if the cell has a wall on the given side.
+
+        Cells outside the grid count as fully walled in.
+
+        Args:
+            col: Column index of the cell.
+            row: Row index of the cell.
+            direction: Side of the cell to check. ``PlayerDir.NONE``
+                counts as blocked.
+
+        Returns:
+            True if the cell has a wall on that side, False otherwise.
+        """
         tile = TileMap.get_tile(self.grid, col, row)
-        return bool(tile & WALL_BIT[direction])
+        return bool(tile & self.WALL_BIT[direction])
