@@ -41,6 +41,12 @@ _OPPOSITES: dict[PlayerDir, PlayerDir] = {
 }
 
 
+class PlayerState(Enum):
+    MOVING = auto()
+    DEAD = auto()
+    IDLE = auto()
+
+
 class LogKind(Enum):
     """Category of a log entry, used by the UI to pick its color.
 

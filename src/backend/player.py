@@ -1,6 +1,6 @@
 # Local modules
 from .level import Level
-from .enums import PlayerDir
+from .enums import PlayerDir, PlayerState
 from .tilemap import TileMap
 from ..constants import TILE_PX
 from .dev_log import DevLog
@@ -37,6 +37,7 @@ class Player():
         self.speed = speed
         self.direction: PlayerDir = PlayerDir.NONE
         self.buffer_direction: PlayerDir = PlayerDir.NONE
+        self.state: PlayerState = PlayerState.IDLE
 
     # ------------------------------------------------------------------
     # Update
@@ -60,6 +61,7 @@ class Player():
             if self._stop_at_wall(level):
                 break
 
+            self.state = PlayerState.MOVING
             distance, center = self._distance_to_next_center()
 
             if (distance <= self.TURN_TOLERANCE_PX
@@ -145,6 +147,7 @@ class Player():
             self.center_pos_to_cell(center)
             self.direction = PlayerDir.NONE
             self.buffer_direction = PlayerDir.NONE
+            self.state = PlayerState.IDLE
             return True
         return False
 
