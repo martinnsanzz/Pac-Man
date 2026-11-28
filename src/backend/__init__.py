@@ -5,7 +5,7 @@ from .dev_log import DevLog
 from .level import Level
 from .tilemap import TileMap
 from .player import Player
-from .enums import PlayerDir, Cheat, LogKind
+from .enums import PlayerDir, Cheat, LogKind, PlayerState
 
 __all__ = [
     "Highscores",
@@ -18,4 +18,5 @@ __all__ = [
     "TileMap",
     "Player",
     "PlayerDir",
+    "PlayerState"
 ]

@@ -72,9 +72,14 @@ class SpritesPaths(PathsBase):
     """Paths to sprite files.
 
     Attributes:
-        PAC_MAN: Path to the Pac-Man animation `.gif` file.
+        PAC_MAN_MOVING: Path to Pac-Man moving spritesheet `.png` file.
+        PAC_MAN_DEAD: Path to Pac-Man dying spritesheet `.png` file.
+        FRUITS: Path to FRUITS spritesheet `.png` file.
     """
-    PAC_MAN = (ASSETS / "player" / "PacMan-Anim").with_suffix(".gif")
+    PAC_MAN_MOVING = (ASSETS / "player" /
+                      "PacMan-Moving-SpriteSheet").with_suffix(".png")
+    PAC_MAN_DEAD = (ASSETS / "player" /
+                    "PacMan-Dead-SpriteSheet").with_suffix(".png")
     FRUITS = (ASSETS / "fruits" / "fruits_sheet").with_suffix(".png")
 
 

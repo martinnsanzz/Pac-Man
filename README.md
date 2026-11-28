@@ -236,6 +236,7 @@ This is a list of multiple resources use throughout the life-cycle of the projec
 - [How to load Custom Fonts](https://www.makeuseof.com/pygame-fonts-text-effects-how-load/)
 - [Pygame-ce Docs](https://pyga.me/docs/)
 - [How to create a text input box with Pygame](https://www.geeksforgeeks.org/python/how-to-create-a-text-input-box-with-pygame/)
+- [Pygame - Character Animation](https://www.geeksforgeeks.org/python/pygame-character-animation/)
 
 ### 😺 GitHub
 - [GitHub Branching Name Best Practices](https://dev.to/jps27cse/github-branching-name-best-practices-49ei)

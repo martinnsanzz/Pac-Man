@@ -9,7 +9,7 @@ import pygame
 from .paths import SpritesPaths, FontsPaths, TilemapPath, HudPaths, SfxPaths
 from .terminal import TerminalPrinter
 from ..constants import (TILE_SRC_PX, TILE_PX, TILEMAP_SHEET_COLS,
-                         FRUIT_SHEET_COLS, SPRITE_PX, HUD_PX)
+                         FRUIT_SHEET_COLS, SPRITE_PX, HUD_PX, SPRITE_SRC_PX)
 from ..exceptions import LoadAssetsError
 
 
@@ -66,7 +66,7 @@ class AssetsLoader():
     def __init__(self) -> None:
         """Declare the attributes and initialize them to nothing"""
         self.tiles: list[pygame.Surface] = []
-        self.sprites: dict[str, pygame.Surface] = {}
+        self.sprites: dict[str, list[pygame.Surface]] = {}
         self.hud_icons: dict[str, pygame.Surface] = {}
         self.fruit_sprites: dict[Fruit, pygame.Surface] = {}
         self.fruit_icons: dict[Fruit, pygame.Surface] = {}
@@ -108,16 +108,28 @@ class AssetsLoader():
         """Cut the tilemap into 16 tiles, in reading order."""
         tilemap = pygame.image.load(TilemapPath.TILEMAP).convert_alpha()
         for v in range(16):
-            tile = self._cut(tilemap, v, TILEMAP_SHEET_COLS)
+            tile = self._cut(tilemap, v, TILEMAP_SHEET_COLS, TILE_SRC_PX)
             self.tiles.append(self._scale(tile, TILE_PX))
 
     def _load_sprites(self) -> None:
-        """Load the in-game sprites (the fruit sheet is handled separately)."""
+        """Load the in-game sprites as lists of frames.
+
+        Each sprite sheet is cut into ``SPRITE_SRC_PX`` squares, in reading
+        order, and every frame is scaled to ``SPRITE_PX``. A sheet with a
+        single cell gives a list with one frame. The fruit sheet is handled
+        separately.
+        """
         for key, path in _public_attrs(SpritesPaths):
             if key == "FRUITS":
                 continue
-            sprite = pygame.image.load(path).convert_alpha()
-            self.sprites[key] = self._scale(sprite, SPRITE_PX)
+            sheet = pygame.image.load(path).convert_alpha()
+            cols = sheet.get_width() // SPRITE_SRC_PX
+            rows = sheet.get_height() // SPRITE_SRC_PX
+            self.sprites[key] = [
+                self._scale(self._cut(sheet, i, cols, SPRITE_SRC_PX),
+                            SPRITE_PX)
+                for i in range(rows * cols)
+            ]
 
     def _load_hud_icons(self) -> None:
         """Load one HUD icon per attribute of HudPaths."""
@@ -129,7 +141,8 @@ class AssetsLoader():
         """Cut the fruit sheet once, scaling each fruit for game and HUD."""
         sheet = pygame.image.load(SpritesPaths.FRUITS).convert_alpha()
         for fruit in Fruit:
-            cell = self._cut(sheet, fruit.value, FRUIT_SHEET_COLS)
+            cell = self._cut(sheet, fruit.value,
+                             FRUIT_SHEET_COLS, SPRITE_SRC_PX)
             self.fruit_sprites[fruit] = self._scale(cell, SPRITE_PX)
             self.fruit_icons[fruit] = self._scale(cell, HUD_PX)
 
@@ -177,20 +190,21 @@ class AssetsLoader():
     # Image helpers
     # ------------------------------------------------------------------
     def _cut(self, sheet: pygame.Surface, index: int,
-             cols: int) -> pygame.Surface:
-        """Return cell `index` of a sheet of TILE_SRC_PX squares.
+             cols: int, cell_px: int) -> pygame.Surface:
+        """Return cell `index` of a sheet of `cell_px` squares.
 
         Args:
             sheet: Sprite sheet to cut from.
             index: Cell number, counted left to right, top to bottom.
             cols: Number of cells per row in the sheet.
+            cell_px: Width and height of one cell in the sheet, in px.
 
         Returns:
             A subsurface of the sheet holding that cell.
         """
-        rect = pygame.Rect((index % cols) * TILE_SRC_PX,
-                           (index // cols) * TILE_SRC_PX,
-                           TILE_SRC_PX, TILE_SRC_PX)
+        rect = pygame.Rect((index % cols) * cell_px,
+                           (index // cols) * cell_px,
+                           cell_px, cell_px)
         return sheet.subsurface(rect)
 
     @staticmethod

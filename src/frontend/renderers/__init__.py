@@ -6,5 +6,5 @@ from .player_renderer import PlayerRenderer
 __all__ = [
     "HudRenderer",
     "MazeRenderer",
-    "PlayerRenderer"
+    "PlayerRenderer",
 ]

@@ -18,27 +18,11 @@ class PlayerDir(Enum):
     RIGHT = auto()
     NONE = auto()
 
-    # ------------------------------------------------------------------
-    # Helpers
-    # ------------------------------------------------------------------
-    @property
-    def opposite(self) -> "PlayerDir":
-        """Return the opposite direction.
 
-        Returns:
-            The direction facing the other way. ``NONE`` has no opposite
-            and returns ``NONE``.
-        """
-        return _OPPOSITES.get(self, PlayerDir.NONE)
-
-
-# Pairs of opposite directions, used by ``PlayerDir.opposite``.
-_OPPOSITES: dict[PlayerDir, PlayerDir] = {
-    PlayerDir.UP: PlayerDir.DOWN,
-    PlayerDir.DOWN: PlayerDir.UP,
-    PlayerDir.LEFT: PlayerDir.RIGHT,
-    PlayerDir.RIGHT: PlayerDir.LEFT,
-}
+class PlayerState(Enum):
+    MOVING = auto()
+    DEAD = auto()
+    IDLE = auto()
 
 
 class LogKind(Enum):
