@@ -3,7 +3,6 @@ from .level import Level
 from .enums import PlayerDir, PlayerState
 from .tilemap import TileMap
 from ..constants import TILE_PX
-from .dev_log import DevLog
 
 
 class Player():
@@ -37,12 +36,13 @@ class Player():
         self.speed = speed
         self.direction: PlayerDir = PlayerDir.NONE
         self.buffer_direction: PlayerDir = PlayerDir.NONE
+        self.view_direction: PlayerDir = self.direction
         self.state: PlayerState = PlayerState.IDLE
 
     # ------------------------------------------------------------------
     # Update
     # ------------------------------------------------------------------
-    def update(self, dt: float, level: Level, dev_log: DevLog) -> None:
+    def update(self, dt: float, level: Level) -> None:
         """Move the player for a time step, stopping at walls.
 
         Travel ``speed * dt`` px along the current direction in steps that
@@ -109,13 +109,12 @@ class Player():
 
         col, row = TileMap.pixel_to_tile(center[0], center[1])
 
-        if (level.has_wall(col, row, self.buffer_direction)
-                or self.buffer_direction == self.direction.opposite):
-            self.buffer_direction = PlayerDir.NONE
+        if level.has_wall(col, row, self.buffer_direction):
             return False
 
         self.center_pos_to_cell(center)
         self.direction = self.buffer_direction
+        self.view_direction = self.direction
         self.buffer_direction = PlayerDir.NONE
         return True
 

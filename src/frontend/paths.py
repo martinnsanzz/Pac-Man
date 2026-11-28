@@ -77,7 +77,7 @@ class SpritesPaths(PathsBase):
         FRUITS: Path to FRUITS spritesheet `.png` file.
     """
     PAC_MAN_MOVING = (ASSETS / "player" /
-                    "PacMan-Moving-SpriteSheet").with_suffix(".png")
+                      "PacMan-Moving-SpriteSheet").with_suffix(".png")
     PAC_MAN_DEAD = (ASSETS / "player" /
                     "PacMan-Dead-SpriteSheet").with_suffix(".png")
     FRUITS = (ASSETS / "fruits" / "fruits_sheet").with_suffix(".png")

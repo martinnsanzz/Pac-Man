@@ -95,6 +95,7 @@ class Game(Screen):
             return
         if self.player.direction == PlayerDir.NONE:
             self.player.direction = direction
+            self.player.view_direction = direction
         else:
             self.player.buffer_direction = direction
 
@@ -146,7 +147,7 @@ class Game(Screen):
             otherwise ``ScreenAction.NONE``.
         """
         self.level.update(dt)
-        self.player.update(dt, self.level, dev_log)
+        self.player.update(dt, self.level)
 
         if self.level.time_left <= 0:
             return ScreenAction.GAME_OVER
